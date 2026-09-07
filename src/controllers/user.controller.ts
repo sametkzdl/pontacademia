@@ -47,4 +47,31 @@ export class UserController {
       return ApiResponse.error(err.message || "Kullanıcı durumu güncellenemedi.", 400);
     }
   }
+
+  /**
+   * POST /api/admin/users/reset-password
+   */
+  static async resetPassword(req: NextRequest) {
+    try {
+      const session = await getSessionUser();
+      if (!session || session.role !== "ADMIN") {
+        return ApiResponse.forbidden("Bu işlemi yalnızca yöneticiler yapabilir.");
+      }
+
+      const body = await req.json();
+      const { userId, newPassword } = body;
+
+      if (!userId) {
+        return ApiResponse.error("Kullanıcı ID zorunludur.", 400);
+      }
+
+      const result = await UserService.resetUserPassword(userId, newPassword);
+      return ApiResponse.success({
+        message: "Kullanıcı şifresi başarıyla yenilendi.",
+        ...result,
+      });
+    } catch (err: any) {
+      return ApiResponse.error(err.message || "Şifre yenilenemedi.", 400);
+    }
+  }
 }

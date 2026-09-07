@@ -1,0 +1,347 @@
+/* Global Component & Utility Styles */
+
+/* Pill Badges */
+.pill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 50px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid var(--color-gold);
+  color: var(--color-gold-soft);
+  background-color: rgba(200, 149, 42, 0.08);
+}
+
+.pill-badge-gold {
+  background-color: var(--color-gold);
+  color: var(--color-white);
+  border: none;
+}
+
+.pill-badge-blue {
+  background-color: var(--color-navy-light);
+  color: var(--color-white);
+  border: none;
+}
+
+/* Ambient Glow - Dark Sections */
+.card-glow {
+  background-color: var(--color-navy-mid);
+  border: 1px solid rgba(200, 149, 42, 0.15);
+  box-shadow: 
+    0 0 0px 0px rgba(200, 149, 42, 0),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  transition: box-shadow 0.6s ease, border-color 0.6s ease, transform 0.3s ease;
+}
+
+.card-glow:hover {
+  border-color: rgba(200, 149, 42, 0.45);
+  box-shadow: 
+    0 0 20px rgba(200, 149, 42, 0.08),
+    0 0 60px rgba(200, 149, 42, 0.04);
+  transform: translateY(-4px);
+}
+
+/* Buttons System */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  padding: 14px 28px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
+  gap: 8px;
+  box-sizing: border-box;
+}
+
+/* Primary (Gold Filled) */
+.btn-primary {
+  background-color: var(--color-gold);
+  color: var(--color-white);
+  border: none;
+  box-shadow: 0 4px 14px rgba(200, 149, 42, 0.2);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px) scale(1.01);
+  box-shadow: 0 6px 20px rgba(200, 149, 42, 0.35);
+  filter: brightness(1.08);
+}
+
+/* Secondary (White / Ghost) */
+.btn-secondary {
+  background-color: transparent;
+  border: 1.5px solid var(--color-white);
+  color: var(--color-white);
+}
+
+.btn-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  transform: translateY(-1px);
+}
+
+/* Dark Ghost (for light background sections) */
+.btn-dark-ghost {
+  background-color: transparent;
+  border: 1.5px solid var(--color-navy);
+  color: var(--color-navy);
+}
+
+.btn-dark-ghost:hover {
+  background-color: rgba(15, 38, 69, 0.06);
+  transform: translateY(-1px);
+}
+
+/* Text links */
+.link-gold {
+  color: var(--color-gold);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  transition: filter 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.link-gold:hover {
+  filter: brightness(0.85);
+}
+
+/* Form Groups & Controls */
+.form-card {
+  background-color: var(--color-navy-mid);
+  padding: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.form-group {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #0F2645;
+}
+
+/* Default / Light Form Inputs (High Contrast) */
+.form-input, .form-select, textarea.form-input {
+  width: 100%;
+  background-color: #FFFFFF;
+  border: 1px solid #CBD5E1;
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: #0F2645;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.form-input::placeholder {
+  color: #94A3B8;
+}
+
+.form-input:focus, .form-select:focus, textarea.form-input:focus {
+  border-color: #C8952A;
+  box-shadow: 0 0 0 3px rgba(200, 149, 42, 0.15);
+}
+
+.form-select option {
+  background-color: #FFFFFF;
+  color: #0F2645;
+}
+
+/* Dark Form Inputs (Specifically scoped to dark cards) */
+[data-theme="dark"] .form-card .form-label {
+  color: var(--color-text-soft);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+[data-theme="dark"] .form-card .form-input,
+[data-theme="dark"] .form-card .form-select {
+  background-color: transparent;
+  border: none;
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0;
+  padding: 12px 0;
+  color: #FFFFFF;
+  font-size: 15px;
+}
+
+[data-theme="dark"] .form-card .form-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+[data-theme="dark"] .form-card .form-input:focus,
+[data-theme="dark"] .form-card .form-select:focus {
+  border-bottom-color: var(--color-gold);
+  box-shadow: 0 4px 12px -4px rgba(200, 149, 42, 0.3);
+}
+
+[data-theme="dark"] .form-card .form-select option {
+  background-color: var(--color-navy-mid);
+  color: var(--color-white);
+}
+
+.form-submit-btn {
+  width: 100%;
+  margin-top: 12px;
+}
+
+/* =========================================
+   Admin & Portal Responsive System
+   ========================================= */
+
+.admin-layout-root, .portal-layout-root {
+  min-height: 100vh;
+  background-color: #F0F5FB;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-header, .portal-header {
+  background-color: #F0F5FB;
+  color: #0F2645;
+  padding: 14px 0;
+  border-bottom: 1.5px solid #DDE6F0;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: 0 2px 10px rgba(15, 38, 69, 0.04);
+}
+
+.admin-header-container, .portal-header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-main-container, .portal-main-container {
+  flex-grow: 1;
+  padding: 24px 20px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+/* Tabs Navigation (Smooth Horizontal Touch Slider) */
+.admin-tabs-nav, .portal-tabs-nav {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 6px;
+  margin-bottom: 24px;
+  scrollbar-width: none;
+}
+
+.admin-tabs-nav::-webkit-scrollbar, .portal-tabs-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.admin-tab-link, .portal-tab-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+/* Responsive Match Cards Grid */
+.match-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+/* Responsive Grids */
+.admin-grid-2col {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.admin-grid-3col {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+/* Table Responsive Container */
+.admin-table-container {
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  border: 1px solid #DDE6F0;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(15, 38, 69, 0.04);
+}
+
+.admin-table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+}
+
+.admin-table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .admin-main-container, .portal-main-container {
+    padding: 16px 12px;
+  }
+  
+  .admin-header, .portal-header {
+    padding: 10px 0;
+  }
+
+  .admin-tabs-nav, .portal-tabs-nav {
+    margin-bottom: 16px;
+    gap: 6px;
+  }
+
+  .admin-tab-link, .portal-tab-link {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .match-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+

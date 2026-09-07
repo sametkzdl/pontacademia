@@ -1,38 +1,54 @@
 // Öğrenci Profili
 model StudentProfile {
-  id           String   @id @default(cuid())
-  userId       String   @unique
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  phone        String
-  city         String?
-  grade        String?
-  target       String?
-  subject      String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  phone            String
+  parentName       String?
+  parentPhone      String?
+  scoreType        String?  // "SAY" | "EA" | "SÖZ" | "DİL" | "LGS"
+  city             String?
+  currentDistrict  String?
+  currentAddress   String?
+  grade            String?
+  target           String?
+  subject          String?
+  selectedSubjects String?  // Comma-separated or JSON list of subjects
+  photoUrl         String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   @@map("student_profiles")
 }
 
 // Öğrenci Başvuruları Havuzu (Özel Ders / Koçluk)
 model StudentApplication {
-  id             String   @id @default(cuid())
-  formType       String   // "ozel_ders" | "kocluk"
-  name           String
-  phone          String
-  email          String
-  city           String?
-  grade          String?
-  subject        String?
-  target         String?
-  coachId        String?
-  coachName      String?
-  notes          String?
+  id               String   @id @default(cuid())
+  formType         String   // "ozel_ders" | "kocluk"
+  name             String
+  phone            String
+  email            String
+  parentName       String?
+  parentPhone      String?
+  scoreType        String?  // "SAY" | "EA" | "SÖZ" | "DİL" | "LGS"
+  city             String?
+  currentDistrict  String?
+  currentAddress   String?
+  grade            String?
+  subject          String?
+  selectedSubjects String?  // Comma-separated or JSON list of subjects
+  target           String?
+  coachId          String?
+  coachName        String?
+  photoUrl         String?
+  photoFileName    String?
+  notes            String?
   
-  status         String   @default("PENDING") // PENDING | APPROVED | REJECTED
-  approvedUserId String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  status           String   @default("PENDING") // PENDING | APPROVED | REJECTED
+  approvedUserId   String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   @@map("student_applications")
 }
+

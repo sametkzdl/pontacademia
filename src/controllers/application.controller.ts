@@ -111,13 +111,15 @@ export class ApplicationController {
       const body = await req.json();
       const { applicationId, temporaryPassword } = body;
 
-      if (!applicationId || !temporaryPassword) {
-        return ApiResponse.error("Başvuru ID ve geçici şifre zorunludur.", 400);
+      if (!applicationId) {
+        return ApiResponse.error("Başvuru ID zorunludur.", 400);
       }
 
       const result = await ApplicationService.approveStudentApplication(applicationId, temporaryPassword);
       return ApiResponse.success({
-        message: "Öğrenci başarıyla onaylandı ve hesabı oluşturuldu.",
+        message: result.isNewAccount
+          ? "Öğrenci başarıyla onaylandı ve hesabı oluşturuldu."
+          : "Öğrenci başarıyla onaylandı ve mevcut hesabına bağlandı.",
         ...result,
       });
     } catch (err: any) {

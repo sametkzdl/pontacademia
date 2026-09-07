@@ -1,165 +1,165 @@
 # 🏛️ Pont Academy - Clean Architecture & Sistem Mimarisi Rehberi
 
-Bu belge, **Pont Academy** projesinin kurumsal yazılım geliştirme standartlarını, katmanlı mimari yapısını, dosya hiyerarşisini ve ölçeklenebilirlik kurallarını tanımlar. Projeye eklenecek her yeni özellik ve uç nokta (endpoint) buradaki standartlara sıkı sıkıya bağlı kalmalıdır.
+Bu belge, **Pont Academy** projesinin kurumsal yazılım mimarisini, katmanlı dizin hiyerarşisini, nested layout portal yapısını, atomik bileşen sistemini, modüler CSS mimarisini, veri tabanı şemalarını ve ölçeklenebilirlik standartlarını tanımlar. Projeye eklenecek her yeni özellik buradaki kurallara sıkı sıkıya bağlı kalmalıdır.
 
 ---
 
 ## 📂 1. Katman Hiyerarşisi ve Dizin Yapısı
 
-Proje, **Clean Architecture (Temiz Mimari)** ve **SoC (Separation of Concerns - Sorumlulukların Ayrışması)** prensiplerine göre yapılandırılmıştır:
+Proje, **Clean Architecture (Temiz Mimari)**, **Atomic Design** ve **Nested Layout Routing** prensiplerine göre yapılandırılmıştır:
 
 ```
 pontacademia/
 ├── prisma/
 │   └── schema/                         # 🗄️ Modüler Prisma Veritabanı Şemaları
 │       ├── base.prisma                 # Datasource & Client Generator
-│       ├── user.prisma                 # User modeli ve genel kimlik modelleri
+│       ├── user.prisma                 # User modeli ve kimlik tanımları
 │       ├── teacher.prisma              # TeacherProfile ve TeacherApplication modelleri
-│       └── student.prisma              # StudentProfile ve StudentApplication modelleri
+│       ├── student.prisma              # StudentProfile ve StudentApplication modelleri
+│       ├── match.prisma                # StudentTeacherMatch (Öğrenci - Öğretmen Eşleştirme)
+│       ├── setting.prisma              # SystemSetting (Dinamik Fiyat, Banner ve İletişim Ayarları)
+│       └── contact.prisma              # ContactMessage (Web Sitesi İletişim & Danışmanlık Mesajları)
 ├── src/
 │   ├── app/
 │   │   ├── api/                        # ⚡ Ultra-Thin Route Handlers (Sadece yönlendirici)
 │   │   │   ├── admin/
-│   │   │   │   ├── applications/
-│   │   │   │   └── users/
-│   │   │   ├── applications/
-│   │   │   │   ├── teacher/
-│   │   │   │   └── student/
-│   │   │   ├── auth/
-│   │   │   │   ├── login/
-│   │   │   │   ├── logout/
-│   │   │   │   ├── me/
-│   │   │   │   └── change-password/
-│   │   │   └── profile/
-│   │   ├── admin/                      # 🖥️ Yönetici Portalı UI
-│   │   ├── teacher/                    # 🖥️ Eğitmen Portalı UI
-│   │   ├── student/                    # 🖥️ Öğrenci Portalı UI
-│   │   ├── login/                      # 🖥️ Giriş Sayfası UI
-│   │   ├── teacherApplicationForm/     # 🖥️ Eğitmen Başvuru Formu UI
-│   │   └── actions.ts                  # Server Actions köprüleri
+│   │   │   │   ├── applications/       # Başvuru onay ve ret uç noktaları
+│   │   │   │   ├── users/              # Kullanıcı listeleme, şifre yenileme ve durum değiştirme
+│   │   │   │   ├── matches/            # Eşleştirme CRUD uç noktaları
+│   │   │   │   ├── settings/           # Genel ayarları güncelleme (Admin)
+│   │   │   │   └── contacts/           # İletişim mesajlarını listeleme ve durum güncelleme
+│   │   │   ├── teacher/
+│   │   │   │   └── students/           # Öğretmenin öğrencileri ve dersleri
+│   │   │   ├── student/
+│   │   │   │   └── teachers/           # Öğrencinin öğretmenleri ve dersleri
+│   │   │   ├── settings/               # Genel ayarları getirme (Genel / Public)
+│   │   │   ├── contact/                # İletişim formu mesajı iletme (Genel / Public)
+│   │   │   ├── coaches/                # Aktif koç listesi uç noktası (Genel)
+│   │   │   ├── auth/                   # Giriş, çıkış, oturum kontrolü (JWT)
+│   │   │   ├── profile/                # Kullanıcı profili güncelleme
+│   │   │   └── storage/                # Cloudflare R2 dosya yükleme, proxy ve silme
+│   │   ├── admin/                      # 🖥️ Yönetici Portalı (Ortak Layout & Nested Rotalar)
+│   │   │   ├── layout.tsx              # Üst bar, dinamik rozet sayaçları ve ortak menü
+│   │   │   ├── teacher-applications/   # Öğretmen başvuruları sekmesi
+│   │   │   ├── student-applications/   # Öğrenci başvuruları sekmesi
+│   │   │   ├── teachers/               # Öğretmen listesi ve şifre yenileme
+│   │   │   ├── students/               # Öğrenci listesi ve şifre yenileme
+│   │   │   ├── matches/                # Öğrenci - Öğretmen eşleştirme yönetimi
+│   │   │   ├── messages/               # Web sitesi gelen iletişim mesajları
+│   │   │   └── settings/               # Genel site & fiyat ayarları sekmesi
+│   │   ├── teacher/                    # 🖥️ Eğitmen Portalı (Ortak Layout & Nested Rotalar)
+│   │   │   ├── layout.tsx              # Üst bar ve eğitmen navigasyonu
+│   │   │   ├── students/               # Atanmış öğrenciler ve dersler
+│   │   │   ├── profile/                # Eğitmen profil düzenleme
+│   │   │   └── password/               # Eğitmen şifre güncelleme
+│   │   ├── student/                    # 🖥️ Öğrenci Portalı (Ortak Layout & Nested Rotalar)
+│   │   │   ├── layout.tsx              # Üst bar ve öğrenci navigasyonu
+│   │   │   ├── teachers/               # Atanmış eğitmenler ve dersler
+│   │   │   ├── profile/                # Öğrenci profil düzenleme
+│   │   │   └── password/               # Öğrenci şifre güncelleme
+│   │   ├── login/                      # 🖥️ Rol bazlı akıllı yönlendirmeli kimlik doğrulama ekranı
+│   │   ├── kocluk-basvuru/             # 🖥️ Dinamik Koç Seçimli Koçluk Başvuru Formu
+│   │   ├── ozel-ders-basvuru/          # 🖥️ Çoklu Ders Seçimli Özel Ders Başvuru Formu
+│   │   └── teacherApplicationForm/     # 🖥️ Eğitmen & Koçluk Başvuru Formu
+│   ├── components/                     # 🧩 Atomik Bileşen Kütüphanesi
+│   │   ├── atoms/                      # Temel Yapı Taşları
+│   │   │   ├── Input.tsx               # Standart ve tutarlı form girdisi
+│   │   │   ├── PasswordInput.tsx       # Şifre göster/gizle ve otomatik üretici
+│   │   │   ├── Button.tsx              # Primary, secondary, danger, ghost butonları
+│   │   │   ├── Badge.tsx               # Durum ve rol rozetleri
+│   │   │   ├── Select.tsx              # Standart seçim kutusu
+│   │   │   └── Textarea.tsx            # Metin alanı bileşeni
+│   │   ├── molecules/                  # Moleküler Bileşenler
+│   │   │   ├── Modal.tsx               # Yeniden kullanılabilir evrensel modal
+│   │   │   ├── SearchFilterBar.tsx     # Arama, durum filtresi ve sıralama çubuğu
+│   │   │   └── SubjectTagSlider.tsx    # Kaydırılabilir yatay çoklu ders rozetleri
+│   │   └── index.ts                    # Barrel export
+│   ├── styles/                         # 🎨 Modüler CSS Sistemi
+│   │   ├── variables.css               # Renk tokenları, gölgeler, font değişkenleri
+│   │   ├── base.css                    # Sıfırlamalar, tipografi, containerlar
+│   │   ├── components.css              # Butonlar, kartlar, formlar, rozetler
+│   │   ├── sections.css                # Header, footer, hero, fiyatlandırma, vitrin
+│   │   └── animations.css              # Keyframes, hover ve scroll efektleri
 │   ├── controllers/                    # 🎯 Request/Response Orkestrasyonu & Validation
 │   │   ├── auth.controller.ts          # Giriş, çıkış, oturum ve şifre kontrolcüsü
-│   │   ├── application.controller.ts   # Başvuru onay, ret ve kayıt kontrolcüsü
-│   │   ├── user.controller.ts          # Kullanıcı listeleme ve durum kontrolcüsü
-│   │   └── profile.controller.ts       # Profil güncelleme kontrolcüsü
+│   │   ├── application.controller.ts   # Başvuru onay/ret ve hesap bağlama kontrolcüsü
+│   │   ├── user.controller.ts          # Kullanıcı listeleme, durum ve şifre yenileme
+│   │   ├── match.controller.ts         # Öğrenci - Öğretmen eşleştirme kontrolcüsü
+│   │   ├── setting.controller.ts       # Sistem ayarları kontrolcüsü
+│   │   ├── contact.controller.ts       # İletişim mesajları kontrolcüsü
+│   │   ├── profile.controller.ts       # Profil güncelleme kontrolcüsü
+│   │   └── storage.controller.ts       # Dosya yükleme ve R2 proxy kontrolcüsü
 │   ├── services/                       # ⚙️ Saf İş Mantığı (Business Logic) & DB İşlemleri
 │   │   ├── auth.service.ts             # Auth iş kuralları
-│   │   ├── application.service.ts      # Başvuru iş kuralları & kullanıcı oluşturma
-│   │   ├── user.service.ts             # Kullanıcı filtreleme & aktif/pasif operasyonları
-│   │   └── profile.service.ts          # Profil veri mutasyonları
+│   │   ├── application.service.ts      # Başvuru iş kuralları & akıllı hesap bağlama
+│   │   ├── user.service.ts             # Kullanıcı filtreleme & şifre güncelleme
+│   │   ├── match.service.ts            # Eşleştirme CRUD & çoklu branş yönetimi
+│   │   ├── setting.service.ts          # Dinamik sistem ayarları servisi
+│   │   ├── contact.service.ts          # İletişim mesajları servisi
+│   │   ├── profile.service.ts          # Profil veri mutasyonları
+│   │   └── storage.service.ts          # Dosya doğrulama ve R2 anahtar yönetimi
 │   ├── utils/                          # 🧰 Yardımcı Araçlar, Güvenlik & 3. Parti
 │   │   ├── db.ts                       # Singleton Prisma Client (`db` & `prisma`)
 │   │   ├── auth.ts                     # JWT imzalama, doğrulama & session helpers
 │   │   ├── hash.ts                     # Bcrypt şifre hashleme & karşılaştırma
-│   │   ├── response.ts                 # Standart ApiResponse JSON üreticisi
+│   │   ├── response.ts                 # Standart `ApiResponse` JSON üreticisi
 │   │   └── third-party/                # 🌐 Dış Servis Entegrasyonları
-│   │       └── mail.service.ts         # E-posta bildirim servisi (Resend, SES, SMTP)
+│   │       ├── mail.service.ts         # E-posta bildirim servisi
+│   │       └── r2.service.ts           # Cloudflare R2 S3 uyumlu nesne depolama
 │   └── middleware.ts                   # 🛡️ Rol Tabanlı Güzergah Koruyucu (Route Guard)
 └── ARCHITECTURE.md                     # 📖 Bu Doküman
 ```
 
 ---
 
-## 🧱 2. Katmanların Görev ve Sorumlulukları
+## ⚡ 2. Nested Routing & Ortak Layout Mimarisi
 
-### A. Route Handlers (`src/app/api/.../route.ts`)
-- **Görevi**: Sadece Next.js HTTP metodlarını (`GET`, `POST`, `PATCH`, `DELETE`) karşılamak ve isteği doğrudan ilgili Controller'a devretmek.
-- **Kural**: Route handler dosyalarında **asla** veritabanı sorgusu, doğrudan JWT doğrulaması veya karmaşık iş mantığı yazılmaz.
-- **Örnek Kod**:
-```typescript
-import { NextRequest } from "next/server";
-import { AuthController } from "@/controllers/auth.controller";
+Platformun `/admin`, `/teacher` ve `/student` portalları **Next.js App Router Nested Routing** mimarisiyle yapılandırılmıştır:
 
-export async function POST(req: NextRequest) {
-  return AuthController.login(req);
-}
-```
+1. **Ortak Layout (`layout.tsx`)**:
+   - Üst bar, marka logosu, rol etiketi, dinamik bildirim sayaçları (bekleyen başvurular, okunmamış mesajlar) ve çıkış butonu tek bir `layout.tsx` dosyasında render edilir.
+   - Sayfalar arası geçişte üst bar asla yeniden yüklenmez, durumunu ve bildirim sayaçlarını korur.
+2. **Modüler Alt Rotalar**:
+   - Her sekme kendi özel URL'ine sahiptir (örn: `/admin/settings`, `/admin/teacher-applications`, `/teacher/students`, `/student/teachers`).
+   - Kullanıcı tarayıcıda sayfayı yenilediğinde veya doğrudan bir alt URL'e gittiğinde doğru sekme anında açılır.
+3. **Akıllı Yönlendirme (Smart Login Redirect)**:
+   - Kullanıcı `/login` ekranından giriş yaptığında rolüne göre doğrudan ilgili portala (`/admin`, `/teacher`, `/student`) aktarılır.
 
 ---
+
+## 🧱 3. Katmanların Görev ve Sorumlulukları
+
+### A. Route Handlers (`src/app/api/.../route.ts`)
+- **Görevi**: Next.js HTTP metodlarını (`GET`, `POST`, `PATCH`, `DELETE`) karşılamak ve isteği doğrudan ilgili Controller'a devretmek.
+- **Kural**: Route handler dosyalarında **asla** doğrudan veritabanı sorgusu veya iş mantığı yazılmaz.
 
 ### B. Controller Katmanı (`src/controllers/...`)
 - **Görevi**: 
-  1. HTTP isteğinden parametreleri ve gövdeyi (`req.json()`) çıkarmak.
+  1. Parametreleri ve istek gövdesini (`req.json()`) çıkarmak.
   2. Girdi doğrulamasını (Validation) yapmak.
-  3. Gerekli yetki kontrollerini (`getSessionUser()`, `role === "ADMIN"`) gerçekleştirmek.
+  3. Yetki kontrollerini (`getSessionUser()`, `role === "ADMIN"`) gerçekleştirmek.
   4. İşi Service katmanına devretmek.
   5. Standart `ApiResponse` formatında yanıt dönmek (`ApiResponse.success`, `ApiResponse.error`, `ApiResponse.forbidden`).
-- **Örnek Kod**:
-```typescript
-export class ApplicationController {
-  static async approveTeacher(req: NextRequest) {
-    try {
-      const session = await getSessionUser();
-      if (!session || session.role !== "ADMIN") {
-        return ApiResponse.forbidden("Yetkisiz işlem.");
-      }
-
-      const { applicationId, temporaryPassword } = await req.json();
-      const result = await ApplicationService.approveTeacherApplication(applicationId, temporaryPassword);
-      return ApiResponse.success(result);
-    } catch (err: any) {
-      return ApiResponse.error(err.message || "İşlem başarısız.", 400);
-    }
-  }
-}
-```
-
----
 
 ### C. Service Katmanı (`src/services/...`)
-- **Görevi**: Sistemin kalbidir. Saf iş mantığını, veritabanı sorgularını (`db`), veri dönüşümlerini ve servisler arası koordinasyonu yönetir.
-- **Kural**: Service sınıfları `NextRequest` veya `NextResponse` gibi HTTP nesnelerine **bağımlı olmamalıdır**. Saf TypeScript tipleri alır ve saf veri veya hata fırlatır (`throw new Error(...)`).
-- **Örnek Kod**:
-```typescript
-export class UserService {
-  static async toggleUserStatus(userId: string, isActive: boolean) {
-    if (!userId) throw new Error("Kullanıcı ID'si gereklidir.");
-    return await db.user.update({
-      where: { id: userId },
-      data: { isActive },
-    });
-  }
-}
-```
+- **Görevi**: Saf iş mantığını, veritabanı sorgularını (`db`), veri dönüşümlerini ve servisler arası koordinasyonu yönetir.
+- **Kural**: Service sınıfları HTTP nesnelerine (`NextRequest`, `NextResponse`) **asla bağımlı olmaz**.
 
 ---
 
-### D. Utils & 3. Parti Entegrasyon Katmanı (`src/utils/...`)
-- **`src/utils/db.ts`**: Global Prisma client singleton.
-- **`src/utils/auth.ts`**: JWT token imzalama (`signToken`), doğrulama (`verifyToken`), cookie oturum okuma (`getSessionUser`).
-- **`src/utils/hash.ts`**: Güvenli şifre hashleme ve parola doğrulama.
-- **`src/utils/response.ts`**: Tutarlı API yanıt formatı sağlayan `ApiResponse` sınıfı.
-- **`src/utils/third-party/`**: E-posta, SMS, ödeme geçitleri, dosya yükleme (S3/Cloudinary) gibi dış dünya servisleri.
+## 🔗 4. Öğrenci - Öğretmen Eşleştirme & Çoklu Branş Sistemi
+
+Platformda bir öğrenci hem Eğitim Koçluğu hem de birden fazla branştan Birebir Özel Ders alabilir:
+- **Çoklu Branş Eşleştirme**: Admin bir öğrenciye Matematik için ayrı, Fizik için ayrı öğretmen atayabilir.
+- **Ders Rozetleri (`SubjectTagSlider`)**: Tablolarda çok sayıda seçilen ders satır yüksekliğini ve tablo kolonlarını bozmadan yatay kaydırılabilir butonlarla gösterilir.
+- **Mevcut Hesap Koruma**: Onaylanan öğrencinin sistemde zaten bir hesabı varsa şifresi sıfırlanmaz, mevcut hesabına bağlanır.
 
 ---
 
-### E. Modüler Prisma Şemaları (`prisma/schema/...`)
-- Prisma 6'nın `prismaSchemaFolder` özelliğiyle şemalar parçalanmıştır:
-  - `base.prisma`: SQLite bağlantısı ve Client yapılandırması.
-  - `user.prisma`: Kullanıcı kimlik tablosu (`users`).
-  - `teacher.prisma`: `TeacherProfile` ve `TeacherApplication` modelleri.
-  - `student.prisma`: `StudentProfile` ve `StudentApplication` modelleri.
-- Şemada değişiklik yapıldığında:
-  ```bash
-  npx prisma validate
-  npx prisma generate
-  npx prisma db push
-  ```
+## ☁️ 5. Cloudflare R2 Nesne Depolama & Güvenli Proxy
 
----
+Tüm medya ve profil fotoğrafları Cloudflare R2 üzerinde yönetilir:
+- **Ortam İzolasyonu**: `.env` içindeki `APP_ENV` değerine göre `development/` veya `production/` klasörlerinde saklanır.
+- **Güvenli Proxy**: `/api/storage/file?key=...` proxy uç noktası üzerinden `Cache-Control: public, max-age=31536000` önbellek başlıklarıyla sunulur.
+- **Fotoğraf Gizlilik Tercihi**: Eğitmen `showPhotoOnWeb: false` seçtiğinde genel `/api/coaches` rotasında fotoğraf gizlenir, admin ve öğretmen panellerinde güvenle gösterilir.
 
-## 🚀 3. Yeni Bir Özellik Eklerken İzlenecek Adımlar (Ölçekleme Kılavuzu)
-
-1. **Model İhtiyacı Varsa**:
-   - `prisma/schema/` altında ilgili `.prisma` dosyasını oluşturun veya güncelleyin.
-   - `npx prisma db push` ile veritabanını güncelleyin.
-2. **Utils / 3. Parti İhtiyacı Varsa**:
-   - `src/utils/` veya `src/utils/third-party/` altına yardımcı fonksiyonu veya servis sınıfını ekleyin.
-3. **Servis Katmanı (`src/services/`)**:
-   - Saf iş mantığını içeren metodu ekleyin (`XService.doSomething(data)`).
-4. **Controller Katmanı (`src/controllers/`)**:
-   - İstek doğrulama ve `ApiResponse` dönüşünü sağlayan Controller metodunu ekleyin (`XController.handleSomething(req)`).
-5. **Route Handler (`src/app/api/.../route.ts`)**:
-   - Controller metodunu çağıran ince rotayı oluşturun.
-6. **Frontend Arayüzü**:
-   - React bileşeninden ilgili API rotasını çağırın.

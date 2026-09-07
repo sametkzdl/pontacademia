@@ -47,4 +47,40 @@ export class UserService {
       },
     });
   }
+
+  /**
+   * Kullanıcı Şifresini Sıfırla / Yenile (Admin için)
+   */
+  static async resetUserPassword(userId: string, newPassword?: string) {
+    if (!userId) {
+      throw new Error("Kullanıcı ID'si gereklidir.");
+    }
+
+    const finalPassword = newPassword && newPassword.trim().length >= 6 
+      ? newPassword.trim() 
+      : `Pont${Math.floor(1000 + Math.random() * 9000)}!`;
+
+    const { hashPassword } = await import("@/utils/hash");
+    const passwordHash = await hashPassword(finalPassword);
+
+    const updatedUser = await db.user.update({
+      where: { id: userId },
+      data: {
+        passwordHash,
+        mustChangePassword: true,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        isActive: true,
+      },
+    });
+
+    return {
+      user: updatedUser,
+      newPassword: finalPassword,
+    };
+  }
 }

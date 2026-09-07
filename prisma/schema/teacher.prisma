@@ -8,6 +8,7 @@ model TeacherProfile {
   birthDate        String?
   gender           String?
   school           String
+  scoreType        String?  // SAY | EA | SÖZ | DİL
   yksRank          String
   classStatus      String
   currentDistrict  String
@@ -15,6 +16,7 @@ model TeacherProfile {
   districts        String   // Yüz yüze ders verilen ilçeler
   onlineAvailable  Boolean  @default(false)
   photoUrl         String?
+  showPhotoOnWeb   Boolean  @default(true) // Sitede fotoğraf görünsün mü? (Admin her zaman görür)
   notes            String?
   
   // TYT Yetkinlik Puanları (1-10)
@@ -26,7 +28,7 @@ model TeacherProfile {
   tytTarih         Int      @default(5)
   tytCografya      Int      @default(5)
 
-  // AYT Yetkinlik Puanları (1-10)
+  // AYT / YDT Yetkinlik Puanları (1-10)
   aytMat           Int      @default(5)
   aytFizik         Int      @default(5)
   aytKimya         Int      @default(5)
@@ -34,6 +36,7 @@ model TeacherProfile {
   aytTurkce        Int      @default(5)
   aytTarih         Int      @default(5)
   aytCografya      Int      @default(5)
+  ydtIngilizce     Int      @default(5) // İngilizce / YDT
   
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
@@ -53,6 +56,7 @@ model TeacherApplication {
   currentDistrict String
   currentAddress  String
   school          String
+  scoreType       String?  // SAY | EA | SÖZ | DİL
   yksRank         String
   classStatus     String
   districts       String

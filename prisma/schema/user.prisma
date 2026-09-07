@@ -13,5 +13,8 @@ model User {
   teacherProfile TeacherProfile?
   studentProfile StudentProfile?
 
+  studentMatches StudentTeacherMatch[] @relation("StudentMatches")
+  teacherMatches StudentTeacherMatch[] @relation("TeacherMatches")
+
   @@map("users")
 }

@@ -1,0 +1,18 @@
+// Öğrenci - Öğretmen Eşleştirmeleri (Koçluk & Branş Bazlı Özel Ders)
+model StudentTeacherMatch {
+  id         String   @id @default(cuid())
+  type       String   // "KOCLUK" | "OZEL_DERS"
+  studentId  String
+  teacherId  String
+  subject    String?  // Özel ders branşı (Örn: "Matematik", "Fizik", "İngilizce (YDT)")
+  status     String   @default("ACTIVE") // "ACTIVE" | "COMPLETED" | "CANCELLED"
+  notes      String?
+  startDate  DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  student    User     @relation("StudentMatches", fields: [studentId], references: [id], onDelete: Cascade)
+  teacher    User     @relation("TeacherMatches", fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@map("student_teacher_matches")
+}

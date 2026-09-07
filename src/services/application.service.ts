@@ -12,6 +12,7 @@ export interface TeacherApplicationInput {
   currentDistrict: string;
   currentAddress: string;
   school: string;
+  scoreType?: string;
   yksRank: string;
   classStatus: string;
   districts: string[];
@@ -26,12 +27,20 @@ export interface StudentApplicationInput {
   name: string;
   phone: string;
   email: string;
+  parentName?: string;
+  parentPhone?: string;
+  scoreType?: string;
   city?: string;
+  currentDistrict?: string;
+  currentAddress?: string;
   grade?: string;
   subject?: string;
+  selectedSubjects?: string;
   target?: string;
   coachId?: string;
   coachName?: string;
+  photoUrl?: string;
+  photoFileName?: string;
   notes?: string;
 }
 
@@ -55,6 +64,7 @@ export class ApplicationService {
         currentDistrict: data.currentDistrict || "",
         currentAddress: data.currentAddress || "",
         school: data.school.trim(),
+        scoreType: data.scoreType || "SAY",
         yksRank: data.yksRank || "",
         classStatus: data.classStatus || "",
         districts: Array.isArray(data.districts) ? data.districts.join(", ") : (data.districts || ""),
@@ -81,12 +91,20 @@ export class ApplicationService {
         name: data.name.trim(),
         phone: data.phone.trim(),
         email: data.email.toLowerCase().trim(),
+        parentName: data.parentName ? data.parentName.trim() : null,
+        parentPhone: data.parentPhone ? data.parentPhone.trim() : null,
+        scoreType: data.scoreType || "SAY",
         city: data.city || "",
+        currentDistrict: data.currentDistrict || "",
+        currentAddress: data.currentAddress || "",
         grade: data.grade || "",
         subject: data.subject || "",
+        selectedSubjects: data.selectedSubjects || "",
         target: data.target || "",
         coachId: data.coachId || "",
         coachName: data.coachName || "",
+        photoUrl: data.photoUrl || null,
+        photoFileName: data.photoFileName || null,
         notes: data.notes || "",
         status: "PENDING",
       },
@@ -161,27 +179,30 @@ export class ApplicationService {
         birthDate: application.birthDate,
         gender: application.gender,
         school: application.school,
+        scoreType: application.scoreType || "SAY",
         yksRank: application.yksRank,
         classStatus: application.classStatus,
         currentDistrict: application.currentDistrict,
         currentAddress: application.currentAddress,
         districts: application.districts,
         onlineAvailable: application.onlineAvailable,
+        showPhotoOnWeb: true,
         notes: application.notes,
-        tytTurkce: parsedTyt["Türkçe"] ?? 5,
-        tytMat: parsedTyt["Temel Matematik"] ?? 5,
-        tytFizik: parsedTyt["Fizik"] ?? 5,
-        tytKimya: parsedTyt["Kimya"] ?? 5,
-        tytBiyoloji: parsedTyt["Biyoloji"] ?? 5,
-        tytTarih: parsedTyt["Tarih"] ?? 5,
-        tytCografya: parsedTyt["Coğrafya"] ?? 5,
-        aytMat: parsedAyt["Matematik"] ?? 5,
-        aytFizik: parsedAyt["Fizik"] ?? 5,
-        aytKimya: parsedAyt["Kimya"] ?? 5,
-        aytBiyoloji: parsedAyt["Biyoloji"] ?? 5,
-        aytTurkce: parsedAyt["Edebiyat"] ?? 5,
-        aytTarih: parsedAyt["Tarih-1"] ?? 5,
-        aytCografya: parsedAyt["Coğrafya-1"] ?? 5,
+        tytTurkce: parsedTyt["tytTurkce"] ?? parsedTyt["Türkçe"] ?? 5,
+        tytMat: parsedTyt["tytMat"] ?? parsedTyt["Temel Matematik"] ?? 5,
+        tytFizik: parsedTyt["tytFizik"] ?? parsedTyt["Fizik"] ?? 5,
+        tytKimya: parsedTyt["tytKimya"] ?? parsedTyt["Kimya"] ?? 5,
+        tytBiyoloji: parsedTyt["tytBiyoloji"] ?? parsedTyt["Biyoloji"] ?? 5,
+        tytTarih: parsedTyt["tytTarih"] ?? parsedTyt["Tarih"] ?? 5,
+        tytCografya: parsedTyt["tytCografya"] ?? parsedTyt["Coğrafya"] ?? 5,
+        aytMat: parsedAyt["aytMat"] ?? parsedAyt["Matematik"] ?? 5,
+        aytFizik: parsedAyt["aytFizik"] ?? parsedAyt["Fizik"] ?? 5,
+        aytKimya: parsedAyt["aytKimya"] ?? parsedAyt["Kimya"] ?? 5,
+        aytBiyoloji: parsedAyt["aytBiyoloji"] ?? parsedAyt["Biyoloji"] ?? 5,
+        aytTurkce: parsedAyt["aytTurkce"] ?? parsedAyt["Edebiyat"] ?? 5,
+        aytTarih: parsedAyt["aytTarih"] ?? parsedAyt["Tarih-1"] ?? 5,
+        aytCografya: parsedAyt["aytCografya"] ?? parsedAyt["Coğrafya-1"] ?? 5,
+        ydtIngilizce: parsedAyt["ydtIngilizce"] ?? parsedAyt["İngilizce (YDT)"] ?? parsedAyt["İngilizce"] ?? 5,
       },
       create: {
         userId: user.id,
@@ -190,27 +211,30 @@ export class ApplicationService {
         birthDate: application.birthDate,
         gender: application.gender,
         school: application.school,
+        scoreType: application.scoreType || "SAY",
         yksRank: application.yksRank,
         classStatus: application.classStatus,
         currentDistrict: application.currentDistrict,
         currentAddress: application.currentAddress,
         districts: application.districts,
         onlineAvailable: application.onlineAvailable,
+        showPhotoOnWeb: true,
         notes: application.notes,
-        tytTurkce: parsedTyt["Türkçe"] ?? 5,
-        tytMat: parsedTyt["Temel Matematik"] ?? 5,
-        tytFizik: parsedTyt["Fizik"] ?? 5,
-        tytKimya: parsedTyt["Kimya"] ?? 5,
-        tytBiyoloji: parsedTyt["Biyoloji"] ?? 5,
-        tytTarih: parsedTyt["Tarih"] ?? 5,
-        tytCografya: parsedTyt["Coğrafya"] ?? 5,
-        aytMat: parsedAyt["Matematik"] ?? 5,
-        aytFizik: parsedAyt["Fizik"] ?? 5,
-        aytKimya: parsedAyt["Kimya"] ?? 5,
-        aytBiyoloji: parsedAyt["Biyoloji"] ?? 5,
-        aytTurkce: parsedAyt["Edebiyat"] ?? 5,
-        aytTarih: parsedAyt["Tarih-1"] ?? 5,
-        aytCografya: parsedAyt["Coğrafya-1"] ?? 5,
+        tytTurkce: parsedTyt["tytTurkce"] ?? parsedTyt["Türkçe"] ?? 5,
+        tytMat: parsedTyt["tytMat"] ?? parsedTyt["Temel Matematik"] ?? 5,
+        tytFizik: parsedTyt["tytFizik"] ?? parsedTyt["Fizik"] ?? 5,
+        tytKimya: parsedTyt["tytKimya"] ?? parsedTyt["Kimya"] ?? 5,
+        tytBiyoloji: parsedTyt["tytBiyoloji"] ?? parsedTyt["Biyoloji"] ?? 5,
+        tytTarih: parsedTyt["tytTarih"] ?? parsedTyt["Tarih"] ?? 5,
+        tytCografya: parsedTyt["tytCografya"] ?? parsedTyt["Coğrafya"] ?? 5,
+        aytMat: parsedAyt["aytMat"] ?? parsedAyt["Matematik"] ?? 5,
+        aytFizik: parsedAyt["aytFizik"] ?? parsedAyt["Fizik"] ?? 5,
+        aytKimya: parsedAyt["aytKimya"] ?? parsedAyt["Kimya"] ?? 5,
+        aytBiyoloji: parsedAyt["aytBiyoloji"] ?? parsedAyt["Biyoloji"] ?? 5,
+        aytTurkce: parsedAyt["aytTurkce"] ?? parsedAyt["Edebiyat"] ?? 5,
+        aytTarih: parsedAyt["aytTarih"] ?? parsedAyt["Tarih-1"] ?? 5,
+        aytCografya: parsedAyt["aytCografya"] ?? parsedAyt["Coğrafya-1"] ?? 5,
+        ydtIngilizce: parsedAyt["ydtIngilizce"] ?? parsedAyt["İngilizce (YDT)"] ?? parsedAyt["İngilizce"] ?? 5,
       },
     });
 
@@ -245,9 +269,9 @@ export class ApplicationService {
   }
 
   /**
-   * Öğrenci Başvurusunu Onayla ve Öğrenci Hesabı Aç
+   * Öğrenci Başvurusunu Onayla ve Öğrenci Hesabı Aç / Mevcut Hesaba Bağla
    */
-  static async approveStudentApplication(applicationId: string, temporaryPassword: string) {
+  static async approveStudentApplication(applicationId: string, temporaryPassword?: string) {
     const application = await db.studentApplication.findUnique({
       where: { id: applicationId },
     });
@@ -256,43 +280,70 @@ export class ApplicationService {
       throw new Error("Başvuru bulunamadı.");
     }
 
-    const passwordHash = await hashPassword(temporaryPassword);
-
-    const user = await db.user.upsert({
-      where: { email: application.email.toLowerCase().trim() },
-      update: {
-        name: application.name,
-        role: "STUDENT",
-        passwordHash,
-        mustChangePassword: true,
-        isActive: true,
-      },
-      create: {
-        email: application.email.toLowerCase().trim(),
-        name: application.name,
-        role: "STUDENT",
-        passwordHash,
-        mustChangePassword: true,
-        isActive: true,
-      },
+    const email = application.email.toLowerCase().trim();
+    const existingUser = await db.user.findUnique({
+      where: { email },
     });
+
+    let user;
+    let isNewAccount = false;
+    const finalTempPassword = temporaryPassword || Math.random().toString(36).substring(2, 10);
+
+    if (existingUser) {
+      // Kullanıcı zaten var, şifresini ezmiyoruz
+      user = await db.user.update({
+        where: { id: existingUser.id },
+        data: {
+          name: application.name || existingUser.name,
+          isActive: true,
+        },
+      });
+    } else {
+      // Yeni kullanıcı oluşturuyoruz
+      isNewAccount = true;
+      const passwordHash = await hashPassword(finalTempPassword);
+      user = await db.user.create({
+        data: {
+          email,
+          name: application.name,
+          role: "STUDENT",
+          passwordHash,
+          mustChangePassword: true,
+          isActive: true,
+        },
+      });
+    }
 
     await db.studentProfile.upsert({
       where: { userId: user.id },
       update: {
         phone: application.phone,
+        parentName: application.parentName,
+        parentPhone: application.parentPhone,
+        scoreType: application.scoreType,
         city: application.city,
+        currentDistrict: application.currentDistrict,
+        currentAddress: application.currentAddress,
         grade: application.grade,
         target: application.target,
         subject: application.subject,
+        selectedSubjects: application.selectedSubjects,
+        photoUrl: application.photoUrl || undefined,
       },
       create: {
         userId: user.id,
         phone: application.phone,
+        parentName: application.parentName,
+        parentPhone: application.parentPhone,
+        scoreType: application.scoreType,
         city: application.city,
+        currentDistrict: application.currentDistrict,
+        currentAddress: application.currentAddress,
         grade: application.grade,
         target: application.target,
         subject: application.subject,
+        selectedSubjects: application.selectedSubjects,
+        photoUrl: application.photoUrl,
       },
     });
 
@@ -304,14 +355,16 @@ export class ApplicationService {
       },
     });
 
-    ThirdPartyMailService.sendAccountApprovalMail(
-      application.email,
-      application.name,
-      temporaryPassword,
-      "STUDENT"
-    ).catch(err => console.error("Mail gönderme hatası:", err));
+    if (isNewAccount) {
+      ThirdPartyMailService.sendAccountApprovalMail(
+        application.email,
+        application.name,
+        finalTempPassword,
+        "STUDENT"
+      ).catch(err => console.error("Mail gönderme hatası:", err));
+    }
 
-    return { user, temporaryPassword };
+    return { user, temporaryPassword: isNewAccount ? finalTempPassword : null, isNewAccount };
   }
 
   /**

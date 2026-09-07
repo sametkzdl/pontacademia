@@ -43,8 +43,26 @@ export default function LoginPage() {
         return;
       }
 
-      // Başarılı giriş -> Role göre yönlendir
-      router.push(data.redirectUrl || "/");
+      // Başarılı giriş -> Role veya URL parametresine göre yönlendir
+      const searchParams = new URLSearchParams(window.location.search);
+      const from = searchParams.get("from");
+
+      let targetUrl = from;
+      if (!targetUrl || targetUrl === "/login" || targetUrl === "/") {
+        if (data.redirectUrl) {
+          targetUrl = data.redirectUrl;
+        } else if (data.user?.role === "ADMIN") {
+          targetUrl = "/admin";
+        } else if (data.user?.role === "TEACHER") {
+          targetUrl = "/teacher";
+        } else if (data.user?.role === "STUDENT") {
+          targetUrl = "/student";
+        } else {
+          targetUrl = "/admin";
+        }
+      }
+
+      router.push(targetUrl || "/admin");
       router.refresh();
     } catch (err) {
       console.error("Login error:", err);

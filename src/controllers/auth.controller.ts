@@ -18,7 +18,20 @@ export class AuthController {
 
       const { user, token } = await AuthService.login(email, password);
 
-      const response = ApiResponse.success({ user, message: "Giriş başarılı." });
+      let redirectUrl = "/";
+      if (user.role === "ADMIN") {
+        redirectUrl = "/admin";
+      } else if (user.role === "TEACHER") {
+        redirectUrl = "/teacher";
+      } else if (user.role === "STUDENT") {
+        redirectUrl = "/student";
+      }
+
+      const response = ApiResponse.success({ 
+        user, 
+        redirectUrl,
+        message: "Giriş başarılı." 
+      });
       
       // HttpOnly Güvenli Cookie Kaydı
       response.cookies.set(COOKIE_NAME, token, {

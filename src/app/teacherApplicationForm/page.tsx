@@ -57,6 +57,7 @@ const AYT_SUBJECTS = [
   { id: "aytTurkce", label: "AYT Edebiyat / Türkçe", desc: "Türk Dili ve Edebiyatı", defaultScore: 5 },
   { id: "aytTarih", label: "AYT Tarih", desc: "Tarih-1 & Tarih-2", defaultScore: 5 },
   { id: "aytCografya", label: "AYT Coğrafya", desc: "Coğrafya-1 & Coğrafya-2", defaultScore: 5 },
+  { id: "ydtIngilizce", label: "İngilizce (YDT / Hazırlık)", desc: "İngilizce Gramer, Okuma & YKS-DİL", defaultScore: 5 },
 ];
 
 // Tek bir ders puanlayıcı bileşeni (Açık, ferah ve yüksek kontrastlı)
@@ -617,6 +618,26 @@ export default function TeacherApplicationForm() {
                       />
                     </div>
 
+                    {/* Sınava Girilen Puan Türü */}
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ color: "#1C2B3A", fontWeight: "700", fontSize: "13px" }} htmlFor="scoreType">
+                        Sınava Girdiğiniz Puan Türü <span style={{ color: "#C8952A" }}>*</span>
+                      </label>
+                      <select 
+                        className="form-select" 
+                        style={{ backgroundColor: "#FFFFFF", color: "#0F2645", borderColor: "#CBD5E1" }}
+                        id="scoreType"
+                        name="scoreType"
+                        defaultValue="SAY"
+                        required
+                      >
+                        <option value="SAY">Sayısal (SAY)</option>
+                        <option value="EA">Eşit Ağırlık (EA)</option>
+                        <option value="SÖZ">Sözel (SÖZ)</option>
+                        <option value="DİL">Dil / İngilizce (DİL)</option>
+                      </select>
+                    </div>
+
                     {/* YKS Sıralaması */}
                     <div className="form-group" style={{ marginBottom: 0 }}>
                       <label className="form-label" style={{ color: "#1C2B3A", fontWeight: "700", fontSize: "13px" }} htmlFor="yksRank">
@@ -628,7 +649,7 @@ export default function TeacherApplicationForm() {
                         type="text" 
                         id="yksRank" 
                         name="yksRank"
-                        placeholder="Örn: Sayısal 450. / EA 120."
+                        placeholder="Örn: 450. / 120."
                         required
                       />
                     </div>

@@ -1,0 +1,26 @@
+/* Pont Academy CSS Tokens & Variables */
+
+:root {
+  /* Color Palette */
+  --color-navy: #0F2645;         /* Deep primary navy background & text */
+  --color-navy-mid: #1A3A5C;     /* Middle navy for dark cards & section divider */
+  --color-navy-light: #2B5280;   /* Interactive navy states & hover */
+  --color-cloud: #F0F5FB;        /* Soft cloud white for light sections */
+  --color-white: #FFFFFF;        /* Bright white card background */
+  --color-gold: #C8952A;         /* Primary Accent Gold (strictly for CTAs/Active states) */
+  --color-gold-soft: #F0DFA8;    /* Soft gold background for badges & labels */
+  --color-text-dark: #1C2B3A;    /* Dark navy for headings on light bg */
+  --color-text-mid: #4A6280;     /* Medium navy for body text */
+  --color-text-soft: #7A92AA;    /* Soft slate blue for labels and small text */
+  --color-divider: #DDE6F0;      /* Border colors on light bg */
+  --color-bg-darkest: #080F1A;   /* Deepest space navy for footer */
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(15, 38, 69, 0.04);
+  --shadow-md: 0 8px 24px rgba(15, 38, 69, 0.08);
+  --shadow-lg: 0 16px 48px rgba(15, 38, 69, 0.12);
+  
+  /* Font Family Fallbacks */
+  --font-roboto-fallback: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-playfair-fallback: Georgia, "Times New Roman", serif;
+}
