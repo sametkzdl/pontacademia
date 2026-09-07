@@ -150,7 +150,7 @@ export default function Home() {
   return (
     <>
       {/* Sticky Header Nav */}
-      <header className={scrolled ? "scrolled" : ""}>
+      <header className={`site-header ${scrolled ? "scrolled" : ""}`}>
         <div className="container nav-container">
           <a href="#" className="logo-container" style={{ display: "flex", alignItems: "center" }}>
             <Image 

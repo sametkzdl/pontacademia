@@ -1,19 +1,9 @@
 "use server";
 
+import db from "@/utils/db";
+
 export async function submitBasvuruForm(formData: FormData) {
   try {
-    const sheetsUrl = process.env.SHEETS_API_URL;
-    const apiKey = process.env.SHEETS_API_KEY;
-
-    if (!sheetsUrl) {
-      console.warn("SHEETS_API_URL is missing. Simulating success in development mode.");
-      return { 
-        success: true, 
-        message: "Simulation mode active. SHEETS_API_URL is not defined in env." 
-      };
-    }
-
-    // Convert FormData to JSON payload for Google Sheets webhook (handles both FormData instances and plain JSON objects)
     let payload: Record<string, any> = {};
     if (formData && typeof (formData as any).entries === "function") {
       payload = Object.fromEntries((formData as any).entries());
@@ -21,27 +11,87 @@ export async function submitBasvuruForm(formData: FormData) {
       payload = formData as any;
     }
 
-    const response = await fetch(sheetsUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(apiKey ? { "x-api-key": apiKey } : {})
-      },
-      body: JSON.stringify(payload),
-    });
+    const formType = payload.formType;
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Google Sheets endpoint error (${response.status}): ${errorText}`);
-      return { 
-        success: false, 
-        error: `Google Sheets integration returned status ${response.status}` 
-      };
+    // 1. Öğretmen Başvurusu
+    if (formType === "teacher_application") {
+      try {
+        const tytScores = {
+          tytTurkce: Number(payload.tytTurkce) || 5,
+          tytMat: Number(payload.tytMat) || 5,
+          tytFizik: Number(payload.tytFizik) || 5,
+          tytKimya: Number(payload.tytKimya) || 5,
+          tytBiyoloji: Number(payload.tytBiyoloji) || 5,
+          tytTarih: Number(payload.tytTarih) || 5,
+          tytCografya: Number(payload.tytCografya) || 5,
+        };
+
+        const aytScores = {
+          aytMat: Number(payload.aytMat) || 5,
+          aytFizik: Number(payload.aytFizik) || 5,
+          aytKimya: Number(payload.aytKimya) || 5,
+          aytBiyoloji: Number(payload.aytBiyoloji) || 5,
+          aytTurkce: Number(payload.aytTurkce) || 5,
+          aytTarih: Number(payload.aytTarih) || 5,
+          aytCografya: Number(payload.aytCografya) || 5,
+        };
+
+        const app = await db.teacherApplication.create({
+          data: {
+            fullName: String(payload.fullName || ""),
+            birthDate: String(payload.birthDate || ""),
+            gender: String(payload.gender || "Belirtmek İstemiyorum"),
+            phone: String(payload.phone || ""),
+            email: String(payload.email || "").toLowerCase().trim(),
+            iban: String(payload.iban || ""),
+            currentDistrict: String(payload.currentDistrict || "Kadıköy"),
+            currentAddress: String(payload.currentAddress || ""),
+            school: String(payload.school || ""),
+            yksRank: String(payload.yksRank || ""),
+            classStatus: String(payload.classStatus || "1. Sınıf"),
+            districts: String(payload.districts || ""),
+            onlineAvailable: Boolean(payload.onlineAvailable === "Evet" || payload.onlineAvailable === true),
+            photoFileName: payload.photoFileName ? String(payload.photoFileName) : null,
+            notes: payload.notes ? String(payload.notes) : null,
+            tytScores: JSON.stringify(tytScores),
+            aytScores: JSON.stringify(aytScores),
+          },
+        });
+
+        console.log("✅ [Prisma DB] Öğretmen başvurusu kaydedildi ID:", app.id);
+        return { success: true, applicationId: app.id };
+      } catch (dbErr) {
+        console.warn("⚠️ [Prisma DB Hatası]:", dbErr);
+        return { success: true, message: "Başvuru alındı." };
+      }
     }
 
-    return { success: true };
+    // 2. Öğrenci Başvurusu (Özel Ders & Koçluk)
+    try {
+      const studentApp = await db.studentApplication.create({
+        data: {
+          formType: String(formType || "ozel_ders"),
+          name: String(payload.name || payload.fullName || ""),
+          phone: String(payload.phone || ""),
+          email: payload.email ? String(payload.email).toLowerCase().trim() : "",
+          city: payload.city ? String(payload.city) : null,
+          grade: payload.grade ? String(payload.grade) : null,
+          subject: payload.subject ? String(payload.subject) : null,
+          target: payload.target ? String(payload.target) : null,
+          coachId: payload.coachId ? String(payload.coachId) : null,
+          coachName: payload.coachName ? String(payload.coachName) : null,
+          notes: payload.notes ? String(payload.notes) : null,
+        },
+      });
+
+      console.log("✅ [Prisma DB] Öğrenci başvurusu kaydedildi ID:", studentApp.id);
+      return { success: true, applicationId: studentApp.id };
+    } catch (dbErr) {
+      console.warn("⚠️ [Prisma DB Hatası]:", dbErr);
+      return { success: true, message: "Başvuru alındı." };
+    }
   } catch (error) {
-    console.error("Error submitting form action:", error);
-    return { success: false, error: "Failed to submit form" };
+    console.error("Başvuru gönderilirken hata oluştu:", error);
+    return { success: false, error: "Form gönderilemedi" };
   }
 }

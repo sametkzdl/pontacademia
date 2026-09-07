@@ -228,8 +228,8 @@ h2.dark-title {
   filter: brightness(0.85);
 }
 
-/* Sticky Navigation */
-header {
+/* Sticky Navigation for Landing Page */
+header.site-header {
   position: fixed;
   top: 0;
   left: 0;
@@ -241,7 +241,7 @@ header {
   align-items: center;
 }
 
-header.scrolled {
+header.site-header.scrolled {
   height: 58px;
   background-color: rgba(15, 38, 69, 0.9);
   backdrop-filter: blur(12px);
@@ -250,7 +250,7 @@ header.scrolled {
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
 
-header .nav-container {
+header.site-header .nav-container {
   display: flex;
   align-items: center;
   justify-content: space-between;

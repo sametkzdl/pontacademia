@@ -1,0 +1,17 @@
+// Kullanıcılar (Giriş Yetkisi Olanlar: Admin, Öğretmen, Öğrenci)
+model User {
+  id                 String    @id @default(cuid())
+  email              String    @unique
+  passwordHash       String
+  name               String
+  role               String    @default("STUDENT") // ADMIN | TEACHER | STUDENT
+  isActive           Boolean   @default(true)
+  mustChangePassword Boolean   @default(true)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  teacherProfile TeacherProfile?
+  studentProfile StudentProfile?
+
+  @@map("users")
+}

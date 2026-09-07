@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🏛️ Pont Academy Web Platform
 
-## Getting Started
+Pont Academy, YKS & LGS sınavlarına hazırlanan öğrenciler için birebir özel ders, öğrenci koçluğu, puan hesaplama araçları ve derece yapmış eğitmen kadrosu sunan modern bir eğitim platformudur.
 
-First, run the development server:
+---
 
+## 🚀 Teknolojiler & Mimari
+
+- **Framework**: [Next.js 16 (App Router)](https://nextjs.org/)
+- **UI / Kütüphane**: React 19, TypeScript
+- **İkon Seti**: Lucide React
+- **Stil & Tasarım**: Vanilla CSS & CSS Design System (Açık Cloud & Gece Laciverti, Altın Vurgular)
+- **State & Performans**: Native DOM & `FormData` mimarisi (Gereksiz render'ları önleyen sıfır re-render yaklaşımı)
+- **Sunucu İletişimi**: Next.js Server Actions (`actions.ts`) & Node.js/PostgreSQL Backend API Entegrasyonu
+
+---
+
+## 📂 Sayfa Yapısı ve Rotalar
+
+| Rota | Durum | Açıklama |
+|---|---|---|
+| `/` | Genel | Pont Academy ana sayfası (Eğitim modelleri, koçlar, başarı istatistikleri, referanslar) |
+| `/ozel-ders-basvuru` | Genel | Öğrenciler için birebir özel ders başvuru formu |
+| `/kocluk-basvuru` | Genel | Eğitmen/Koç seçimi ve koçluk başvuru formu |
+| `/tyt-puan-hesaplama` | Genel | TYT net ve puan hesaplama motoru |
+| `/yks-puan-hesaplama` | Genel | TYT + AYT + OBP puan ve sıralama simülasyonu |
+| `/teacherApplicationForm` | **Özel (Gizli Rota)** | Eğitmen ve koç adayları için kapsamlı başvuru ve ders yetkinlik formu (`noindex, nofollow`) |
+
+---
+
+## 📋 Eğitmen Başvuru Formu (`/teacherApplicationForm`)
+
+Eğitmen adaylarının değerlendirilmesi için hazırlanan özel başvuru sayfası aşağıdaki bölümlerden oluşur:
+
+1. **Kişisel & İletişim Bilgileri**: Ad Soyad, Doğum Tarihi, Cinsiyet (Kadın/Erkek), Telefon, E-posta, IBAN Numarası, Vesikalık Fotoğrafı
+2. **İstanbul İkametgah / Konum Bilgisi**: Aktif bulunulan ilçe (39 ilçe listesi) ve açık adres/mahalle/yurt bilgisi
+3. **Akademik Bilgiler & YKS Derecesi**: Üniversite & Bölüm, YKS Sıralaması, Sınıf / Mezuniyet durumu
+4. **Ders Yetkinlik Seviyeleri (10 Üzerinden Puanlama)**:
+   - **TYT:** Türkçe, Matematik, Fizik, Kimya, Biyoloji, Tarih, Coğrafya
+   - **AYT:** Matematik, Fizik, Kimya, Biyoloji, Edebiyat/Türkçe, Tarih, Coğrafya
+5. **Yüz Yüze Gidilebilecek İstanbul İlçeleri (*Zorunlu)**: 39 ilçe içinden çoklu seçim (Avrupa/Anadolu filtreleri, arama çubuğu)
+6. **Online Ders Seçeneği (Opsiyonel)**: Uzaktan ders verme tercihi
+7. **Ek Notlar (Opsiyonel)**: Eğitmenlik deneyimi ve müsaitlik detayları
+
+---
+
+## 🛠️ Kurulum ve Çalıştırma
+
+### 1. Bağımlılıkları Yükleyin
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Geliştirme Sunucusunu Başlatın
+```bash
+npm run dev
+```
+Tarayıcınızda [http://localhost:3000](http://localhost:3000) adresine gidin.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Prodüksiyon Derlemesi
+```bash
+npm run build
+npm run start
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🗄️ Backend Entegrasyonu (Roadmap)
 
-To learn more about Next.js, take a look at the following resources:
+Form verileri `src/app/actions.ts` üzerinden Node.js & PostgreSQL backend servisine yönlendirilecek şekilde yapılandırılmıştır.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Detaylı mimari ve veritabanı şemaları için:
+- 📖 [ARCHITECTURE.md](./ARCHITECTURE.md)
+- 📋 [FORM_SCHEMAS.md](./FORM_SCHEMAS.md)

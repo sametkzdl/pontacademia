@@ -1,0 +1,73 @@
+// Öğretmen Profili
+model TeacherProfile {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  phone            String
+  iban             String
+  birthDate        String?
+  gender           String?
+  school           String
+  yksRank          String
+  classStatus      String
+  currentDistrict  String
+  currentAddress   String
+  districts        String   // Yüz yüze ders verilen ilçeler
+  onlineAvailable  Boolean  @default(false)
+  photoUrl         String?
+  notes            String?
+  
+  // TYT Yetkinlik Puanları (1-10)
+  tytTurkce        Int      @default(5)
+  tytMat           Int      @default(5)
+  tytFizik         Int      @default(5)
+  tytKimya         Int      @default(5)
+  tytBiyoloji      Int      @default(5)
+  tytTarih         Int      @default(5)
+  tytCografya      Int      @default(5)
+
+  // AYT Yetkinlik Puanları (1-10)
+  aytMat           Int      @default(5)
+  aytFizik         Int      @default(5)
+  aytKimya         Int      @default(5)
+  aytBiyoloji      Int      @default(5)
+  aytTurkce        Int      @default(5)
+  aytTarih         Int      @default(5)
+  aytCografya      Int      @default(5)
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("teacher_profiles")
+}
+
+// Öğretmen Başvuruları Havuzu
+model TeacherApplication {
+  id              String   @id @default(cuid())
+  fullName        String
+  birthDate       String
+  gender          String
+  phone           String
+  email           String
+  iban            String
+  currentDistrict String
+  currentAddress  String
+  school          String
+  yksRank         String
+  classStatus     String
+  districts       String
+  onlineAvailable Boolean  @default(false)
+  photoFileName   String?
+  notes           String?
+  
+  // Puanlar JSON String olarak saklanır
+  tytScores       String
+  aytScores       String
+
+  status          String   @default("PENDING") // PENDING | APPROVED | REJECTED
+  approvedUserId  String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("teacher_applications")
+}
