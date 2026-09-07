@@ -9,7 +9,9 @@ import {
   User, 
   Lock, 
   LogOut, 
-  AlertCircle
+  AlertCircle,
+  Calendar,
+  MessageSquare
 } from "lucide-react";
 
 export default function StudentLayout({ children }: { children: React.ReactNode }) {
@@ -73,6 +75,16 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
       icon: GraduationCap,
       badge: teacherCount,
       badgeColor: "#C8952A",
+    },
+    {
+      href: "/student/lessons",
+      label: "Derslerim & Randevular",
+      icon: Calendar,
+    },
+    {
+      href: "/student/requests",
+      label: "Talepler & Destek",
+      icon: MessageSquare,
     },
     {
       href: "/student/profile",

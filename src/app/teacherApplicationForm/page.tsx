@@ -19,24 +19,7 @@ import {
   ShieldCheck
 } from "lucide-react";
 import { submitBasvuruForm } from "../actions";
-
-// İstanbul İlçeleri Listesi (Avrupa & Anadolu Yakası)
-const ISTANBUL_DISTRICTS = {
-  anadolu: [
-    "Adalar", "Ataşehir", "Beykoz", "Çekmeköy", "Kadıköy", 
-    "Kartal", "Maltepe", "Pendik", "Sancaktepe", "Sultanbeyli", 
-    "Şile", "Tuzla", "Ümraniye", "Üsküdar"
-  ],
-  avrupa: [
-    "Arnavutköy", "Avcılar", "Bağcılar", "Bahçelievler", "Bakırköy", 
-    "Başakşehir", "Bayrampaşa", "Beşiktaş", "Beylikdüzü", "Beyoğlu", 
-    "Büyükçekmece", "Çatalca", "Esenler", "Esenyurt", "Eyüpsultan", 
-    "Fatih", "Gaziosmanpaşa", "Güngören", "Kağıthane", "Küçükçekmece", 
-    "Sarıyer", "Silivri", "Sultangazi", "Şişli", "Zeytinburnu"
-  ]
-};
-
-const ALL_DISTRICTS = [...ISTANBUL_DISTRICTS.avrupa, ...ISTANBUL_DISTRICTS.anadolu].sort((a, b) => a.localeCompare("tr"));
+import { ISTANBUL_DISTRICTS, ALL_ISTANBUL_DISTRICTS as ALL_DISTRICTS } from "@/constants";
 
 // TYT ve AYT Ders Listeleri
 const TYT_SUBJECTS = [
@@ -145,18 +128,53 @@ export default function TeacherApplicationForm() {
   const [selectedDistricts, setSelectedDistricts] = useState<string[]>([]);
   const [districtSearch, setDistrictSearch] = useState("");
   const [districtError, setDistrictError] = useState(false);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [photoDisplayName, setPhotoDisplayName] = useState("");
 
   const formRef = useRef<HTMLFormElement>(null);
 
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setPhotoFileName(file.name);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPhotoPreview(reader.result as string);
+    if (!file) return;
+
+    setPhotoDisplayName(file.name);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPhotoPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    setIsUploadingPhoto(true);
+    try {
+      const data = new FormData();
+      data.append("file", file);
+      data.append("category", "avatars");
+
+      const res = await fetch("/api/storage/upload", {
+        method: "POST",
+        body: data,
+      });
+
+      const result = await res.json();
+      if (res.ok && result.success && result.url) {
+        setPhotoFileName(result.url);
+      } else {
+        // Fallback to base64 if storage fails
+        const fallbackReader = new FileReader();
+        fallbackReader.onloadend = () => {
+          setPhotoFileName(fallbackReader.result as string);
+        };
+        fallbackReader.readAsDataURL(file);
+      }
+    } catch (err) {
+      console.warn("Photo upload error, using base64 fallback:", err);
+      const fallbackReader = new FileReader();
+      fallbackReader.onloadend = () => {
+        setPhotoFileName(fallbackReader.result as string);
       };
-      reader.readAsDataURL(file);
+      fallbackReader.readAsDataURL(file);
+    } finally {
+      setIsUploadingPhoto(false);
     }
   };
 
@@ -573,10 +591,10 @@ export default function TeacherApplicationForm() {
                             boxShadow: "0 2px 4px rgba(15, 38, 69, 0.15)"
                           }}
                         >
-                          {photoFileName ? "Fotoğrafı Değiştir" : "Fotoğraf Seç"}
+                          {isUploadingPhoto ? "Fotoğraf Yükleniyor..." : photoDisplayName ? "Fotoğrafı Değiştir" : "Fotoğraf Seç"}
                         </label>
                         <span style={{ marginLeft: "12px", fontSize: "13px", color: "#64748B" }}>
-                          {photoFileName ? photoFileName : "JPG, PNG veya WEBP formatında (Max 5MB)"}
+                          {isUploadingPhoto ? "Sunucuya yükleniyor..." : photoDisplayName ? photoDisplayName : "JPG, PNG veya WEBP formatında (Max 5MB)"}
                         </span>
                       </div>
                     </div>

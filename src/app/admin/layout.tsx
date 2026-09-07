@@ -12,7 +12,8 @@ import {
   Settings, 
   MessageSquare, 
   Shield, 
-  LogOut 
+  LogOut,
+  Calendar
 } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -22,14 +23,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     pendingTeacherApps: 0,
     pendingStudentApps: 0,
     unreadMessages: 0,
+    pendingRequests: 0,
   });
 
   useEffect(() => {
     const fetchCounts = async () => {
       try {
-        const [appsRes, contactsRes] = await Promise.all([
+        const [appsRes, contactsRes, requestsRes] = await Promise.all([
           fetch("/api/admin/applications"),
           fetch("/api/admin/contacts"),
+          fetch("/api/admin/requests"),
         ]);
 
         if (appsRes.ok) {
@@ -49,6 +52,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             setBadgeCounts(prev => ({
               ...prev,
               unreadMessages: contactsData.data.filter((m: any) => m.status === "UNREAD").length,
+            }));
+          }
+        }
+
+        if (requestsRes.ok) {
+          const reqData = await requestsRes.json();
+          if (reqData.success && reqData.stats) {
+            setBadgeCounts(prev => ({
+              ...prev,
+              pendingRequests: reqData.stats.pending || 0,
             }));
           }
         }
@@ -95,6 +108,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       href: "/admin/matches",
       label: "Eşleştirmeler",
       icon: Link2,
+    },
+    {
+      href: "/admin/lessons",
+      label: "Ders Takibi & Oturumlar",
+      icon: Calendar,
+    },
+    {
+      href: "/admin/requests",
+      label: "Talepler & Şikayetler",
+      icon: MessageSquare,
+      badge: badgeCounts.pendingRequests,
+      badgeColor: "#EA580C",
     },
     {
       href: "/admin/messages",

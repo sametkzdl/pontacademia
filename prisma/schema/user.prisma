@@ -13,8 +13,18 @@ model User {
   teacherProfile TeacherProfile?
   studentProfile StudentProfile?
 
-  studentMatches StudentTeacherMatch[] @relation("StudentMatches")
-  teacherMatches StudentTeacherMatch[] @relation("TeacherMatches")
+  studentMatches  StudentTeacherMatch[] @relation("StudentMatches")
+  teacherMatches  StudentTeacherMatch[] @relation("TeacherMatches")
+
+  createdLessons  Lesson[]         @relation("CreatedLessons")
+  rejectedLessons Lesson[]         @relation("RejectedLessons")
+  lessonLogs      LessonLog[]      @relation("UserLessonLogs")
+  lessonFeedbacks LessonFeedback[] @relation("UserLessonFeedbacks")
+
+  requests               SupportRequest[] @relation("UserRequests")
+  targetStudentRequests  SupportRequest[] @relation("TargetStudentRequests")
+  targetTeacherRequests  SupportRequest[] @relation("TargetTeacherRequests")
+  resolvedRequests       SupportRequest[] @relation("ResolvedByAdmin")
 
   @@map("users")
 }

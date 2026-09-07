@@ -10,7 +10,9 @@ import {
   Lock, 
   LogOut, 
   AlertCircle,
-  Sparkles
+  Sparkles,
+  Calendar,
+  MessageSquare
 } from "lucide-react";
 
 export default function TeacherLayout({ children }: { children: React.ReactNode }) {
@@ -74,6 +76,16 @@ export default function TeacherLayout({ children }: { children: React.ReactNode 
       icon: Users,
       badge: studentCount,
       badgeColor: "#C8952A",
+    },
+    {
+      href: "/teacher/lessons",
+      label: "Derslerim & Randevular",
+      icon: Calendar,
+    },
+    {
+      href: "/teacher/requests",
+      label: "Talepler & Bildirimler",
+      icon: MessageSquare,
     },
     {
       href: "/teacher/profile",

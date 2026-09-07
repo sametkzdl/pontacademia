@@ -13,7 +13,22 @@ export class UserService {
       }),
       db.user.findMany({
         where: { role: "STUDENT" },
-        include: { studentProfile: true },
+        include: { 
+          studentProfile: true,
+          studentMatches: {
+            where: { status: "ACTIVE" },
+            include: {
+              teacher: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  teacherProfile: true,
+                },
+              },
+            },
+          },
+        },
         orderBy: { createdAt: "desc" },
       }),
     ]);
@@ -83,4 +98,39 @@ export class UserService {
       newPassword: finalPassword,
     };
   }
+
+  /**
+   * Öğretmen Ders Yetkinlik Puanlarını Güncelle (Admin için)
+   */
+  static async updateTeacherCompetencies(userId: string, scores: Record<string, number>) {
+    if (!userId) {
+      throw new Error("Kullanıcı ID'si gereklidir.");
+    }
+
+    const teacherProfile = await db.teacherProfile.findUnique({
+      where: { userId },
+    });
+
+    if (!teacherProfile) {
+      throw new Error("Öğretmen profili bulunamadı.");
+    }
+
+    const dataToUpdate: any = {};
+    const validKeys = [
+      "tytTurkce", "tytMat", "tytFizik", "tytKimya", "tytBiyoloji", "tytTarih", "tytCografya",
+      "aytMat", "aytFizik", "aytKimya", "aytBiyoloji", "aytTurkce", "aytTarih", "aytCografya", "ydtIngilizce"
+    ];
+
+    for (const key of validKeys) {
+      if (scores[key] !== undefined) {
+        dataToUpdate[key] = Math.max(1, Math.min(10, Number(scores[key])));
+      }
+    }
+
+    return await db.teacherProfile.update({
+      where: { userId },
+      data: dataToUpdate,
+    });
+  }
 }
+

@@ -1,0 +1,104 @@
+// Ders Oturumları ve Randevu Takip Sistemi
+model Lesson {
+  id              String    @id @default(cuid())
+  matchId         String
+  createdById     String    // Dersi oluşturan kullanıcı (Admin, Öğretmen veya Öğrenci)
+  
+  scheduledDate   DateTime  // Ders başlangıç tarihi & saati
+  durationMinutes Int       @default(60) // Ders süresi (dk: 40, 60, 90, 120 vb.)
+  locationType    String    // "YUZ_YUZE" | "ONLINE"
+  locationDetails String?   // Açık adres veya Online toplantı linki/platformu
+  notes           String?   // Konu detayı veya özel açıklama
+
+  // Durum Yönetimi:
+  // "PENDING_APPROVAL": Karşı tarafın onayı bekleniyor
+  // "SCHEDULED": İki tarafça onaylandı, yapılması bekleniyor
+  // "REJECTED": Reddedildi
+  // "COMPLETED": Karşılıklı olarak işlendiği onaylandı
+  // "CANCELLED": İptal edildi
+  status          String    @default("PENDING_APPROVAL")
+
+  // Karşılıklı Onay Durumu (Ders Öncesi Planlama İçin)
+  teacherApproved Boolean   @default(false)
+  studentApproved Boolean   @default(false)
+  approvedAt      DateTime?
+
+  // Reddedilme & İptal Detayları
+  rejectedById    String?
+  rejectionReason String?
+  rejectedAt      DateTime?
+
+  // Ders Sonu Karşılıklı Tamamlanma Onayı
+  teacherCompleted Boolean   @default(false)
+  teacherCompletedAt DateTime?
+  studentCompleted Boolean   @default(false)
+  studentCompletedAt DateTime?
+  completedAt     DateTime?
+
+  // Ödeme Takip Durumu & Bilgileri (Tahsilat - Öğrenci/Veli -> Kurum)
+  // "UNPAID": Ödeme bekleniyor / henüz alınmadı
+  // "PAID": Ödeme alındı ve onaylandı
+  // "FAILED": Ödeme alınamadı / onaylanmadı (gerekçe ile)
+  paymentStatus     String    @default("UNPAID")
+  paidAmount        Float?
+  paidBy            String?   // Ödemeyi yapan (Öğrenci, Veli vb.)
+  paymentDate       DateTime? // Ödeme alınma tarihi
+  paymentMethod     String?   // "HAVALE_EFT", "FAST", "KREDI_KARTI", "NAKIT", "DIGER"
+  paymentNotes      String?   // Ödeme notu veya alınamama gerekçesi
+  paymentApprovedAt DateTime? // Onaylama zamanı
+
+  // Eğitmen Hakediş / Ücret Transfer Takip Durumu (Kurum -> Eğitmen)
+  // "UNPAID": Hakediş henüz gönderilmedi / beklemede
+  // "PAID": Eğitmene transfer yapıldı / gönderildi
+  // "FAILED": Eğitmene transfer yapılamadı / iptal (gerekçe ile)
+  teacherPaymentStatus     String    @default("UNPAID")
+  teacherPaidAmount        Float?    // Eğitmene aktarılan tutar (TL)
+  teacherPaidDate          DateTime? // Aktarım/Transfer tarihi
+  teacherPaymentMethod     String?   // "HAVALE_EFT", "FAST", "KREDI_KARTI", "NAKIT", "DIGER"
+  teacherPaymentNotes      String?   // Dekont no, IBAN transfer referansı veya gerekçe
+  teacherPaymentApprovedAt DateTime? // Transfer onay tarihi
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  match           StudentTeacherMatch @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  createdBy       User      @relation("CreatedLessons", fields: [createdById], references: [id], onDelete: Cascade)
+  rejectedBy      User?     @relation("RejectedLessons", fields: [rejectedById], references: [id], onDelete: SetNull)
+  logs            LessonLog[]
+  feedbacks       LessonFeedback[]
+
+  @@map("lessons")
+}
+
+// Ders İşlem Geçmişi / Logları (Oluşturma, Onaylama, Reddetme, Tamamlama, vb.)
+model LessonLog {
+  id          String   @id @default(cuid())
+  lessonId    String
+  userId      String
+  action      String   // "CREATED" | "APPROVED" | "REJECTED" | "TEACHER_COMPLETED" | "STUDENT_COMPLETED" | "FULLY_COMPLETED" | "CANCELLED"
+  message     String   // "Öğretmen Ahmet Yılmaz dersi onayladı." vb.
+  reason      String?  // Reddetme veya iptal durumundaki açıklama
+  createdAt   DateTime @default(now())
+
+  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  user        User     @relation("UserLessonLogs", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("lesson_logs")
+}
+
+// Derse Özel Yorum & Geri Bildirim (SADECE ADMİN GÖRÜR)
+model LessonFeedback {
+  id          String   @id @default(cuid())
+  lessonId    String
+  userId      String   // Yorumu bırakan (Öğretmen veya Öğrenci)
+  userRole    String   // "TEACHER" | "STUDENT"
+  rating      Int?     // 1-5 yıldız (opsiyonel)
+  comment     String   // Gizli yönetici notu / yorum
+  createdAt   DateTime @default(now())
+
+  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  user        User     @relation("UserLessonFeedbacks", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([lessonId, userId]) // Bir derse kişi başı en fazla 1 yorum
+  @@map("lesson_feedbacks")
+}

@@ -150,4 +150,36 @@ export class ApplicationController {
       return ApiResponse.error(err.message || "Başvuru reddedilemedi.", 400);
     }
   }
+
+  /**
+   * POST /api/admin/applications/teacher/update-scores
+   */
+  static async updateTeacherScores(req: NextRequest) {
+    try {
+      const session = await getSessionUser();
+      if (!session || session.role !== "ADMIN") {
+        return ApiResponse.forbidden("Bu işlemi yalnızca yöneticiler yapabilir.");
+      }
+
+      const body = await req.json();
+      const { applicationId, tytScores, aytScores } = body;
+
+      if (!applicationId) {
+        return ApiResponse.error("Başvuru ID zorunludur.", 400);
+      }
+
+      const updated = await ApplicationService.updateTeacherApplicationScores(applicationId, {
+        tytScores,
+        aytScores,
+      });
+
+      return ApiResponse.success({
+        application: updated,
+        message: "Başvuru ders yetkinlik puanları başarıyla güncellendi.",
+      });
+    } catch (err: any) {
+      return ApiResponse.error(err.message || "Ders puanları güncellenemedi.", 400);
+    }
+  }
 }
+

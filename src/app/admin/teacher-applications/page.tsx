@@ -10,7 +10,8 @@ import {
   AlertCircle, 
   Sparkles
 } from "lucide-react";
-import { Button, Badge, PasswordInput, Modal, SearchFilterBar } from "@/components";
+import { Button, Badge, PasswordInput, Modal, SearchFilterBar, Avatar } from "@/components";
+import { getPhotoUrl } from "@/utils/media";
 
 export default function TeacherApplicationsPage() {
   const [teacherApps, setTeacherApps] = useState<any[]>([]);
@@ -26,6 +27,96 @@ export default function TeacherApplicationsPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [actionSuccessMsg, setActionSuccessMsg] = useState("");
   const [actionErrorMsg, setActionErrorMsg] = useState("");
+
+  // Score Editing States
+  const [isEditingScores, setIsEditingScores] = useState(false);
+  const [scoreSaveLoading, setScoreSaveLoading] = useState(false);
+  const [scoreSaveMsg, setScoreSaveMsg] = useState("");
+  const [appTytScores, setAppTytScores] = useState<Record<string, number>>({});
+  const [appAytScores, setAppAytScores] = useState<Record<string, number>>({});
+
+  const initScoresFromApp = (app: any) => {
+    if (!app) return;
+    let tyt: Record<string, number> = {};
+    let ayt: Record<string, number> = {};
+    try {
+      if (typeof app.tytScores === "string") tyt = JSON.parse(app.tytScores);
+      else if (app.tytScores) tyt = app.tytScores;
+    } catch {}
+    try {
+      if (typeof app.aytScores === "string") ayt = JSON.parse(app.aytScores);
+      else if (app.aytScores) ayt = app.aytScores;
+    } catch {}
+
+    setAppTytScores({
+      tytTurkce: tyt.tytTurkce ?? tyt["Türkçe"] ?? 5,
+      tytMat: tyt.tytMat ?? tyt["Temel Matematik"] ?? 5,
+      tytFizik: tyt.tytFizik ?? tyt["Fizik"] ?? 5,
+      tytKimya: tyt.tytKimya ?? tyt["Kimya"] ?? 5,
+      tytBiyoloji: tyt.tytBiyoloji ?? tyt["Biyoloji"] ?? 5,
+      tytTarih: tyt.tytTarih ?? tyt["Tarih"] ?? 5,
+      tytCografya: tyt.tytCografya ?? tyt["Coğrafya"] ?? 5,
+    });
+
+    setAppAytScores({
+      aytMat: ayt.aytMat ?? ayt["Matematik"] ?? 5,
+      aytFizik: ayt.aytFizik ?? ayt["Fizik"] ?? 5,
+      aytKimya: ayt.aytKimya ?? ayt["Kimya"] ?? 5,
+      aytBiyoloji: ayt.aytBiyoloji ?? ayt["Biyoloji"] ?? 5,
+      aytTurkce: ayt.aytTurkce ?? ayt["Edebiyat"] ?? 5,
+      aytTarih: ayt.aytTarih ?? ayt["Tarih-1"] ?? ayt["Tarih"] ?? 5,
+      aytCografya: ayt.aytCografya ?? ayt["Coğrafya-1"] ?? ayt["Coğrafya"] ?? 5,
+      ydtIngilizce: ayt.ydtIngilizce ?? ayt["İngilizce (YDT)"] ?? ayt["İngilizce"] ?? 5,
+    });
+  };
+
+  const handleSaveApplicationScores = async () => {
+    if (!selectedApp) return;
+    setScoreSaveLoading(true);
+    setScoreSaveMsg("");
+    try {
+      const res = await fetch("/api/admin/applications/teacher/update-scores", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          applicationId: selectedApp.id,
+          tytScores: appTytScores,
+          aytScores: appAytScores,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setScoreSaveMsg("Ders yetkinlik puanları başarıyla güncellendi!");
+        setIsEditingScores(false);
+        // update local list
+        setTeacherApps(prev => prev.map(a => a.id === selectedApp.id ? {
+          ...a,
+          tytScores: JSON.stringify(appTytScores),
+          aytScores: JSON.stringify(appAytScores),
+        } : a));
+        setSelectedApp((prev: any) => ({
+          ...prev,
+          tytScores: JSON.stringify(appTytScores),
+          aytScores: JSON.stringify(appAytScores),
+        }));
+      } else {
+        alert(data.error || "Puanlar güncellenemedi.");
+      }
+    } catch (err) {
+      console.error("Score save error:", err);
+      alert("Bir hata oluştu.");
+    } finally {
+      setScoreSaveLoading(false);
+    }
+  };
+
+  const openDetailModal = (app: any) => {
+    setSelectedApp(app);
+    initScoresFromApp(app);
+    setIsEditingScores(false);
+    setScoreSaveMsg("");
+    setModalType("detail");
+  };
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -180,8 +271,19 @@ export default function TeacherApplicationsPage() {
                 filteredApps.map((app) => (
                   <tr key={app.id} style={{ borderBottom: "1px solid #F1F5F9" }}>
                     <td style={{ padding: "14px 18px" }}>
-                      <div style={{ fontWeight: "700", color: "#0F2645" }}>{app.fullName}</div>
-                      <div style={{ fontSize: "12px", color: "#64748B" }}>{app.classStatus || "Öğrenci"}</div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                        <Avatar
+                          src={app.photoFileName || app.photoUrl}
+                          name={app.fullName}
+                          size={40}
+                          showBorder
+                          style={{ boxShadow: "0 2px 6px rgba(15, 38, 69, 0.12)" }}
+                        />
+                        <div>
+                          <div style={{ fontWeight: "700", color: "#0F2645" }}>{app.fullName}</div>
+                          <div style={{ fontSize: "12px", color: "#64748B" }}>{app.classStatus || "Öğrenci"}</div>
+                        </div>
+                      </div>
                     </td>
                     <td style={{ padding: "14px 18px" }}>
                       <div style={{ color: "#0F2645" }}>{app.email}</div>
@@ -220,7 +322,7 @@ export default function TeacherApplicationsPage() {
                           variant="secondary"
                           size="sm"
                           icon={<Eye size={13} />}
-                          onClick={() => { setSelectedApp(app); setModalType("detail"); }}
+                          onClick={() => openDetailModal(app)}
                         >
                           Detay
                         </Button>
@@ -276,6 +378,47 @@ export default function TeacherApplicationsPage() {
       >
         {selectedApp && (
           <div>
+            {/* Header / Photo Banner */}
+            <div style={{ 
+              display: "flex", 
+              alignItems: "center", 
+              gap: "20px", 
+              padding: "16px", 
+              backgroundColor: "#F8FAFC", 
+              borderRadius: "12px", 
+              border: "1px solid #E2E8F0",
+              marginBottom: "20px",
+              flexWrap: "wrap"
+            }}>
+              <div>
+                <Avatar
+                  src={selectedApp.photoFileName || selectedApp.photoUrl}
+                  name={selectedApp.fullName}
+                  size={88}
+                  showBorder
+                  style={{ boxShadow: "0 4px 12px rgba(15, 38, 69, 0.15)", border: "3px solid #C8952A" }}
+                />
+              </div>
+
+              <div style={{ flex: 1, minWidth: "220px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                  <h3 style={{ margin: 0, fontSize: "18px", fontWeight: "800", color: "#0F2645" }}>
+                    {selectedApp.fullName}
+                  </h3>
+                  <Badge variant={selectedApp.status as any} />
+                </div>
+
+                <div style={{ marginTop: "6px", fontSize: "13px", color: "#64748B", display: "flex", flexDirection: "column", gap: "4px" }}>
+                  <div>
+                    <strong style={{ color: "#0F2645" }}>{selectedApp.school}</strong> • {selectedApp.classStatus}
+                  </div>
+                  <div>
+                    <span style={{ color: "#C8952A", fontWeight: "700" }}>{selectedApp.scoreType}</span> &bull; {selectedApp.yksRank ? `YKS Sıralaması: ${selectedApp.yksRank}` : "Derece Belirtilmedi"}
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="admin-grid-2col" style={{ marginBottom: "20px", fontSize: "14px" }}>
               <div>
                 <span style={{ fontSize: "12px", color: "#64748B", fontWeight: "600", display: "block" }}>E-Posta</span>
@@ -325,6 +468,173 @@ export default function TeacherApplicationsPage() {
                 </p>
               </div>
             )}
+
+            {/* Direct High-Resolution Photo Preview if available */}
+            {getPhotoUrl(selectedApp.photoFileName || selectedApp.photoUrl) && (
+              <div style={{ marginBottom: "20px" }}>
+                <span style={{ fontSize: "12px", color: "#64748B", fontWeight: "600", display: "block", marginBottom: "6px" }}>
+                  Adayın Yüklediği Profil Fotoğrafı
+                </span>
+                <div style={{ 
+                  borderRadius: "10px", 
+                  overflow: "hidden", 
+                  border: "1px solid #E2E8F0", 
+                  maxHeight: "300px", 
+                  display: "flex", 
+                  alignItems: "center", 
+                  justifyContent: "center",
+                  backgroundColor: "#0F2645"
+                }}>
+                  <img
+                    src={getPhotoUrl(selectedApp.photoFileName || selectedApp.photoUrl)!}
+                    alt={selectedApp.fullName}
+                    style={{ maxWidth: "100%", maxHeight: "300px", objectFit: "contain" }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* SUBJECT COMPETENCY EVALUATIONS (ADMIN VIEW & EDIT) */}
+            <div style={{ backgroundColor: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: "10px", padding: "16px", marginBottom: "20px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px", flexWrap: "wrap", gap: "8px" }}>
+                <div>
+                  <h4 style={{ margin: 0, fontSize: "14px", fontWeight: "800", color: "#0F2645", display: "flex", alignItems: "center", gap: "6px" }}>
+                    <GraduationCap size={16} color="#C8952A" /> Adayın Girdiği Ders Bilgisi & Yetkinlik Puanları (1 - 10)
+                  </h4>
+                  <p style={{ margin: "2px 0 0 0", fontSize: "12px", color: "#64748B" }}>
+                    Adayın başvuru sırasında beyan ettiği ders puanları. Yönetici olarak bu puanları düzenleyebilirsiniz.
+                  </p>
+                </div>
+
+                <div style={{ display: "flex", gap: "8px" }}>
+                  {!isEditingScores ? (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => setIsEditingScores(true)}
+                    >
+                      ✏️ Puanları Düzenle
+                    </Button>
+                  ) : (
+                    <>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => {
+                          setIsEditingScores(false);
+                          initScoresFromApp(selectedApp);
+                        }}
+                      >
+                        Vazgeç
+                      </Button>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        loading={scoreSaveLoading}
+                        onClick={handleSaveApplicationScores}
+                      >
+                        💾 Puanları Kaydet
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {scoreSaveMsg && (
+                <div style={{ backgroundColor: "#DCFCE7", color: "#166534", padding: "8px 12px", borderRadius: "6px", fontSize: "12px", fontWeight: "700", marginBottom: "12px" }}>
+                  {scoreSaveMsg}
+                </div>
+              )}
+
+              {/* TYT Scores */}
+              <div style={{ marginBottom: "16px" }}>
+                <div style={{ fontSize: "12px", fontWeight: "800", color: "#1D4ED8", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                  📘 TYT Yetkinlik Puanları
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "10px" }}>
+                  {[
+                    { key: "tytTurkce", label: "TYT Türkçe" },
+                    { key: "tytMat", label: "TYT Matematik" },
+                    { key: "tytFizik", label: "TYT Fizik" },
+                    { key: "tytKimya", label: "TYT Kimya" },
+                    { key: "tytBiyoloji", label: "TYT Biyoloji" },
+                    { key: "tytTarih", label: "TYT Tarih" },
+                    { key: "tytCografya", label: "TYT Coğrafya" },
+                  ].map((sub) => {
+                    const score = appTytScores[sub.key] ?? 5;
+                    return (
+                      <div key={sub.key} style={{ backgroundColor: "#FFFFFF", padding: "10px", borderRadius: "8px", border: "1px solid #CBD5E1" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", fontWeight: "700", color: "#0F2645", marginBottom: "4px" }}>
+                          <span>{sub.label}</span>
+                          <span style={{ color: score >= 8 ? "#16A34A" : score >= 5 ? "#D97706" : "#DC2626" }}>
+                            {score} / 10
+                          </span>
+                        </div>
+                        {isEditingScores ? (
+                          <input
+                            type="range"
+                            min="1"
+                            max="10"
+                            value={score}
+                            onChange={(e) => setAppTytScores({ ...appTytScores, [sub.key]: Number(e.target.value) })}
+                            style={{ width: "100%", accentColor: "#0F2645", cursor: "pointer" }}
+                          />
+                        ) : (
+                          <div style={{ height: "6px", width: "100%", backgroundColor: "#E2E8F0", borderRadius: "4px", overflow: "hidden" }}>
+                            <div style={{ height: "100%", width: `${score * 10}%`, backgroundColor: score >= 8 ? "#16A34A" : score >= 5 ? "#F59E0B" : "#EF4444" }} />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* AYT Scores */}
+              <div>
+                <div style={{ fontSize: "12px", fontWeight: "800", color: "#7E22CE", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                  📙 AYT & YDT Yetkinlik Puanları
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "10px" }}>
+                  {[
+                    { key: "aytMat", label: "AYT Matematik" },
+                    { key: "aytFizik", label: "AYT Fizik" },
+                    { key: "aytKimya", label: "AYT Kimya" },
+                    { key: "aytBiyoloji", label: "AYT Biyoloji" },
+                    { key: "aytTurkce", label: "AYT Edebiyat" },
+                    { key: "aytTarih", label: "AYT Tarih-1/2" },
+                    { key: "aytCografya", label: "AYT Coğrafya-1/2" },
+                    { key: "ydtIngilizce", label: "YDT İngilizce" },
+                  ].map((sub) => {
+                    const score = appAytScores[sub.key] ?? 5;
+                    return (
+                      <div key={sub.key} style={{ backgroundColor: "#FFFFFF", padding: "10px", borderRadius: "8px", border: "1px solid #CBD5E1" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", fontWeight: "700", color: "#0F2645", marginBottom: "4px" }}>
+                          <span>{sub.label}</span>
+                          <span style={{ color: score >= 8 ? "#16A34A" : score >= 5 ? "#D97706" : "#DC2626" }}>
+                            {score} / 10
+                          </span>
+                        </div>
+                        {isEditingScores ? (
+                          <input
+                            type="range"
+                            min="1"
+                            max="10"
+                            value={score}
+                            onChange={(e) => setAppAytScores({ ...appAytScores, [sub.key]: Number(e.target.value) })}
+                            style={{ width: "100%", accentColor: "#7E22CE", cursor: "pointer" }}
+                          />
+                        ) : (
+                          <div style={{ height: "6px", width: "100%", backgroundColor: "#E2E8F0", borderRadius: "4px", overflow: "hidden" }}>
+                            <div style={{ height: "100%", width: `${score * 10}%`, backgroundColor: score >= 8 ? "#16A34A" : score >= 5 ? "#F59E0B" : "#EF4444" }} />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </Modal>

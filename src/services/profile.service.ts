@@ -48,6 +48,21 @@ export class ProfileService {
           iban: body.iban !== undefined ? String(body.iban).trim() : undefined,
           scoreType: body.scoreType !== undefined ? (body.scoreType ? String(body.scoreType).trim() : null) : undefined,
           notes: body.notes !== undefined ? String(body.notes) : undefined,
+          tytTurkce: body.tytTurkce !== undefined ? Number(body.tytTurkce) : undefined,
+          tytMat: body.tytMat !== undefined ? Number(body.tytMat) : undefined,
+          tytFizik: body.tytFizik !== undefined ? Number(body.tytFizik) : undefined,
+          tytKimya: body.tytKimya !== undefined ? Number(body.tytKimya) : undefined,
+          tytBiyoloji: body.tytBiyoloji !== undefined ? Number(body.tytBiyoloji) : undefined,
+          tytTarih: body.tytTarih !== undefined ? Number(body.tytTarih) : undefined,
+          tytCografya: body.tytCografya !== undefined ? Number(body.tytCografya) : undefined,
+          aytMat: body.aytMat !== undefined ? Number(body.aytMat) : undefined,
+          aytFizik: body.aytFizik !== undefined ? Number(body.aytFizik) : undefined,
+          aytKimya: body.aytKimya !== undefined ? Number(body.aytKimya) : undefined,
+          aytBiyoloji: body.aytBiyoloji !== undefined ? Number(body.aytBiyoloji) : undefined,
+          aytTurkce: body.aytTurkce !== undefined ? Number(body.aytTurkce) : undefined,
+          aytTarih: body.aytTarih !== undefined ? Number(body.aytTarih) : undefined,
+          aytCografya: body.aytCografya !== undefined ? Number(body.aytCografya) : undefined,
+          ydtIngilizce: body.ydtIngilizce !== undefined ? Number(body.ydtIngilizce) : undefined,
         },
         create: {
           userId,
@@ -64,12 +79,88 @@ export class ProfileService {
           iban: String(body.iban || "").trim(),
           scoreType: body.scoreType ? String(body.scoreType).trim() : null,
           notes: String(body.notes || ""),
+          tytTurkce: body.tytTurkce !== undefined ? Number(body.tytTurkce) : 5,
+          tytMat: body.tytMat !== undefined ? Number(body.tytMat) : 5,
+          tytFizik: body.tytFizik !== undefined ? Number(body.tytFizik) : 5,
+          tytKimya: body.tytKimya !== undefined ? Number(body.tytKimya) : 5,
+          tytBiyoloji: body.tytBiyoloji !== undefined ? Number(body.tytBiyoloji) : 5,
+          tytTarih: body.tytTarih !== undefined ? Number(body.tytTarih) : 5,
+          tytCografya: body.tytCografya !== undefined ? Number(body.tytCografya) : 5,
+          aytMat: body.aytMat !== undefined ? Number(body.aytMat) : 5,
+          aytFizik: body.aytFizik !== undefined ? Number(body.aytFizik) : 5,
+          aytKimya: body.aytKimya !== undefined ? Number(body.aytKimya) : 5,
+          aytBiyoloji: body.aytBiyoloji !== undefined ? Number(body.aytBiyoloji) : 5,
+          aytTurkce: body.aytTurkce !== undefined ? Number(body.aytTurkce) : 5,
+          aytTarih: body.aytTarih !== undefined ? Number(body.aytTarih) : 5,
+          aytCografya: body.aytCografya !== undefined ? Number(body.aytCografya) : 5,
+          ydtIngilizce: body.ydtIngilizce !== undefined ? Number(body.ydtIngilizce) : 5,
         },
       });
     }
 
     // 3. Öğrenci Profili Güncelleme
     if (role === "STUDENT") {
+      // Eğer ders listesi güncelleniyorsa, kaldırılan dersler için işlenmemiş randevu kontrolü yap
+      if (body.selectedSubjects !== undefined) {
+        const currentProfile = await db.studentProfile.findUnique({
+          where: { userId },
+        });
+
+        if (currentProfile?.selectedSubjects) {
+          const currentSubjects = currentProfile.selectedSubjects
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean);
+
+          const newSubjects = (
+            Array.isArray(body.selectedSubjects)
+              ? body.selectedSubjects
+              : String(body.selectedSubjects || "").split(",")
+          )
+            .map((s) => s.trim())
+            .filter(Boolean);
+
+          const removedSubjects = currentSubjects.filter((sub) => !newSubjects.includes(sub));
+
+          for (const removedSub of removedSubjects) {
+            const isCoaching =
+              removedSub.toLowerCase().includes("koçluk") ||
+              removedSub.toLowerCase().includes("kocluk");
+
+            const activeMatchWithPendingLessons = await db.studentTeacherMatch.findFirst({
+              where: {
+                studentId: userId,
+                status: "ACTIVE",
+                OR: isCoaching
+                  ? [{ type: "KOCLUK" }, { subject: removedSub }]
+                  : [{ subject: removedSub }],
+                lessons: {
+                  some: {
+                    status: { in: ["PENDING_APPROVAL", "SCHEDULED"] },
+                  },
+                },
+              },
+              include: {
+                teacher: true,
+                lessons: {
+                  where: {
+                    status: { in: ["PENDING_APPROVAL", "SCHEDULED"] },
+                  },
+                },
+              },
+            });
+
+            if (activeMatchWithPendingLessons) {
+              const teacherName = activeMatchWithPendingLessons.teacher?.name || "eğitmeniniz";
+              const pendingCount = activeMatchWithPendingLessons.lessons.length;
+              throw new Error(
+                `"${removedSub}" dersine ait ${teacherName} ile onay bekleyen veya henüz işlenmemiş ${pendingCount} adet ders randevunuz bulunmaktadır. Bu dersi profilinizden kaldırmadan önce lütfen ders oturumunu tamamlayınız veya iptal ediniz.`
+              );
+            }
+          }
+        }
+      }
+
       await db.studentProfile.upsert({
         where: { userId },
         update: {

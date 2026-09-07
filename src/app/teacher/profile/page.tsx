@@ -10,26 +10,11 @@ import {
   Camera, 
   Trash2, 
   Check, 
-  AlertCircle
+  AlertCircle,
+  GraduationCap
 } from "lucide-react";
-import { Button, Input, Select, Modal } from "@/components";
-
-const ISTANBUL_DISTRICTS = {
-  anadolu: [
-    "Adalar", "Ataşehir", "Beykoz", "Çekmeköy", "Kadıköy", 
-    "Kartal", "Maltepe", "Pendik", "Sancaktepe", "Sultanbeyli", 
-    "Şile", "Tuzla", "Ümraniye", "Üsküdar"
-  ],
-  avrupa: [
-    "Arnavutköy", "Avcılar", "Bağcılar", "Bahçelievler", "Bakırköy", 
-    "Başakşehir", "Bayrampaşa", "Beşiktaş", "Beylikdüzü", "Beyoğlu", 
-    "Büyükçekmece", "Çatalca", "Esenler", "Esenyurt", "Eyüpsultan", 
-    "Fatih", "Gaziosmanpaşa", "Güngören", "Kağıthane", "Küçükçekmece", 
-    "Sarıyer", "Silivri", "Sultangazi", "Şişli", "Zeytinburnu"
-  ]
-};
-
-const ALL_DISTRICTS = [...ISTANBUL_DISTRICTS.avrupa, ...ISTANBUL_DISTRICTS.anadolu].sort((a, b) => a.localeCompare("tr"));
+import { Button, Input, Select, Modal, Avatar } from "@/components";
+import { ISTANBUL_DISTRICTS, ALL_ISTANBUL_DISTRICTS as ALL_DISTRICTS } from "@/constants";
 
 export default function TeacherProfilePage() {
   const [user, setUser] = useState<any>(null);
@@ -56,6 +41,13 @@ export default function TeacherProfilePage() {
   const [editLoading, setEditLoading] = useState(false);
   const [editSuccessMsg, setEditSuccessMsg] = useState("");
   const [editErrorMsg, setEditErrorMsg] = useState("");
+
+  // Competencies Modal State
+  const [isCompModalOpen, setIsCompModalOpen] = useState(false);
+  const [compScores, setCompScores] = useState<Record<string, number>>({});
+  const [compSaveLoading, setCompSaveLoading] = useState(false);
+  const [compSuccessMsg, setCompSuccessMsg] = useState("");
+  const [compErrorMsg, setCompErrorMsg] = useState("");
 
   const fetchUser = async () => {
     setIsLoading(true);
@@ -87,6 +79,65 @@ export default function TeacherProfilePage() {
       console.error("Fetch profile error:", err);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const openCompetenciesModal = () => {
+    const prof = user?.teacherProfile || {};
+    setCompScores({
+      tytTurkce: prof.tytTurkce ?? 5,
+      tytMat: prof.tytMat ?? 5,
+      tytFizik: prof.tytFizik ?? 5,
+      tytKimya: prof.tytKimya ?? 5,
+      tytBiyoloji: prof.tytBiyoloji ?? 5,
+      tytTarih: prof.tytTarih ?? 5,
+      tytCografya: prof.tytCografya ?? 5,
+      aytMat: prof.aytMat ?? 5,
+      aytFizik: prof.aytFizik ?? 5,
+      aytKimya: prof.aytKimya ?? 5,
+      aytBiyoloji: prof.aytBiyoloji ?? 5,
+      aytTurkce: prof.aytTurkce ?? 5,
+      aytTarih: prof.aytTarih ?? 5,
+      aytCografya: prof.aytCografya ?? 5,
+      ydtIngilizce: prof.ydtIngilizce ?? 5,
+    });
+    setCompSuccessMsg("");
+    setCompErrorMsg("");
+    setIsCompModalOpen(true);
+  };
+
+  const handleSaveCompetencies = async () => {
+    setCompSaveLoading(true);
+    setCompSuccessMsg("");
+    setCompErrorMsg("");
+    try {
+      const res = await fetch("/api/teacher/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(compScores),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setCompSuccessMsg("Ders yetkinlik puanlarınız başarıyla kaydedildi!");
+        setUser((prev: any) => ({
+          ...prev,
+          teacherProfile: {
+            ...(prev?.teacherProfile || {}),
+            ...compScores,
+          },
+        }));
+        setTimeout(() => {
+          setIsCompModalOpen(false);
+          setCompSuccessMsg("");
+        }, 1200);
+      } else {
+        setCompErrorMsg(data.error || "Puanlar güncellenemedi.");
+      }
+    } catch (err) {
+      console.error("Save competencies error:", err);
+      setCompErrorMsg("Bir hata oluştu.");
+    } finally {
+      setCompSaveLoading(false);
     }
   };
 
@@ -295,6 +346,10 @@ export default function TeacherProfilePage() {
               <strong style={{ color: "#0F2645" }}>{profile?.currentDistrict || "İstanbul"}</strong>
             </div>
             <div>
+              <span style={{ fontSize: "12px", color: "#64748B", fontWeight: "600", display: "block" }}>Açık Adres / Mahalle</span>
+              <strong style={{ color: "#0F2645" }}>{profile?.currentAddress || "Belirtilmedi"}</strong>
+            </div>
+            <div>
               <span style={{ fontSize: "12px", color: "#64748B", fontWeight: "600", display: "block" }}>Ödeme IBAN</span>
               <strong style={{ color: "#0F2645", fontFamily: "monospace" }}>{profile?.iban || "Belirtilmedi"}</strong>
             </div>
@@ -321,6 +376,96 @@ export default function TeacherProfilePage() {
           ) : (
             <span style={{ color: "#94A3B8", fontSize: "13px" }}>Henüz ilçe seçilmedi (Tüm İstanbul / Online).</span>
           )}
+        </div>
+      </div>
+
+      {/* Card 4: Ders Yetkinlik Puanlarım (1 - 10) */}
+      <div style={{ backgroundColor: "#FFFFFF", borderRadius: "14px", border: "1px solid #DDE6F0", padding: "20px", marginBottom: "24px", boxShadow: "0 4px 16px rgba(15, 38, 69, 0.04)" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "10px", borderBottom: "1px solid #F1F5F9", paddingBottom: "12px" }}>
+          <div>
+            <h3 style={{ fontSize: "16px", fontWeight: "800", color: "#0F2645", margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
+              <GraduationCap size={20} color="#C8952A" /> Ders Bilgisi & Yetkinlik Puanlarım (1 - 10)
+            </h3>
+            <p style={{ fontSize: "13px", color: "#64748B", margin: "4px 0 0 0" }}>
+              Öğrenci eşleştirmelerinde dikkate alınan branş bazlı yetkinlik değerlendirmeleriniz
+            </p>
+          </div>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={openCompetenciesModal}
+            leftIcon={<Edit3 size={14} />}
+          >
+            Puanlarımı Düzenle
+          </Button>
+        </div>
+
+        {/* TYT & AYT Preview Grid */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "20px" }}>
+          {/* TYT Puanları */}
+          <div style={{ backgroundColor: "#F8FAFC", padding: "16px", borderRadius: "10px", border: "1px solid #E2E8F0" }}>
+            <div style={{ fontSize: "13px", fontWeight: "800", color: "#0F2645", marginBottom: "12px", textTransform: "uppercase", letterSpacing: "0.5px", display: "flex", alignItems: "center", gap: "6px" }}>
+              📘 TYT Branşları
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              {[
+                { label: "TYT Türkçe", val: profile?.tytTurkce ?? 5 },
+                { label: "TYT Temel Matematik", val: profile?.tytMat ?? 5 },
+                { label: "TYT Fizik", val: profile?.tytFizik ?? 5 },
+                { label: "TYT Kimya", val: profile?.tytKimya ?? 5 },
+                { label: "TYT Biyoloji", val: profile?.tytBiyoloji ?? 5 },
+                { label: "TYT Tarih", val: profile?.tytTarih ?? 5 },
+                { label: "TYT Coğrafya", val: profile?.tytCografya ?? 5 },
+              ].map((item, idx) => (
+                <div key={idx} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "13px", padding: "4px 0", borderBottom: idx < 6 ? "1px dashed #E2E8F0" : "none" }}>
+                  <span style={{ color: "#334155", fontWeight: "600" }}>{item.label}</span>
+                  <span style={{ 
+                    fontWeight: "800", 
+                    color: item.val >= 8 ? "#16A34A" : item.val >= 5 ? "#D97706" : "#DC2626",
+                    backgroundColor: item.val >= 8 ? "#DCFCE7" : item.val >= 5 ? "#FEF3C7" : "#FEE2E2",
+                    padding: "2px 8px",
+                    borderRadius: "12px",
+                    fontSize: "12px"
+                  }}>
+                    {item.val} / 10
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* AYT & YDT Puanları */}
+          <div style={{ backgroundColor: "#F8FAFC", padding: "16px", borderRadius: "10px", border: "1px solid #E2E8F0" }}>
+            <div style={{ fontSize: "13px", fontWeight: "800", color: "#7E22CE", marginBottom: "12px", textTransform: "uppercase", letterSpacing: "0.5px", display: "flex", alignItems: "center", gap: "6px" }}>
+              📙 AYT & YDT Branşları
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              {[
+                { label: "AYT Matematik", val: profile?.aytMat ?? 5 },
+                { label: "AYT Fizik", val: profile?.aytFizik ?? 5 },
+                { label: "AYT Kimya", val: profile?.aytKimya ?? 5 },
+                { label: "AYT Biyoloji", val: profile?.aytBiyoloji ?? 5 },
+                { label: "AYT Edebiyat", val: profile?.aytTurkce ?? 5 },
+                { label: "AYT Tarih", val: profile?.aytTarih ?? 5 },
+                { label: "AYT Coğrafya", val: profile?.aytCografya ?? 5 },
+                { label: "YDT İngilizce", val: profile?.ydtIngilizce ?? 5 },
+              ].map((item, idx) => (
+                <div key={idx} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "13px", padding: "4px 0", borderBottom: idx < 7 ? "1px dashed #E2E8F0" : "none" }}>
+                  <span style={{ color: "#334155", fontWeight: "600" }}>{item.label}</span>
+                  <span style={{ 
+                    fontWeight: "800", 
+                    color: item.val >= 8 ? "#16A34A" : item.val >= 5 ? "#D97706" : "#DC2626",
+                    backgroundColor: item.val >= 8 ? "#DCFCE7" : item.val >= 5 ? "#FEF3C7" : "#FEE2E2",
+                    padding: "2px 8px",
+                    borderRadius: "12px",
+                    fontSize: "12px"
+                  }}>
+                    {item.val} / 10
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -456,6 +601,16 @@ export default function TeacherProfilePage() {
               />
             </div>
 
+            {/* Açık Adres */}
+            <div style={{ marginBottom: "16px" }}>
+              <Input
+                label="Açık Adres / Mahalle / Semt"
+                value={editFormData.currentAddress}
+                onChange={(e) => setEditFormData({ ...editFormData, currentAddress: e.target.value })}
+                placeholder="Örn: Fenerbahçe Mah. Bağdat Cad. No: 44 Kadıköy"
+              />
+            </div>
+
             {/* Online Available Toggle */}
             <div style={{ marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
               <input
@@ -501,6 +656,123 @@ export default function TeacherProfilePage() {
               </div>
             </div>
           </form>
+        </div>
+      </Modal>
+
+      {/* Competencies Edit Modal */}
+      <Modal
+        isOpen={isCompModalOpen}
+        onClose={() => setIsCompModalOpen(false)}
+        title="Ders Yetkinlik Puanlarımı Düzenle"
+        titleIcon={<GraduationCap size={20} color="#C8952A" />}
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setIsCompModalOpen(false)}>
+              İptal
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleSaveCompetencies}
+              loading={compSaveLoading}
+            >
+              💾 Puanları Kaydet
+            </Button>
+          </>
+        }
+      >
+        <div>
+          {compSuccessMsg && (
+            <div style={{ backgroundColor: "#DCFCE7", border: "1px solid #86EFAC", color: "#15803D", padding: "14px", borderRadius: "8px", fontSize: "14px", fontWeight: "700", marginBottom: "20px", display: "flex", alignItems: "center", gap: "8px" }}>
+              <Check size={18} /> {compSuccessMsg}
+            </div>
+          )}
+
+          {compErrorMsg && (
+            <div style={{ backgroundColor: "#FEE2E2", border: "1px solid #FCA5A5", color: "#B91C1C", padding: "14px", borderRadius: "8px", fontSize: "14px", fontWeight: "700", marginBottom: "20px", display: "flex", alignItems: "center", gap: "8px" }}>
+              <AlertCircle size={18} /> {compErrorMsg}
+            </div>
+          )}
+
+          <p style={{ fontSize: "13px", color: "#64748B", margin: "0 0 16px 0" }}>
+            Öğretmenliğini ve koçluğunu yapabileceğiniz derslerdeki kendinize ait yetkinlik puanlarını (1 - 10) aşağıdaki sürgülerle belirleyebilirsiniz.
+          </p>
+
+          {/* TYT Section */}
+          <div style={{ marginBottom: "20px" }}>
+            <div style={{ fontSize: "12px", fontWeight: "800", color: "#0F2645", marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+              📘 TYT Branş Puanları
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "10px" }}>
+              {[
+                { key: "tytTurkce", label: "TYT Türkçe" },
+                { key: "tytMat", label: "TYT Matematik" },
+                { key: "tytFizik", label: "TYT Fizik" },
+                { key: "tytKimya", label: "TYT Kimya" },
+                { key: "tytBiyoloji", label: "TYT Biyoloji" },
+                { key: "tytTarih", label: "TYT Tarih" },
+                { key: "tytCografya", label: "TYT Coğrafya" },
+              ].map((sub) => {
+                const score = compScores[sub.key] ?? 5;
+                return (
+                  <div key={sub.key} style={{ backgroundColor: "#F8FAFC", padding: "10px 12px", borderRadius: "8px", border: "1px solid #E2E8F0" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                      <span style={{ fontSize: "12px", fontWeight: "700", color: "#0F2645" }}>{sub.label}</span>
+                      <span style={{ fontSize: "12px", fontWeight: "800", color: score >= 8 ? "#16A34A" : score >= 5 ? "#D97706" : "#DC2626" }}>
+                        {score} / 10
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="1"
+                      max="10"
+                      value={score}
+                      onChange={(e) => setCompScores({ ...compScores, [sub.key]: Number(e.target.value) })}
+                      style={{ width: "100%", accentColor: "#0F2645", cursor: "pointer" }}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* AYT Section */}
+          <div style={{ marginBottom: "20px" }}>
+            <div style={{ fontSize: "12px", fontWeight: "800", color: "#7E22CE", marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+              📙 AYT & YDT Branş Puanları
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "10px" }}>
+              {[
+                { key: "aytMat", label: "AYT Matematik" },
+                { key: "aytFizik", label: "AYT Fizik" },
+                { key: "aytKimya", label: "AYT Kimya" },
+                { key: "aytBiyoloji", label: "AYT Biyoloji" },
+                { key: "aytTurkce", label: "AYT Edebiyat" },
+                { key: "aytTarih", label: "AYT Tarih" },
+                { key: "aytCografya", label: "AYT Coğrafya" },
+                { key: "ydtIngilizce", label: "YDT İngilizce" },
+              ].map((sub) => {
+                const score = compScores[sub.key] ?? 5;
+                return (
+                  <div key={sub.key} style={{ backgroundColor: "#F8FAFC", padding: "10px 12px", borderRadius: "8px", border: "1px solid #E2E8F0" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                      <span style={{ fontSize: "12px", fontWeight: "700", color: "#0F2645" }}>{sub.label}</span>
+                      <span style={{ fontSize: "12px", fontWeight: "800", color: score >= 8 ? "#16A34A" : score >= 5 ? "#D97706" : "#DC2626" }}>
+                        {score} / 10
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="1"
+                      max="10"
+                      value={score}
+                      onChange={(e) => setCompScores({ ...compScores, [sub.key]: Number(e.target.value) })}
+                      style={{ width: "100%", accentColor: "#7E22CE", cursor: "pointer" }}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </Modal>
     </div>

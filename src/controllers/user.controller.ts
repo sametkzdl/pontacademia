@@ -74,4 +74,32 @@ export class UserController {
       return ApiResponse.error(err.message || "Şifre yenilenemedi.", 400);
     }
   }
+
+  /**
+   * POST /api/admin/users/update-competencies
+   */
+  static async updateTeacherCompetencies(req: NextRequest) {
+    try {
+      const session = await getSessionUser();
+      if (!session || session.role !== "ADMIN") {
+        return ApiResponse.forbidden("Bu işlemi yalnızca yöneticiler yapabilir.");
+      }
+
+      const body = await req.json();
+      const { userId, scores } = body;
+
+      if (!userId || !scores) {
+        return ApiResponse.error("Kullanıcı ID ve ders yetkinlik puanları zorunludur.", 400);
+      }
+
+      const updatedProfile = await UserService.updateTeacherCompetencies(userId, scores);
+      return ApiResponse.success({
+        profile: updatedProfile,
+        message: "Eğitmen ders yetkinlik puanları başarıyla güncellendi.",
+      });
+    } catch (err: any) {
+      return ApiResponse.error(err.message || "Yetkinlik puanları güncellenemedi.", 400);
+    }
+  }
 }
+

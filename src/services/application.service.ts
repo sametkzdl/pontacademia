@@ -170,6 +170,12 @@ export class ApplicationService {
       },
     });
 
+    const teacherPhoto = application.photoFileName
+      ? (application.photoFileName.startsWith("http") || application.photoFileName.startsWith("/")
+          ? application.photoFileName
+          : `/api/storage/file?key=${encodeURIComponent(application.photoFileName)}`)
+      : null;
+
     // Upsert TeacherProfile
     await db.teacherProfile.upsert({
       where: { userId: user.id },
@@ -187,6 +193,7 @@ export class ApplicationService {
         districts: application.districts,
         onlineAvailable: application.onlineAvailable,
         showPhotoOnWeb: true,
+        photoUrl: teacherPhoto || undefined,
         notes: application.notes,
         tytTurkce: parsedTyt["tytTurkce"] ?? parsedTyt["Türkçe"] ?? 5,
         tytMat: parsedTyt["tytMat"] ?? parsedTyt["Temel Matematik"] ?? 5,
@@ -219,6 +226,7 @@ export class ApplicationService {
         districts: application.districts,
         onlineAvailable: application.onlineAvailable,
         showPhotoOnWeb: true,
+        photoUrl: teacherPhoto,
         notes: application.notes,
         tytTurkce: parsedTyt["tytTurkce"] ?? parsedTyt["Türkçe"] ?? 5,
         tytMat: parsedTyt["tytMat"] ?? parsedTyt["Temel Matematik"] ?? 5,
@@ -314,6 +322,8 @@ export class ApplicationService {
       });
     }
 
+    const studentPhoto = application.photoFileName || application.photoUrl || null;
+
     await db.studentProfile.upsert({
       where: { userId: user.id },
       update: {
@@ -328,7 +338,7 @@ export class ApplicationService {
         target: application.target,
         subject: application.subject,
         selectedSubjects: application.selectedSubjects,
-        photoUrl: application.photoUrl || undefined,
+        photoUrl: studentPhoto || undefined,
       },
       create: {
         userId: user.id,
@@ -343,7 +353,7 @@ export class ApplicationService {
         target: application.target,
         subject: application.subject,
         selectedSubjects: application.selectedSubjects,
-        photoUrl: application.photoUrl,
+        photoUrl: studentPhoto,
       },
     });
 
@@ -376,4 +386,26 @@ export class ApplicationService {
       data: { status: "REJECTED" },
     });
   }
+
+  /**
+   * Öğretmen Başvurusundaki Ders Bilgi & Yetkinlik Puanlarını Güncelle (Admin için)
+   */
+  static async updateTeacherApplicationScores(
+    applicationId: string,
+    data: { tytScores?: Record<string, number> | string; aytScores?: Record<string, number> | string }
+  ) {
+    const updateData: any = {};
+    if (data.tytScores !== undefined) {
+      updateData.tytScores = typeof data.tytScores === "string" ? data.tytScores : JSON.stringify(data.tytScores);
+    }
+    if (data.aytScores !== undefined) {
+      updateData.aytScores = typeof data.aytScores === "string" ? data.aytScores : JSON.stringify(data.aytScores);
+    }
+
+    return await db.teacherApplication.update({
+      where: { id: applicationId },
+      data: updateData,
+    });
+  }
 }
+
