@@ -30,40 +30,14 @@ interface Coach {
   badge: string;
 }
 
-const DEFAULT_COACHES: Coach[] = [
-  {
-    id: "ahmet_yilmaz",
-    name: "Ahmet Yılmaz",
-    branch: "Matematik & Geometri (YKS)",
-    uni: "ODTÜ - Bilgisayar Müh.",
-    img: "/teacher_math.png",
-    badge: "YKS SAY Derecesi (240.)"
-  },
-  {
-    id: "canan_kaya",
-    name: "Canan Kaya",
-    branch: "Fizik & Kimya (YKS & LGS)",
-    uni: "İTÜ - Endüstri Müh.",
-    img: "/teacher_physics.png",
-    badge: "YKS SAY Derecesi (410.)"
-  },
-  {
-    id: "mehmet_demir",
-    name: "Mehmet Demir",
-    branch: "Edebiyat, Tarih & Türkçe (EA/SÖZ)",
-    uni: "BİLKENT - Hukuk",
-    img: "/teacher_lit.png",
-    badge: "YKS EA Derecesi (115.)"
-  },
-  {
-    id: "fark_etmez",
-    name: "En Uygun Koç Eşleştirmesi",
-    branch: "Tüm Branşlar & Alanlar",
-    uni: "Pont Academy Akademik Kurulu",
-    img: "",
-    badge: "Akademik Kurul Tarafından Atanır"
-  }
-];
+const AUTO_MATCH_COACH: Coach = {
+  id: "fark_etmez",
+  name: "En Uygun Koç Eşleştirmesi",
+  branch: "Tüm Branşlar & Alanlar",
+  uni: "Pont Academy Akademik Kurulu",
+  img: "",
+  badge: "Akademik Kurul Tarafından Atanır"
+};
 
 const AVAILABLE_SUBJECTS = [
   // TYT
@@ -96,8 +70,8 @@ const AVAILABLE_SUBJECTS = [
 
 export default function KoclukBasvuruClient() {
   const [step, setStep] = useState<1 | 2>(1);
-  const [coaches, setCoaches] = useState<Coach[]>(DEFAULT_COACHES);
-  const [selectedCoach, setSelectedCoach] = useState<Coach | null>(DEFAULT_COACHES[3]);
+  const [coaches, setCoaches] = useState<Coach[]>([AUTO_MATCH_COACH]);
+  const [selectedCoach, setSelectedCoach] = useState<Coach | null>(AUTO_MATCH_COACH);
   const [loadingCoaches, setLoadingCoaches] = useState(true);
   const [isPending, startTransition] = useTransition();
   const [formSubmitted, setFormSubmitted] = useState(false);
@@ -111,14 +85,13 @@ export default function KoclukBasvuruClient() {
   useEffect(() => {
     async function loadCoaches() {
       try {
-        const res = await fetch("/api/coaches");
+        const res = await fetch("/api/coaches", { cache: "no-store" });
         if (res.ok) {
           const data = await res.json();
-          if (data && data.success && Array.isArray(data.coaches) && data.coaches.length > 0) {
-            setCoaches(data.coaches);
-            // Default select "fark_etmez" or the last item
-            const defaultItem = data.coaches.find((c: Coach) => c.id === "fark_etmez") || data.coaches[0];
-            setSelectedCoach(defaultItem);
+          if (data && data.success && Array.isArray(data.coaches)) {
+            const list = [...data.coaches, AUTO_MATCH_COACH];
+            setCoaches(list);
+            setSelectedCoach(AUTO_MATCH_COACH);
           }
         }
       } catch (err) {

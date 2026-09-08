@@ -14,13 +14,13 @@ import { Button, Input } from "@/components";
 
 export default function AdminSettingsPage() {
   const [settingsData, setSettingsData] = useState<any>({
-    privateLessonPrice: "1.250 ₺",
-    coachingPrice: "4.500 ₺",
-    campaignBannerActive: true,
-    campaignBannerText: "✨ 2026 Sezonu Açıldı: İlk Seviye Tespiti ve Tanışma Dersi Tamamen Ücretsiz! Kontenjanlar Sınırlıdır.",
-    contactPhone: "+90 (212) 000 00 00",
-    contactEmail: "info@pontakademi.com",
-    contactAddress: "Beşiktaş / İstanbul",
+    privateLessonPrice: "",
+    coachingPrice: "",
+    campaignBannerActive: false,
+    campaignBannerText: "",
+    contactPhone: "",
+    contactEmail: "",
+    contactAddress: "",
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -30,11 +30,11 @@ export default function AdminSettingsPage() {
   const fetchSettings = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch("/api/settings");
+      const res = await fetch("/api/settings", { cache: "no-store" });
       const data = await res.json();
       const loaded = data.settings || data.data;
       if (loaded && typeof loaded === "object") {
-        setSettingsData((prev: any) => ({ ...prev, ...loaded }));
+        setSettingsData(loaded);
       }
     } catch (err) {
       console.error("Fetch settings error:", err);

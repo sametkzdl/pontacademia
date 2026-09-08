@@ -3,6 +3,10 @@ import HomeClient from "./HomeClient";
 import { SettingService } from "@/services/setting.service";
 import db from "@/utils/db";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
+
 export const metadata: Metadata = {
   title: "Pont Academy — Birebir Özel Ders ve Kişisel Sınav Koçluğu",
   description: "Boğaziçi, ODTÜ, İTÜ, Bilkent dereceli eğitmen kadrosuyla YKS ve LGS sınavlarına hazırlıkta kişiselleştirilmiş birebir dersler ve profesyonel koçluk.",
@@ -95,11 +99,11 @@ export default async function HomePage() {
         "url": "https://pontacademy.com",
         "logo": "https://pontacademy.com/pont_logo.png",
         "description": "Boğaziçi, ODTÜ, İTÜ, Bilkent dereceli eğitmen kadrosuyla YKS ve LGS sınavlarına hazırlıkta kişiselleştirilmiş birebir dersler ve profesyonel koçluk.",
-        "telephone": settings?.contactPhone || "+905300000000",
-        "email": settings?.contactEmail || "info@pontakademi.com",
+        "telephone": settings?.contactPhone || "",
+        "email": settings?.contactEmail || "",
         "address": {
           "@type": "PostalAddress",
-          "streetAddress": settings?.contactAddress || "Beşiktaş",
+          "streetAddress": settings?.contactAddress || "",
           "addressLocality": "İstanbul",
           "addressCountry": "TR"
         }

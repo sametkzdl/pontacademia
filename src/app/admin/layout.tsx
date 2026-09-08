@@ -30,9 +30,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const fetchCounts = async () => {
       try {
         const [appsRes, contactsRes, requestsRes] = await Promise.all([
-          fetch("/api/admin/applications"),
-          fetch("/api/admin/contacts"),
-          fetch("/api/admin/requests"),
+          fetch("/api/admin/applications", { cache: "no-store" }),
+          fetch("/api/admin/contacts", { cache: "no-store" }),
+          fetch("/api/admin/requests", { cache: "no-store" }),
         ]);
 
         if (appsRes.ok) {

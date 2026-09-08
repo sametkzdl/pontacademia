@@ -59,14 +59,51 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
   // Dynamic Settings & Coaches
   const [coaches, setCoaches] = useState<any[]>(initialCoaches || []);
   const [settings, setSettings] = useState<any>(initialSettings || {
-    privateLessonPrice: "1.250 ₺",
-    coachingPrice: "4.500 ₺",
-    campaignBannerActive: true,
-    campaignBannerText: "✨ 2026 Sezonu: İlk Seviye Tespiti ve Tanışma Dersi Tamamen Ücretsiz! Kontenjanlar Sınırlıdır.",
-    contactPhone: "+90 (212) 000 00 00",
-    contactEmail: "info@pontakademi.com",
-    contactAddress: "Beşiktaş / İstanbul",
+    privateLessonPrice: "",
+    coachingPrice: "",
+    campaignBannerActive: false,
+    campaignBannerText: "",
+    contactPhone: "",
+    contactEmail: "",
+    contactAddress: "",
   });
+
+  // Props güncellendiğinde state'i senkronize et
+  useEffect(() => {
+    if (initialSettings) {
+      setSettings(initialSettings);
+    }
+  }, [initialSettings]);
+
+  useEffect(() => {
+    if (initialCoaches) {
+      setCoaches(initialCoaches);
+    }
+  }, [initialCoaches]);
+
+  // Sayfa yüklendiğinde en güncel DB verisini önbelleksiz çek
+  useEffect(() => {
+    const fetchFreshData = async () => {
+      try {
+        const [settingsRes, coachesRes] = await Promise.all([
+          fetch("/api/settings", { cache: "no-store" }),
+          fetch("/api/coaches", { cache: "no-store" }),
+        ]);
+
+        if (settingsRes.ok) {
+          const sData = await settingsRes.json();
+          if (sData.settings) setSettings(sData.settings);
+        }
+        if (coachesRes.ok) {
+          const cData = await coachesRes.json();
+          if (cData.coaches) setCoaches(cData.coaches);
+        }
+      } catch (err) {
+        // quiet catch
+      }
+    };
+    fetchFreshData();
+  }, []);
 
   // Contact Form State
   const [formData, setFormData] = useState({
@@ -216,12 +253,12 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
     <>
       {/* FIXED TOP HEADER WRAPPER (BANNER + NAVIGATION) */}
       <div className="site-header-wrapper">
-        {/* CAMPAIGN BANNER (İLK DERS / SEVİYE TESPİTİ ÜCRETSİZ) */}
-        {isBannerActive && (
+        {/* CAMPAIGN BANNER */}
+        {isBannerActive && settings.campaignBannerText && (
           <div className="top-campaign-banner">
             <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
               <Sparkles size={16} color="#C8952A" />
-              {settings.campaignBannerText || "✨ İlk Seviye Tespiti ve Tanışma Dersi Tamamen Ücretsiz! Kontenjanlar Sınırlıdır."}
+              {settings.campaignBannerText}
             </span>
             <a href="/ozel-ders-basvuru" className="banner-link">
               FIRSATI YAKALA →
@@ -592,77 +629,14 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
                   </div>
                 ))
               ) : (
-                <>
-                  {/* Fallback Teacher 1 */}
-                  <div className="card-glow teacher-card">
-                    <div className="teacher-img-wrapper">
-                      <Image 
-                        className="teacher-img" 
-                        src="/teacher_math.png" 
-                        alt="Ahmet Yılmaz" 
-                        width={96} 
-                        height={96} 
-                        priority
-                      />
-                      <div className="teacher-uni-badge">ODTÜ</div>
-                    </div>
-                    <h4 className="teacher-name">Ahmet Yılmaz</h4>
-                    <div className="teacher-branch">Matematik & Geometri</div>
-                    <div className="teacher-badge-container">
-                      <span className="pill-badge pill-badge-blue" style={{ fontSize: "11px", padding: "4px 8px" }}>YKS UZMANI</span>
-                      <span className="pill-badge pill-badge-gold" style={{ fontSize: "11px", padding: "4px 8px" }}>Özel Ders</span>
-                    </div>
-                    <div className="teacher-btn-wrapper">
-                      <a href="/ozel-ders-basvuru" className="link-gold">Ders Al <ArrowRight size={14} /></a>
-                    </div>
-                  </div>
-
-                  {/* Fallback Teacher 2 */}
-                  <div className="card-glow teacher-card">
-                    <div className="teacher-img-wrapper">
-                      <Image 
-                        className="teacher-img" 
-                        src="/teacher_physics.png" 
-                        alt="Canan Kaya" 
-                        width={96} 
-                        height={96}
-                      />
-                      <div className="teacher-uni-badge">İTÜ</div>
-                    </div>
-                    <h4 className="teacher-name">Canan Kaya</h4>
-                    <div className="teacher-branch">Fizik & Kimya</div>
-                    <div className="teacher-badge-container">
-                      <span className="pill-badge pill-badge-blue" style={{ fontSize: "11px", padding: "4px 8px" }}>YKS & LGS</span>
-                      <span className="pill-badge pill-badge-gold" style={{ fontSize: "11px", padding: "4px 8px" }}>Koçluk</span>
-                    </div>
-                    <div className="teacher-btn-wrapper">
-                      <a href="/kocluk-basvuru" className="link-gold">Koçluk Başlat <ArrowRight size={14} /></a>
-                    </div>
-                  </div>
-
-                  {/* Fallback Teacher 3 */}
-                  <div className="card-glow teacher-card">
-                    <div className="teacher-img-wrapper">
-                      <Image 
-                        className="teacher-img" 
-                        src="/teacher_lit.png" 
-                        alt="Mehmet Demir" 
-                        width={96} 
-                        height={96}
-                      />
-                      <div className="teacher-uni-badge">BİLKENT</div>
-                    </div>
-                    <h4 className="teacher-name">Mehmet Demir</h4>
-                    <div className="teacher-branch">Edebiyat & Türkçe</div>
-                    <div className="teacher-badge-container">
-                      <span className="pill-badge pill-badge-blue" style={{ fontSize: "11px", padding: "4px 8px" }}>LGS UZMANI</span>
-                      <span className="pill-badge pill-badge-gold" style={{ fontSize: "11px", padding: "4px 8px" }}>Her İkisi</span>
-                    </div>
-                    <div className="teacher-btn-wrapper">
-                      <a href="/kocluk-basvuru" className="link-gold">Ders / Koçluk Al <ArrowRight size={14} /></a>
-                    </div>
-                  </div>
-                </>
+                <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: "36px 20px", backgroundColor: "#FFFFFF", borderRadius: "14px", border: "1px solid #DDE6F0" }}>
+                  <p style={{ color: "#64748B", fontSize: "15px", margin: "0 0 14px 0" }}>
+                    Eğitmen kadromuz güncelleniyor. Birebir özel ders veya koçluk talebiniz için hemen başvurabilirsiniz.
+                  </p>
+                  <a href="/kocluk-basvuru" className="btn btn-primary" style={{ display: "inline-flex" }}>
+                    Hemen Başvuru Yap <ArrowRight size={16} style={{ marginLeft: "6px" }} />
+                  </a>
+                </div>
               )}
             </div>
           </div>
@@ -689,7 +663,7 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
               <div className="pricing-title">Birebir Özel Ders</div>
               <div className="pricing-price-container">
                 <span className="price-symbol"></span>
-                <span className="price-amount numeric" style={{ fontSize: "32px" }}>{settings.privateLessonPrice || "1.250 ₺"}</span>
+                <span className="price-amount numeric" style={{ fontSize: "32px" }}>{settings.privateLessonPrice || ""}</span>
                 <span className="price-period">/ ders saati</span>
               </div>
               <ul className="pricing-list">
@@ -707,7 +681,7 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
               <div className="pricing-title">Birebir Eğitim Koçluğu</div>
               <div className="pricing-price-container">
                 <span className="price-symbol"></span>
-                <span className="price-amount numeric" style={{ fontSize: "32px" }}>{settings.coachingPrice || "4.500 ₺"}</span>
+                <span className="price-amount numeric" style={{ fontSize: "32px" }}>{settings.coachingPrice || ""}</span>
                 <span className="price-period">/ ay</span>
               </div>
               <ul className="pricing-list">
@@ -841,79 +815,85 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
               
               {/* Contact Channels Cards */}
               <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "28px" }}>
-                <a 
-                  href={`tel:${settings.contactPhone || "+905300000000"}`} 
-                  style={{ 
-                    display: "flex", 
-                    alignItems: "center", 
-                    gap: "14px", 
-                    padding: "14px 18px", 
-                    backgroundColor: "#FFFFFF", 
-                    borderRadius: "12px", 
-                    border: "1px solid #DDE6F0", 
-                    textDecoration: "none",
-                    boxShadow: "0 2px 8px rgba(15, 38, 69, 0.04)",
-                    transition: "all 0.2s ease"
-                  }}
-                >
-                  <div style={{ width: "40px", height: "40px", borderRadius: "50%", backgroundColor: "#FEF9EE", border: "1px solid #F0DFA8", display: "flex", alignItems: "center", justifyContent: "center", color: "#C8952A", flexShrink: 0 }}>
-                    <Phone size={18} />
-                  </div>
-                  <div>
-                    <div style={{ fontSize: "11px", color: "#64748B", fontWeight: "600", textTransform: "uppercase" }}>Telefon ile Ulaşın</div>
-                    <div style={{ fontSize: "15px", fontWeight: "700", color: "#0F2645" }}>{settings.contactPhone || "0530 000 00 00"}</div>
-                  </div>
-                </a>
+                {settings.contactPhone && (
+                  <a 
+                    href={`tel:${settings.contactPhone.replace(/\s+/g, "")}`} 
+                    style={{ 
+                      display: "flex", 
+                      alignItems: "center", 
+                      gap: "14px", 
+                      padding: "14px 18px", 
+                      backgroundColor: "#FFFFFF", 
+                      borderRadius: "12px", 
+                      border: "1px solid #DDE6F0", 
+                      textDecoration: "none",
+                      boxShadow: "0 2px 8px rgba(15, 38, 69, 0.04)",
+                      transition: "all 0.2s ease"
+                    }}
+                  >
+                    <div style={{ width: "40px", height: "40px", borderRadius: "50%", backgroundColor: "#FEF9EE", border: "1px solid #F0DFA8", display: "flex", alignItems: "center", justifyContent: "center", color: "#C8952A", flexShrink: 0 }}>
+                      <Phone size={18} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: "11px", color: "#64748B", fontWeight: "600", textTransform: "uppercase" }}>Telefon ile Ulaşın</div>
+                      <div style={{ fontSize: "15px", fontWeight: "700", color: "#0F2645" }}>{settings.contactPhone}</div>
+                    </div>
+                  </a>
+                )}
 
-                <a 
-                  href={`mailto:${settings.contactEmail || "info@pontakademi.com"}`} 
-                  style={{ 
-                    display: "flex", 
-                    alignItems: "center", 
-                    gap: "14px", 
-                    padding: "14px 18px", 
-                    backgroundColor: "#FFFFFF", 
-                    borderRadius: "12px", 
-                    border: "1px solid #DDE6F0", 
-                    textDecoration: "none",
-                    boxShadow: "0 2px 8px rgba(15, 38, 69, 0.04)",
-                    transition: "all 0.2s ease"
-                  }}
-                >
-                  <div style={{ width: "40px", height: "40px", borderRadius: "50%", backgroundColor: "#FEF9EE", border: "1px solid #F0DFA8", display: "flex", alignItems: "center", justifyContent: "center", color: "#C8952A", flexShrink: 0 }}>
-                    <Mail size={18} />
-                  </div>
-                  <div>
-                    <div style={{ fontSize: "11px", color: "#64748B", fontWeight: "600", textTransform: "uppercase" }}>E-Posta Gönderin</div>
-                    <div style={{ fontSize: "15px", fontWeight: "700", color: "#0F2645" }}>{settings.contactEmail || "info@pontakademi.com"}</div>
-                  </div>
-                </a>
+                {settings.contactEmail && (
+                  <a 
+                    href={`mailto:${settings.contactEmail}`} 
+                    style={{ 
+                      display: "flex", 
+                      alignItems: "center", 
+                      gap: "14px", 
+                      padding: "14px 18px", 
+                      backgroundColor: "#FFFFFF", 
+                      borderRadius: "12px", 
+                      border: "1px solid #DDE6F0", 
+                      textDecoration: "none",
+                      boxShadow: "0 2px 8px rgba(15, 38, 69, 0.04)",
+                      transition: "all 0.2s ease"
+                    }}
+                  >
+                    <div style={{ width: "40px", height: "40px", borderRadius: "50%", backgroundColor: "#FEF9EE", border: "1px solid #F0DFA8", display: "flex", alignItems: "center", justifyContent: "center", color: "#C8952A", flexShrink: 0 }}>
+                      <Mail size={18} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: "11px", color: "#64748B", fontWeight: "600", textTransform: "uppercase" }}>E-Posta Gönderin</div>
+                      <div style={{ fontSize: "15px", fontWeight: "700", color: "#0F2645" }}>{settings.contactEmail}</div>
+                    </div>
+                  </a>
+                )}
 
-                <a 
-                  href={`https://wa.me/${(settings.contactPhone || "905300000000").replace(/[^0-9]/g, "")}`} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  style={{ 
-                    display: "flex", 
-                    alignItems: "center", 
-                    gap: "14px", 
-                    padding: "14px 18px", 
-                    backgroundColor: "#FFFFFF", 
-                    borderRadius: "12px", 
-                    border: "1px solid #DDE6F0", 
-                    textDecoration: "none",
-                    boxShadow: "0 2px 8px rgba(15, 38, 69, 0.04)",
-                    transition: "all 0.2s ease"
-                  }}
-                >
-                  <div style={{ width: "40px", height: "40px", borderRadius: "50%", backgroundColor: "#EBFBF2", border: "1px solid #A7F3D0", display: "flex", alignItems: "center", justifyContent: "center", color: "#10B981", flexShrink: 0 }}>
-                    <MessageCircle size={18} />
-                  </div>
-                  <div style={{ flexGrow: 1 }}>
-                    <div style={{ fontSize: "11px", color: "#10B981", fontWeight: "700", textTransform: "uppercase" }}>WhatsApp Canlı Destek</div>
-                    <div style={{ fontSize: "15px", fontWeight: "700", color: "#0F2645" }}>WhatsApp&apos;tan Anında Yazın →</div>
-                  </div>
-                </a>
+                {settings.contactPhone && (
+                  <a 
+                    href={`https://wa.me/${settings.contactPhone.replace(/[^0-9]/g, "")}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    style={{ 
+                      display: "flex", 
+                      alignItems: "center", 
+                      gap: "14px", 
+                      padding: "14px 18px", 
+                      backgroundColor: "#FFFFFF", 
+                      borderRadius: "12px", 
+                      border: "1px solid #DDE6F0", 
+                      textDecoration: "none",
+                      boxShadow: "0 2px 8px rgba(15, 38, 69, 0.04)",
+                      transition: "all 0.2s ease"
+                    }}
+                  >
+                    <div style={{ width: "40px", height: "40px", borderRadius: "50%", backgroundColor: "#EBFBF2", border: "1px solid #A7F3D0", display: "flex", alignItems: "center", justifyContent: "center", color: "#10B981", flexShrink: 0 }}>
+                      <MessageCircle size={18} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: "11px", color: "#64748B", fontWeight: "600", textTransform: "uppercase" }}>WhatsApp Danışma Hattı</div>
+                      <div style={{ fontSize: "15px", fontWeight: "700", color: "#0F2645" }}>Hemen Mesaj Gönderin</div>
+                    </div>
+                  </a>
+                )}
               </div>
 
               {/* Fast Form Links Pills */}
@@ -1128,18 +1108,22 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
           <div>
             <h5 className="footer-title">İletişim & Konum</h5>
             <ul className="footer-links">
-              <li style={{ fontSize: "14px", color: "var(--color-text-mid)", display: "flex", alignItems: "center", gap: "8px" }}>
-                <Phone size={15} color="#C8952A" />
-                <a href={`tel:${settings.contactPhone || "+902120000000"}`} className="footer-link">
-                  {settings.contactPhone || "+90 (212) 000 00 00"}
-                </a>
-              </li>
-              <li style={{ fontSize: "14px", color: "var(--color-text-mid)", display: "flex", alignItems: "center", gap: "8px" }}>
-                <Mail size={15} color="#C8952A" />
-                <a href={`mailto:${settings.contactEmail || "info@pontakademi.com"}`} className="footer-link">
-                  {settings.contactEmail || "info@pontakademi.com"}
-                </a>
-              </li>
+              {settings.contactPhone && (
+                <li style={{ fontSize: "14px", color: "var(--color-text-mid)", display: "flex", alignItems: "center", gap: "8px" }}>
+                  <Phone size={15} color="#C8952A" />
+                  <a href={`tel:${settings.contactPhone.replace(/\s+/g, "")}`} className="footer-link">
+                    {settings.contactPhone}
+                  </a>
+                </li>
+              )}
+              {settings.contactEmail && (
+                <li style={{ fontSize: "14px", color: "var(--color-text-mid)", display: "flex", alignItems: "center", gap: "8px" }}>
+                  <Mail size={15} color="#C8952A" />
+                  <a href={`mailto:${settings.contactEmail}`} className="footer-link">
+                    {settings.contactEmail}
+                  </a>
+                </li>
+              )}
               {settings.contactAddress && (
                 <li style={{ fontSize: "13px", color: "var(--color-text-soft)", lineHeight: "1.4" }}>
                   📍 {settings.contactAddress}
@@ -1151,8 +1135,12 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
           <div>
             <h5 className="footer-title">Bizi Takip Edin</h5>
             <div className="footer-socials" style={{ marginBottom: "16px" }}>
-              <a href={`mailto:${settings.contactEmail || "info@pontakademi.com"}`} className="footer-social-btn" title="E-Posta"><Mail size={18} /></a>
-              <a href={`https://wa.me/${(settings.contactPhone || "905300000000").replace(/[^0-9]/g, "")}`} className="footer-social-btn" title="WhatsApp" target="_blank" rel="noopener noreferrer"><Phone size={18} /></a>
+              {settings.contactEmail && (
+                <a href={`mailto:${settings.contactEmail}`} className="footer-social-btn" title="E-Posta"><Mail size={18} /></a>
+              )}
+              {settings.contactPhone && (
+                <a href={`https://wa.me/${settings.contactPhone.replace(/[^0-9]/g, "")}`} className="footer-social-btn" title="WhatsApp" target="_blank" rel="noopener noreferrer"><Phone size={18} /></a>
+              )}
               <a href="/kocluk-basvuru" className="footer-social-btn" title="Hemen Başvur"><Sparkles size={18} /></a>
             </div>
             <p style={{ fontSize: "13px", color: "var(--color-text-soft)" }}>

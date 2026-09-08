@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import db from "@/utils/db";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
+
 export async function GET() {
   try {
     const teachers = await db.user.findMany({
@@ -42,7 +46,11 @@ export async function GET() {
       };
     });
 
-    return NextResponse.json({ success: true, coaches });
+    const response = NextResponse.json({ success: true, coaches });
+    response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    response.headers.set("Pragma", "no-cache");
+    response.headers.set("Expires", "0");
+    return response;
   } catch (error: any) {
     console.error("Coaches fetch error:", error);
     return NextResponse.json({ success: false, error: "Koçlar alınamadı." }, { status: 500 });
