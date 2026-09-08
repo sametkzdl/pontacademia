@@ -248,6 +248,7 @@ export default function StudentApplicationsPage() {
       <Modal
         isOpen={modalType === "detail" && Boolean(selectedApp)}
         onClose={closeModal}
+        maxWidth="750px"
         title={`${selectedApp?.name || ""} • Öğrenci Başvuru Detayı`}
         titleIcon={<Users size={20} color="#C8952A" />}
         footer={

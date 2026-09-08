@@ -358,6 +358,7 @@ export default function TeacherApplicationsPage() {
       <Modal
         isOpen={modalType === "detail" && Boolean(selectedApp)}
         onClose={closeModal}
+        maxWidth="800px"
         title={`${selectedApp?.fullName || ""} • Başvuru Detayı`}
         titleIcon={<GraduationCap size={20} color="#C8952A" />}
         footer={

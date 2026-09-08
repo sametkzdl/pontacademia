@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 export interface ModalProps {
@@ -24,9 +25,14 @@ export const Modal: React.FC<ModalProps> = ({
   titleIcon,
   children,
   footer,
-  maxWidth = "560px",
+  maxWidth = "640px",
 }) => {
+  const [mounted, setMounted] = useState(false);
   const effectiveIcon = icon || titleIcon;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -46,22 +52,27 @@ export const Modal: React.FC<ModalProps> = ({
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!mounted || !isOpen) return null;
 
-  return (
+  const modalElement = (
     <div
       className="modal-backdrop-anim"
       style={{
         position: "fixed",
-        inset: 0,
-        backgroundColor: "rgba(15, 38, 69, 0.7)",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: "100vw",
+        height: "100vh",
+        backgroundColor: "rgba(15, 38, 69, 0.75)",
         backdropFilter: "blur(6px)",
         WebkitBackdropFilter: "blur(6px)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        zIndex: 99999,
-        padding: "20px 16px",
+        zIndex: 999999,
+        padding: "24px 16px",
         boxSizing: "border-box",
         overflow: "hidden",
       }}
@@ -76,27 +87,57 @@ export const Modal: React.FC<ModalProps> = ({
           borderRadius: "16px",
           maxWidth,
           width: "100%",
-          maxHeight: "min(90vh, 880px)",
+          maxHeight: "calc(100vh - 48px)",
           display: "flex",
           flexDirection: "column",
-          boxShadow: "0 25px 50px -12px rgba(15, 38, 69, 0.35), 0 0 0 1px rgba(15, 38, 69, 0.08)",
+          boxShadow: "0 25px 50px -12px rgba(15, 38, 69, 0.4), 0 0 0 1px rgba(15, 38, 69, 0.08)",
           border: "1px solid #DDE6F0",
           boxSizing: "border-box",
           overflow: "hidden",
           margin: "auto",
         }}
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Header (Sticky / Fixed at top of modal) */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 20px", borderBottom: "1px solid #E2E8F0", flexShrink: 0, backgroundColor: "#FFFFFF" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            padding: "16px 22px",
+            borderBottom: "1px solid #E2E8F0",
+            flexShrink: 0,
+            backgroundColor: "#FFFFFF",
+          }}
+        >
           <div style={{ flex: 1, minWidth: 0, paddingRight: "12px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               {effectiveIcon}
-              <h3 style={{ fontSize: "17px", fontWeight: "800", color: "#0F2645", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              <h3
+                style={{
+                  fontSize: "17px",
+                  fontWeight: "800",
+                  color: "#0F2645",
+                  margin: 0,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
                 {title}
               </h3>
             </div>
             {subtitle && (
-              <p style={{ fontSize: "12px", color: "#64748B", margin: "4px 0 0 0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              <p
+                style={{
+                  fontSize: "12px",
+                  color: "#64748B",
+                  margin: "4px 0 0 0",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
                 {subtitle}
               </p>
             )}
@@ -115,7 +156,7 @@ export const Modal: React.FC<ModalProps> = ({
               justifyContent: "center",
               borderRadius: "8px",
               transition: "all 0.15s ease",
-              flexShrink: 0
+              flexShrink: 0,
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = "#E2E8F0";
@@ -132,17 +173,40 @@ export const Modal: React.FC<ModalProps> = ({
         </div>
 
         {/* Content Body (Smooth Scrollable Area) */}
-        <div style={{ color: "#0F2645", padding: "20px", overflowY: "auto", flex: "1 1 auto", WebkitOverflowScrolling: "touch" }}>
+        <div
+          style={{
+            color: "#0F2645",
+            padding: "22px",
+            overflowY: "auto",
+            flex: "1 1 auto",
+            WebkitOverflowScrolling: "touch",
+          }}
+        >
           {children}
         </div>
 
         {/* Optional Footer (Sticky / Fixed at bottom of modal) */}
         {footer && (
-          <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "flex-end", gap: "10px", padding: "14px 20px", borderTop: "1px solid #E2E8F0", backgroundColor: "#F8FAFC", flexShrink: 0, borderBottomLeftRadius: "16px", borderBottomRightRadius: "16px" }}>
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: "flex-end",
+              gap: "10px",
+              padding: "14px 22px",
+              borderTop: "1px solid #E2E8F0",
+              backgroundColor: "#F8FAFC",
+              flexShrink: 0,
+              borderBottomLeftRadius: "16px",
+              borderBottomRightRadius: "16px",
+            }}
+          >
             {footer}
           </div>
         )}
       </div>
     </div>
   );
+
+  return createPortal(modalElement, document.body);
 };
