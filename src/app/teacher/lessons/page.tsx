@@ -1290,7 +1290,7 @@ export default function TeacherLessonsPage() {
           display: flex;
           align-items: center;
           justify-content: center;
-          z-index: 1000;
+          z-index: 99999;
           padding: 16px;
         }
         .modal-container-card {

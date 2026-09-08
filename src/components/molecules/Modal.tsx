@@ -54,14 +54,16 @@ export const Modal: React.FC<ModalProps> = ({
       style={{
         position: "fixed",
         inset: 0,
-        backgroundColor: "rgba(15, 38, 69, 0.65)",
+        backgroundColor: "rgba(15, 38, 69, 0.7)",
         backdropFilter: "blur(6px)",
+        WebkitBackdropFilter: "blur(6px)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        zIndex: 1000,
-        padding: "12px",
-        boxSizing: "border-box"
+        zIndex: 99999,
+        padding: "20px 16px",
+        boxSizing: "border-box",
+        overflow: "hidden",
       }}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
@@ -72,27 +74,29 @@ export const Modal: React.FC<ModalProps> = ({
         style={{
           backgroundColor: "#FFFFFF",
           borderRadius: "16px",
-          padding: "20px 20px",
           maxWidth,
           width: "100%",
-          maxHeight: "92vh",
-          overflowY: "auto",
-          boxShadow: "0 25px 50px -12px rgba(15, 38, 69, 0.25)",
+          maxHeight: "min(90vh, 880px)",
+          display: "flex",
+          flexDirection: "column",
+          boxShadow: "0 25px 50px -12px rgba(15, 38, 69, 0.35), 0 0 0 1px rgba(15, 38, 69, 0.08)",
           border: "1px solid #DDE6F0",
-          boxSizing: "border-box"
+          boxSizing: "border-box",
+          overflow: "hidden",
+          margin: "auto",
         }}
       >
-        {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px", borderBottom: "1px solid #E2E8F0", paddingBottom: "12px" }}>
-          <div>
+        {/* Header (Sticky / Fixed at top of modal) */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 20px", borderBottom: "1px solid #E2E8F0", flexShrink: 0, backgroundColor: "#FFFFFF" }}>
+          <div style={{ flex: 1, minWidth: 0, paddingRight: "12px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               {effectiveIcon}
-              <h3 style={{ fontSize: "17px", fontWeight: "800", color: "#0F2645", margin: 0 }}>
+              <h3 style={{ fontSize: "17px", fontWeight: "800", color: "#0F2645", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {title}
               </h3>
             </div>
             {subtitle && (
-              <p style={{ fontSize: "12px", color: "#64748B", margin: "4px 0 0 0" }}>
+              <p style={{ fontSize: "12px", color: "#64748B", margin: "4px 0 0 0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {subtitle}
               </p>
             )}
@@ -101,31 +105,40 @@ export const Modal: React.FC<ModalProps> = ({
             type="button"
             onClick={onClose}
             style={{
-              background: "none",
+              background: "#F1F5F9",
               border: "none",
               cursor: "pointer",
-              color: "#94A3B8",
-              padding: "4px",
+              color: "#64748B",
+              padding: "6px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              borderRadius: "6px",
-              transition: "all 0.15s ease"
+              borderRadius: "8px",
+              transition: "all 0.15s ease",
+              flexShrink: 0
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#0F2645")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "#94A3B8")}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "#E2E8F0";
+              e.currentTarget.style.color = "#0F2645";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "#F1F5F9";
+              e.currentTarget.style.color = "#64748B";
+            }}
             title="Kapat"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
-        {/* Content Body */}
-        <div style={{ color: "#0F2645" }}>{children}</div>
+        {/* Content Body (Smooth Scrollable Area) */}
+        <div style={{ color: "#0F2645", padding: "20px", overflowY: "auto", flex: "1 1 auto", WebkitOverflowScrolling: "touch" }}>
+          {children}
+        </div>
 
-        {/* Optional Footer */}
+        {/* Optional Footer (Sticky / Fixed at bottom of modal) */}
         {footer && (
-          <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "flex-end", gap: "10px", marginTop: "20px", borderTop: "1px solid #E2E8F0", paddingTop: "14px" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "flex-end", gap: "10px", padding: "14px 20px", borderTop: "1px solid #E2E8F0", backgroundColor: "#F8FAFC", flexShrink: 0, borderBottomLeftRadius: "16px", borderBottomRightRadius: "16px" }}>
             {footer}
           </div>
         )}
