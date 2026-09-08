@@ -246,8 +246,10 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
           })}
         </div>
 
-        {/* Content of the active nested route */}
-        {children}
+        {/* Content of the active nested route with smooth animation */}
+        <div key={pathname} className="page-transition">
+          {children}
+        </div>
       </main>
     </div>
   );

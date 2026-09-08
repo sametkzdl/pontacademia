@@ -50,17 +50,17 @@ export const Modal: React.FC<ModalProps> = ({
 
   return (
     <div
+      className="modal-backdrop-anim"
       style={{
         position: "fixed",
         inset: 0,
-        backgroundColor: "rgba(15, 38, 69, 0.6)",
-        backdropFilter: "blur(4px)",
+        backgroundColor: "rgba(15, 38, 69, 0.65)",
+        backdropFilter: "blur(6px)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         zIndex: 1000,
         padding: "12px",
-        animation: "fadeIn 0.15s ease",
         boxSizing: "border-box"
       }}
       onClick={(e) => {
@@ -68,6 +68,7 @@ export const Modal: React.FC<ModalProps> = ({
       }}
     >
       <div
+        className="modal-content-anim"
         style={{
           backgroundColor: "#FFFFFF",
           borderRadius: "16px",
@@ -109,7 +110,10 @@ export const Modal: React.FC<ModalProps> = ({
               alignItems: "center",
               justifyContent: "center",
               borderRadius: "6px",
+              transition: "all 0.15s ease"
             }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "#0F2645")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "#94A3B8")}
             title="Kapat"
           >
             <X size={20} />

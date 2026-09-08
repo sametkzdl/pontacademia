@@ -372,7 +372,7 @@ export default function StudentRequestsPage() {
 
       {/* TAB 1: NEW LESSON REQUEST FORM */}
       {activeTab === "lesson" && (
-        <div style={{ backgroundColor: "#FFFFFF", borderRadius: "12px", border: "1px solid #E2E8F0", padding: "24px", boxShadow: "0 2px 6px rgba(0,0,0,0.03)" }}>
+        <div className="tab-pane-transition" style={{ backgroundColor: "#FFFFFF", borderRadius: "12px", border: "1px solid #E2E8F0", padding: "24px", boxShadow: "0 2px 6px rgba(0,0,0,0.03)" }}>
           <div style={{ borderBottom: "1px solid #F1F5F9", paddingBottom: "14px", marginBottom: "18px" }}>
             <h2 style={{ fontSize: "16px", fontWeight: "800", color: "#1D4ED8", margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
               <BookOpen size={20} color="#2563EB" /> Yeni Ders / Koçluk Talep Formu
@@ -514,7 +514,7 @@ export default function StudentRequestsPage() {
 
       {/* TAB 2: DROP TEACHER MATCH FORM */}
       {activeTab === "drop" && (
-        <div style={{ backgroundColor: "#FFFFFF", borderRadius: "12px", border: "1px solid #E2E8F0", padding: "24px", boxShadow: "0 2px 6px rgba(0,0,0,0.03)" }}>
+        <div className="tab-pane-transition" style={{ backgroundColor: "#FFFFFF", borderRadius: "12px", border: "1px solid #E2E8F0", padding: "24px", boxShadow: "0 2px 6px rgba(0,0,0,0.03)" }}>
           <div style={{ borderBottom: "1px solid #F1F5F9", paddingBottom: "14px", marginBottom: "18px" }}>
             <h2 style={{ fontSize: "16px", fontWeight: "800", color: "#9A3412", margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
               <UserMinus size={20} color="#EA580C" /> Hoca Bırakma / Eğitmen Değişikliği Talebi
@@ -608,7 +608,7 @@ export default function StudentRequestsPage() {
 
       {/* TAB 3: GENERAL COMPLAINT / SUPPORT FORM */}
       {activeTab === "complaint" && (
-        <div style={{ backgroundColor: "#FFFFFF", borderRadius: "12px", border: "1px solid #E2E8F0", padding: "24px", boxShadow: "0 2px 6px rgba(0,0,0,0.03)" }}>
+        <div className="tab-pane-transition" style={{ backgroundColor: "#FFFFFF", borderRadius: "12px", border: "1px solid #E2E8F0", padding: "24px", boxShadow: "0 2px 6px rgba(0,0,0,0.03)" }}>
           <div style={{ borderBottom: "1px solid #F1F5F9", paddingBottom: "14px", marginBottom: "18px" }}>
             <h2 style={{ fontSize: "16px", fontWeight: "800", color: "#991B1B", margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
               <AlertCircle size={20} color="#DC2626" /> Genel Şikayet / Destek Bildirimi
@@ -679,7 +679,7 @@ export default function StudentRequestsPage() {
 
       {/* TAB 4: REQUEST HISTORY */}
       {activeTab === "history" && (
-        <div>
+        <div className="tab-pane-transition">
           {isLoading ? (
             <div style={{ backgroundColor: "#FFFFFF", padding: "40px", borderRadius: "12px", textAlign: "center", color: "#64748B" }}>
               Yükleniyor...

@@ -1,6 +1,157 @@
-/* Animations & Accessibility Styles */
+/* ==========================================================================
+   Pont Academy - UI Animations & Micro-Interactions
+   ========================================================================== */
 
-/* Animations Reveal */
+/* 1. Page & Tab Transitions */
+@keyframes pageFadeSlide {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes tabFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(4px) scale(0.995);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes modalPopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.96) translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes backdropFade {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes pulseGlow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(200, 149, 42, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(200, 149, 42, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(200, 149, 42, 0);
+  }
+}
+
+@keyframes badgePulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* 2. Utility Classes */
+.page-transition {
+  animation: pageFadeSlide 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
+}
+
+.tab-pane-transition {
+  animation: tabFadeIn 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
+}
+
+.modal-backdrop-anim {
+  animation: backdropFade 0.2s ease-out forwards;
+}
+
+.modal-content-anim {
+  animation: modalPopIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
+}
+
+.pulse-badge {
+  animation: badgePulse 2.5s infinite ease-in-out;
+}
+
+.badge-glow {
+  animation: pulseGlow 2s infinite ease-in-out;
+}
+
+/* 3. Interactive Hover & Click Effects */
+
+/* Tab Links (Admin & Portals) */
+.admin-tab-link,
+.portal-tab-link {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  user-select: none;
+}
+
+.admin-tab-link:hover,
+.portal-tab-link:hover {
+  transform: translateY(-2px);
+}
+
+.admin-tab-link:active,
+.portal-tab-link:active {
+  transform: translateY(0) scale(0.97);
+}
+
+/* Interactive Cards */
+.card-hover-lift {
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.22s ease !important;
+}
+
+.card-hover-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(15, 38, 69, 0.08) !important;
+  border-color: #CBD5E1 !important;
+}
+
+/* Action Buttons Micro-Interactions */
+button:not(:disabled),
+.btn:not(:disabled) {
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+button:not(:disabled):active,
+.btn:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+/* Subtle Shimmer Skeleton */
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* 4. Section Reveals (Landing Page) */
 .reveal {
   opacity: 0;
   transform: translateY(24px);
@@ -12,37 +163,22 @@
   transform: translateY(0);
 }
 
-/* Keyframe animations */
-@keyframes pulse {
-  0% { transform: scale(1.0); }
-  50% { transform: scale(1.04); }
-  100% { transform: scale(1.0); }
-}
-
-.pulse-animation {
-  animation: pulse 0.08s ease-in-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.fade-in {
-  animation: fadeIn 0.2s ease;
-}
-
-/* Accessibility */
+/* 5. Accessibility */
 @media (prefers-reduced-motion: reduce) {
-  * {
+  *,
+  *::before,
+  *::after {
     animation-delay: 0s !important;
-    animation-duration: 0s !important;
+    animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0s !important;
+    transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
     transform: none !important;
   }
-  .reveal {
+  .page-transition,
+  .tab-pane-transition,
+  .modal-content-anim {
+    animation: none !important;
     opacity: 1 !important;
     transform: none !important;
   }
