@@ -58,10 +58,47 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "EducationalOrganization",
+    "name": "Pont Academy",
+    "url": "https://pontacademy.com",
+    "logo": "https://pontacademy.com/pont_logo.png",
+    "description": "Türkiye'nin en başarılı üniversitelerinden mezun eğitmen kadrosuyla YKS ve LGS sınavlarına hazırlıkta kişiselleştirilmiş birebir dersler ve profesyonel koçluk.",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "İstanbul",
+      "addressRegion": "İstanbul",
+      "addressCountry": "TR"
+    },
+    "sameAs": [
+      "https://www.instagram.com/pontacademy",
+      "https://www.linkedin.com/company/pontacademy"
+    ],
+    "offers": [
+      {
+        "@type": "Offer",
+        "name": "Birebir Özel Ders",
+        "category": "Eğitim"
+      },
+      {
+        "@type": "Offer",
+        "name": "YKS & LGS Eğitim Koçluğu",
+        "category": "Sınav Koçluğu"
+      }
+    ]
+  };
+
   return (
     <html lang="tr" className={`${playfair.variable} ${roboto.variable}`}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+        <meta name="theme-color" content="#0F2645" />
+        <link rel="icon" href="/icon.png" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
       </head>
       <body>{children}</body>
     </html>
