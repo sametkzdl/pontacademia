@@ -621,10 +621,10 @@ export default function TeacherApplicationClient() {
 
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "20px" }}>
                     
-                    {/* Okulu / Üniversite & Bölüm */}
+                    {/* Okuduğunuz / Mezun Olduğunuz Üniversite */}
                     <div className="form-group" style={{ marginBottom: 0 }}>
                       <label className="form-label" style={{ color: "#1C2B3A", fontWeight: "700", fontSize: "13px" }} htmlFor="school">
-                        Okuduğunuz / Mezun Olduğunuz Okul (Üniversite & Bölüm) <span style={{ color: "#C8952A" }}>*</span>
+                        Üniversite <span style={{ color: "#C8952A" }}>*</span>
                       </label>
                       <input 
                         className="form-input" 
@@ -632,7 +632,23 @@ export default function TeacherApplicationClient() {
                         type="text" 
                         id="school" 
                         name="school"
-                        placeholder="Örn: Boğaziçi Üniversitesi - Bilgisayar Mühendisliği"
+                        placeholder="Örn: Boğaziçi Üniversitesi / ODTÜ / İTÜ"
+                        required
+                      />
+                    </div>
+
+                    {/* Okuduğunuz / Mezun Olduğunuz Bölüm */}
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ color: "#1C2B3A", fontWeight: "700", fontSize: "13px" }} htmlFor="department">
+                        Okuduğunuz / Mezun Olduğunuz Bölüm <span style={{ color: "#C8952A" }}>*</span>
+                      </label>
+                      <input 
+                        className="form-input" 
+                        style={{ backgroundColor: "#FFFFFF", color: "#0F2645", borderColor: "#CBD5E1" }}
+                        type="text" 
+                        id="department" 
+                        name="department"
+                        placeholder="Örn: Bilgisayar Mühendisliği / Tıp / Matematik"
                         required
                       />
                     </div>

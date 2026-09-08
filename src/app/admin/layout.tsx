@@ -137,55 +137,35 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="admin-layout-root">
-      {/* Top Navbar (Light Gray Theme) */}
+      {/* Top Navbar (Clean, White Theme with Gold Accents) */}
       <header className="admin-header">
-        <div className="container admin-header-container">
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <Link href="/">
+        <div className="admin-header-container">
+          <div className="admin-brand-group">
+            <Link href="/" style={{ display: "inline-flex", alignItems: "center" }}>
               <Image 
                 src="/pont_logo.png" 
                 alt="Pont Academy Logo" 
-                width={135} 
-                height={38} 
-                style={{ objectFit: "contain" }}
+                width={125} 
+                height={35} 
+                style={{ objectFit: "contain", height: "32px", width: "auto" }}
                 priority
               />
             </Link>
-            <span style={{ 
-              backgroundColor: "#FEF3C7", 
-              color: "#92400E", 
-              padding: "4px 10px", 
-              borderRadius: "6px", 
-              fontSize: "11px", 
-              fontWeight: "800",
-              border: "1px solid #FCD34D",
-              letterSpacing: "0.5px"
-            }}>
+            <span className="admin-badge-pill">
               YÖNETİCİ PANELİ
             </span>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div className="admin-user-group">
             <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", color: "#0F2645" }}>
               <Shield size={16} color="#C8952A" />
               <span style={{ fontWeight: "700" }}>Admin</span>
             </div>
             <button 
+              type="button"
               onClick={handleLogout}
-              style={{ 
-                display: "inline-flex", 
-                alignItems: "center", 
-                gap: "5px", 
-                backgroundColor: "#FFFFFF", 
-                color: "#DC2626", 
-                border: "1px solid #FECACA", 
-                padding: "6px 12px", 
-                borderRadius: "6px", 
-                fontSize: "12px", 
-                fontWeight: "700",
-                cursor: "pointer",
-                boxShadow: "0 1px 2px rgba(0,0,0,0.03)"
-              }}
+              className="admin-logout-btn"
+              title="Güvenli Çıkış Yap"
             >
               <LogOut size={13} /> <span>Çıkış Yap</span>
             </button>

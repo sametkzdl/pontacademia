@@ -44,8 +44,13 @@ export default function StudentTeachersPage() {
     const tName = match.teacher?.name?.toLowerCase() || "";
     const tEmail = match.teacher?.email?.toLowerCase() || "";
     const tSchool = match.teacher?.teacherProfile?.school?.toLowerCase() || "";
+    const tDept = match.teacher?.teacherProfile?.department?.toLowerCase() || "";
     const tSubject = match.subject?.toLowerCase() || "";
-    const matchesSearch = tName.includes(searchQuery.toLowerCase()) || tEmail.includes(searchQuery.toLowerCase()) || tSchool.includes(searchQuery.toLowerCase()) || tSubject.includes(searchQuery.toLowerCase());
+    const matchesSearch = tName.includes(searchQuery.toLowerCase()) || 
+      tEmail.includes(searchQuery.toLowerCase()) || 
+      tSchool.includes(searchQuery.toLowerCase()) || 
+      tDept.includes(searchQuery.toLowerCase()) || 
+      tSubject.includes(searchQuery.toLowerCase());
     if (!matchesSearch) return false;
     if (typeFilter === "ALL") return true;
     return match.type === typeFilter;
@@ -160,7 +165,9 @@ export default function StudentTeachersPage() {
                       {match.teacher?.name}
                     </h3>
                     <div style={{ fontSize: "12px", color: "#64748B", fontWeight: "600" }}>
-                      {match.teacher?.teacherProfile?.school || "Pont Akademi Eğitmeni"}
+                      {match.teacher?.teacherProfile?.school
+                        ? (match.teacher.teacherProfile.department ? `${match.teacher.teacherProfile.school} • ${match.teacher.teacherProfile.department}` : match.teacher.teacherProfile.school)
+                        : "Pont Akademi Eğitmeni"}
                     </div>
                   </div>
                 </div>

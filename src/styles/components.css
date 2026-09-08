@@ -262,17 +262,20 @@
   background-color: #F0F5FB;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
+  width: 100%;
 }
 
 .admin-header, .portal-header {
-  background-color: #F0F5FB;
+  background-color: #FFFFFF;
   color: #0F2645;
-  padding: 14px 0;
+  padding: 12px 0;
   border-bottom: 1.5px solid #DDE6F0;
   position: sticky;
   top: 0;
   z-index: 50;
-  box-shadow: 0 2px 10px rgba(15, 38, 69, 0.04);
+  box-shadow: 0 2px 12px rgba(15, 38, 69, 0.04);
+  width: 100%;
 }
 
 .admin-header-container, .portal-header-container {
@@ -280,6 +283,82 @@
   justify-content: space-between;
   align-items: center;
   gap: 12px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
+  box-sizing: border-box;
+}
+
+.admin-brand-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex-shrink: 1;
+}
+
+.admin-badge-pill {
+  background-color: #FEF3C7;
+  color: #92400E;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  border: 1px solid #FCD34D;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.admin-user-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.admin-logout-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background-color: #FFF1F2;
+  color: #E11D48;
+  border: 1px solid #FECDD3;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.admin-logout-btn:hover {
+  background-color: #FFE4E6;
+  border-color: #FDA4AF;
+  color: #BE123C;
+}
+
+@media (max-width: 640px) {
+  .admin-header, .portal-header {
+    padding: 8px 0;
+  }
+  .admin-header-container, .portal-header-container {
+    padding: 0 12px;
+    gap: 8px;
+  }
+  .admin-badge-pill {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+  .admin-logout-btn {
+    padding: 5px 8px;
+    font-size: 11px;
+  }
+  .admin-logout-btn span {
+    display: none;
+  }
 }
 
 .admin-main-container, .portal-main-container {

@@ -37,6 +37,7 @@ export class ProfileService {
         update: {
           phone: body.phone !== undefined ? String(body.phone).trim() : undefined,
           school: body.school !== undefined ? String(body.school).trim() : undefined,
+          department: body.department !== undefined ? String(body.department).trim() : undefined,
           yksRank: body.yksRank !== undefined ? String(body.yksRank).trim() : undefined,
           classStatus: body.classStatus !== undefined ? String(body.classStatus).trim() : undefined,
           currentDistrict: body.currentDistrict !== undefined ? String(body.currentDistrict).trim() : undefined,
@@ -68,6 +69,7 @@ export class ProfileService {
           userId,
           phone: String(body.phone || "").trim(),
           school: String(body.school || "").trim(),
+          department: String(body.department || "").trim(),
           yksRank: String(body.yksRank || ""),
           classStatus: String(body.classStatus || ""),
           currentDistrict: String(body.currentDistrict || ""),

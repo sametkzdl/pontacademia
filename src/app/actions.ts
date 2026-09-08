@@ -48,6 +48,7 @@ export async function submitBasvuruForm(formData: FormData) {
             currentDistrict: String(payload.currentDistrict || "Kadıköy"),
             currentAddress: String(payload.currentAddress || ""),
             school: String(payload.school || ""),
+            department: payload.department ? String(payload.department).trim() : null,
             scoreType: String(payload.scoreType || "SAY"),
             yksRank: String(payload.yksRank || ""),
             classStatus: String(payload.classStatus || "1. Sınıf"),

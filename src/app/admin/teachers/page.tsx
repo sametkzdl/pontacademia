@@ -312,7 +312,10 @@ export default function TeachersListPage() {
                       <div style={{ fontSize: "12px", color: "#64748B" }}>{t.teacherProfile?.phone || "Telefon yok"}</div>
                     </td>
                     <td style={{ padding: "14px 18px" }}>
-                      <div style={{ fontWeight: "600", color: "#0F2645" }}>{t.teacherProfile?.school || "Belirtilmedi"}</div>
+                      <div style={{ fontWeight: "700", color: "#0F2645" }}>{t.teacherProfile?.school || "Belirtilmedi"}</div>
+                      {t.teacherProfile?.department && (
+                        <div style={{ fontSize: "12px", color: "#475569", fontWeight: "600" }}>{t.teacherProfile.department}</div>
+                      )}
                       <div style={{ fontSize: "12px", color: "#64748B" }}>{t.teacherProfile?.currentDistrict || "İstanbul"}</div>
                     </td>
                     <td style={{ padding: "14px 18px" }}>

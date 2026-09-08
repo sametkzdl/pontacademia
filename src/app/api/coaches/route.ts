@@ -18,6 +18,7 @@ export async function GET() {
         teacherProfile: {
           select: {
             school: true,
+            department: true,
             scoreType: true,
             yksRank: true,
             classStatus: true,
@@ -34,13 +35,20 @@ export async function GET() {
 
     const coaches = teachers.map((t) => {
       const p = t.teacherProfile;
+      const formattedUni = p?.school
+        ? (p?.department ? `${p.school} • ${p.department}` : p.school)
+        : (p?.department || "Üniversite Belirtilmedi");
+
       return {
         id: t.id,
         name: t.name,
         branch: p?.scoreType ? `${p.scoreType} Alanı / YKS Koçu` : "YKS Koçu",
-        uni: p?.school || "Üniversite Belirtilmedi",
+        uni: formattedUni,
+        school: p?.school || "",
+        department: p?.department || "",
         badge: p?.yksRank ? `YKS ${p.scoreType ? `${p.scoreType} ` : ""}Sıralaması: ${p.yksRank}` : "Derece Eğitmeni",
         img: p?.showPhotoOnWeb !== false ? (p?.photoUrl || "") : "",
+        showPhotoOnWeb: p?.showPhotoOnWeb !== false,
         districts: p?.districts || "",
         onlineAvailable: Boolean(p?.onlineAvailable),
       };

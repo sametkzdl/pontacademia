@@ -12,6 +12,7 @@ export interface TeacherApplicationInput {
   currentDistrict: string;
   currentAddress: string;
   school: string;
+  department?: string;
   scoreType?: string;
   yksRank: string;
   classStatus: string;
@@ -64,6 +65,7 @@ export class ApplicationService {
         currentDistrict: data.currentDistrict || "",
         currentAddress: data.currentAddress || "",
         school: data.school.trim(),
+        department: data.department ? data.department.trim() : null,
         scoreType: data.scoreType || "SAY",
         yksRank: data.yksRank || "",
         classStatus: data.classStatus || "",
@@ -185,6 +187,7 @@ export class ApplicationService {
         birthDate: application.birthDate,
         gender: application.gender,
         school: application.school,
+        department: application.department,
         scoreType: application.scoreType || "SAY",
         yksRank: application.yksRank,
         classStatus: application.classStatus,
@@ -218,6 +221,7 @@ export class ApplicationService {
         birthDate: application.birthDate,
         gender: application.gender,
         school: application.school,
+        department: application.department,
         scoreType: application.scoreType || "SAY",
         yksRank: application.yksRank,
         classStatus: application.classStatus,

@@ -8,6 +8,7 @@ model TeacherProfile {
   birthDate        String?
   gender           String?
   school           String
+  department       String?  // Okuduğu veya mezun olduğu bölüm
   scoreType        String?  // SAY | EA | SÖZ | DİL
   yksRank          String
   classStatus      String
@@ -56,6 +57,7 @@ model TeacherApplication {
   currentDistrict String
   currentAddress  String
   school          String
+  department      String?  // Okuduğu veya mezun olduğu bölüm
   scoreType       String?  // SAY | EA | SÖZ | DİL
   yksRank         String
   classStatus     String

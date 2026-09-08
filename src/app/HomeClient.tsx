@@ -40,17 +40,31 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  // Lock body scroll on mobile when menu is open
+  // Lock body scroll on mobile when menu is open & listen for ESC key
   useEffect(() => {
     if (mobileMenuOpen) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
     }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && mobileMenuOpen) {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
     return () => {
       document.body.style.overflow = "";
+      window.removeEventListener("keydown", handleKeyDown);
     };
   }, [mobileMenuOpen]);
+
+  const handleMobileNavClick = (e?: React.MouseEvent) => {
+    document.body.style.overflow = "";
+    setMobileMenuOpen(false);
+  };
 
   // Countdown States
   const [yksTime, setYksTime] = useState<CountdownTime>({ days: 287, hours: 0, minutes: 0, seconds: 0 });
@@ -300,8 +314,13 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
             </div>
 
             {/* Mobile Hamburguer */}
-            <button className="hamburger" onClick={() => setMobileMenuOpen(true)} aria-label="Menüyü Aç">
-              <Menu size={24} />
+            <button 
+              type="button"
+              className="hamburger" 
+              onClick={() => setMobileMenuOpen(prev => !prev)} 
+              aria-label={mobileMenuOpen ? "Menüyü Kapat" : "Menüyü Aç"}
+            >
+              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
         </header>
@@ -310,13 +329,15 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
       {/* Mobile Menu Backdrop & Sliding Drawer */}
       <div 
         className={`mobile-menu-backdrop ${mobileMenuOpen ? "open" : ""}`}
-        onClick={() => setMobileMenuOpen(false)}
+        onClick={handleMobileNavClick}
         aria-hidden={!mobileMenuOpen}
+        role="button"
+        tabIndex={-1}
       />
 
       <div className={`mobile-menu-drawer ${mobileMenuOpen ? "open" : ""}`}>
         <div className="mobile-menu-header">
-          <a href="/" style={{ display: "inline-flex", alignItems: "center" }} onClick={() => setMobileMenuOpen(false)}>
+          <a href="/" style={{ display: "inline-flex", alignItems: "center" }} onClick={handleMobileNavClick}>
             <Image 
               src="/pont_logo.png" 
               alt="Pont Academy Logo" 
@@ -326,7 +347,12 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
               priority
             />
           </a>
-          <button className="mobile-menu-close" onClick={() => setMobileMenuOpen(false)} aria-label="Menüyü Kapat">
+          <button 
+            type="button"
+            className="mobile-menu-close" 
+            onClick={handleMobileNavClick} 
+            aria-label="Menüyü Kapat"
+          >
             <X size={22} />
           </button>
         </div>
@@ -335,21 +361,21 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
           <div>
             <div className="mobile-nav-group-title">Eğitim Programları</div>
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              <a href="#ozel-ders" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>
+              <a href="#ozel-ders" className="mobile-nav-link" onClick={handleMobileNavClick}>
                 <div className="mobile-nav-link-inner">
                   <GraduationCap size={18} color="#C8952A" />
                   <span>Birebir Özel Ders</span>
                 </div>
                 <ArrowRight size={15} color="#C8952A" />
               </a>
-              <a href="#kocluk" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>
+              <a href="#kocluk" className="mobile-nav-link" onClick={handleMobileNavClick}>
                 <div className="mobile-nav-link-inner">
                   <Compass size={18} color="#C8952A" />
                   <span>Kişisel Sınav Koçluğu</span>
                 </div>
                 <ArrowRight size={15} color="#C8952A" />
               </a>
-              <a href="#ekibimiz" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>
+              <a href="#ekibimiz" className="mobile-nav-link" onClick={handleMobileNavClick}>
                 <div className="mobile-nav-link-inner">
                   <Brain size={18} color="#C8952A" />
                   <span>Dereceli Eğitmen Kadromuz</span>
@@ -362,14 +388,14 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
           <div>
             <div className="mobile-nav-group-title">Sınav Hesaplama Araçları</div>
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              <a href="/tyt-puan-hesaplama" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>
+              <a href="/tyt-puan-hesaplama" className="mobile-nav-link" onClick={handleMobileNavClick}>
                 <div className="mobile-nav-link-inner">
                   <Calculator size={18} color="#38BDF8" />
                   <span>TYT Puan Hesaplama</span>
                 </div>
                 <ArrowRight size={15} color="#38BDF8" />
               </a>
-              <a href="/yks-puan-hesaplama" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>
+              <a href="/yks-puan-hesaplama" className="mobile-nav-link" onClick={handleMobileNavClick}>
                 <div className="mobile-nav-link-inner">
                   <Calculator size={18} color="#34D399" />
                   <span>YKS (TYT-AYT) Hesaplama</span>
@@ -382,21 +408,21 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
           <div>
             <div className="mobile-nav-group-title">Hızlı İşlemler & İletişim</div>
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              <a href="/teacherApplicationForm" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>
+              <a href="/teacherApplicationForm" className="mobile-nav-link" onClick={handleMobileNavClick}>
                 <div className="mobile-nav-link-inner">
                   <Sparkles size={18} color="#F59E0B" />
                   <span>Eğitmen & Koç Başvurusu</span>
                 </div>
                 <span style={{ fontSize: "11px", backgroundColor: "rgba(245, 158, 11, 0.2)", color: "#FDE68A", padding: "2px 8px", borderRadius: "6px", fontWeight: "700" }}>Katıl</span>
               </a>
-              <a href="/login" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>
+              <a href="/login" className="mobile-nav-link" onClick={handleMobileNavClick}>
                 <div className="mobile-nav-link-inner">
                   <LogIn size={18} color="#A78BFA" />
                   <span>Öğrenci / Eğitmen Girişi</span>
                 </div>
                 <ArrowRight size={15} color="#A78BFA" />
               </a>
-              <a href="#iletisim" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>
+              <a href="#iletisim" className="mobile-nav-link" onClick={handleMobileNavClick}>
                 <div className="mobile-nav-link-inner">
                   <Mail size={18} color="#94A3B8" />
                   <span>İletişim & Danışmanlık</span>
@@ -411,7 +437,7 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
               href="/kocluk-basvuru" 
               className="btn btn-primary btn-block" 
               style={{ minHeight: "48px", fontSize: "15px", fontWeight: "700" }}
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={handleMobileNavClick}
             >
               Hemen Koçluk Başvurusu Yap
             </a>
@@ -419,7 +445,7 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
               href="/ozel-ders-basvuru" 
               className="btn btn-secondary btn-block" 
               style={{ minHeight: "48px", fontSize: "15px", fontWeight: "700" }}
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={handleMobileNavClick}
             >
               Birebir Özel Ders Başvurusu
             </a>
@@ -592,7 +618,7 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
                 coaches.map((coach) => (
                   <div key={coach.id} className="card-glow teacher-card">
                     <div className="teacher-img-wrapper">
-                      {coach.img ? (
+                      {coach.img && coach.showPhotoOnWeb !== false ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img 
                           className="teacher-img" 
@@ -601,13 +627,13 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
                           style={{ width: "96px", height: "96px", borderRadius: "50%", objectFit: "cover" }} 
                         />
                       ) : (
-                        <div style={{ width: "96px", height: "96px", borderRadius: "50%", backgroundColor: "#0F2645", display: "flex", alignItems: "center", justifyContent: "center", color: "#C8952A", border: "2px solid #C8952A" }}>
-                          <Brain size={38} />
+                        <div style={{ width: "96px", height: "96px", borderRadius: "50%", backgroundColor: "#0F2645", display: "flex", alignItems: "center", justifyContent: "center", color: "#C8952A", border: "2px solid #C8952A", fontWeight: "800", fontSize: "30px" }}>
+                          {coach.name?.charAt(0) || <Brain size={38} />}
                         </div>
                       )}
-                      {coach.school && (
-                        <div className="teacher-uni-badge" style={{ fontSize: "10px", padding: "2px 8px" }}>
-                          {coach.school.length > 14 ? coach.school.substring(0, 12) + "..." : coach.school}
+                      {coach.uni && (
+                        <div className="teacher-uni-badge" style={{ fontSize: "10px", padding: "3px 8px", maxWidth: "160px", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }} title={coach.uni}>
+                          {coach.uni}
                         </div>
                       )}
                     </div>

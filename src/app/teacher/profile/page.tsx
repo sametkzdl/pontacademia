@@ -27,6 +27,7 @@ export default function TeacherProfilePage() {
     name: "",
     phone: "",
     school: "",
+    department: "",
     yksRank: "",
     classStatus: "",
     currentDistrict: "",
@@ -62,6 +63,7 @@ export default function TeacherProfilePage() {
             name: data.user.name || "",
             phone: p?.phone || "",
             school: p?.school || "",
+            department: p?.department || "",
             yksRank: p?.yksRank ? String(p.yksRank) : "",
             classStatus: p?.classStatus || "",
             currentDistrict: p?.currentDistrict || "",
@@ -278,11 +280,20 @@ export default function TeacherProfilePage() {
             </h2>
             <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
               <span style={{ backgroundColor: "#EFF6FF", color: "#1D4ED8", padding: "3px 10px", borderRadius: "20px", fontSize: "12px", fontWeight: "700", border: "1px solid #BFDBFE" }}>
-                {profile?.school || "Üniversite Belirtilmedi"}
+                {profile?.school ? (profile?.department ? `${profile.school} • ${profile.department}` : profile.school) : "Üniversite Belirtilmedi"}
               </span>
               {profile?.yksRank && (
                 <span style={{ backgroundColor: "#FEF3C7", color: "#92400E", padding: "3px 10px", borderRadius: "20px", fontSize: "12px", fontWeight: "700", border: "1px solid #FCD34D" }}>
                   🏆 YKS {profile.scoreType || "SAY"} {profile.yksRank}.
+                </span>
+              )}
+              {profile?.showPhotoOnWeb !== false ? (
+                <span style={{ backgroundColor: "#ECFDF5", color: "#047857", padding: "3px 10px", borderRadius: "20px", fontSize: "11px", fontWeight: "700", border: "1px solid #A7F3D0" }}>
+                  👁️ Sitede Fotoğraf Görünüyor
+                </span>
+              ) : (
+                <span style={{ backgroundColor: "#F1F5F9", color: "#475569", padding: "3px 10px", borderRadius: "20px", fontSize: "11px", fontWeight: "700", border: "1px solid #CBD5E1" }}>
+                  🙈 Sitede Fotoğraf Gizli
                 </span>
               )}
             </div>
@@ -312,12 +323,22 @@ export default function TeacherProfilePage() {
               <strong style={{ color: "#0F2645" }}>{profile?.school || "Belirtilmedi"}</strong>
             </div>
             <div>
+              <span style={{ fontSize: "12px", color: "#64748B", fontWeight: "600", display: "block" }}>Bölüm</span>
+              <strong style={{ color: "#0F2645" }}>{profile?.department || "Belirtilmedi"}</strong>
+            </div>
+            <div>
               <span style={{ fontSize: "12px", color: "#64748B", fontWeight: "600", display: "block" }}>Sınıf Durumu</span>
               <strong style={{ color: "#0F2645" }}>{profile?.classStatus || "Belirtilmedi"}</strong>
             </div>
             <div>
               <span style={{ fontSize: "12px", color: "#64748B", fontWeight: "600", display: "block" }}>YKS Derecesi & Puan Türü</span>
               <strong style={{ color: "#C8952A" }}>{profile?.scoreType || "SAY"} &bull; {profile?.yksRank ? `${profile.yksRank}. Sıralama` : "Belirtilmedi"}</strong>
+            </div>
+            <div>
+              <span style={{ fontSize: "12px", color: "#64748B", fontWeight: "600", display: "block" }}>Web Sitesinde Fotoğraf Görünürlüğü</span>
+              <strong style={{ color: profile?.showPhotoOnWeb !== false ? "#16A34A" : "#D97706" }}>
+                {profile?.showPhotoOnWeb !== false ? "✅ Ön yüzde fotoğraf açık" : "🔒 Ön yüzde fotoğraf gizli (monogram gösterilir)"}
+              </strong>
             </div>
             <div>
               <span style={{ fontSize: "12px", color: "#64748B", fontWeight: "600", display: "block" }}>Online Ders Durumu</span>
@@ -565,14 +586,39 @@ export default function TeacherProfilePage() {
               />
             </div>
 
-            {/* Grid 2: Okul & Derece */}
+            {/* Grid 2: Okul, Bölüm & Derece */}
             <div className="admin-grid-2col" style={{ marginBottom: "16px" }}>
               <Input
                 label="Okul / Üniversite"
                 value={editFormData.school}
                 onChange={(e) => setEditFormData({ ...editFormData, school: e.target.value })}
-                placeholder="Örn: ODTÜ - Bilgisayar Müh."
+                placeholder="Örn: Boğaziçi Üniversitesi / ODTÜ"
                 required
+              />
+              <Input
+                label="Okuduğunuz / Mezun Olduğunuz Bölüm"
+                value={editFormData.department}
+                onChange={(e) => setEditFormData({ ...editFormData, department: e.target.value })}
+                placeholder="Örn: Bilgisayar Mühendisliği"
+              />
+            </div>
+
+            {/* Grid 2.5: Sınıf & Sıralama */}
+            <div className="admin-grid-2col" style={{ marginBottom: "16px" }}>
+              <Select
+                label="Sınıf / Mezuniyet Durumu"
+                value={editFormData.classStatus}
+                onChange={(e) => setEditFormData({ ...editFormData, classStatus: e.target.value })}
+                options={[
+                  { value: "", label: "Seçiniz" },
+                  { value: "Hazırlık", label: "Hazırlık Sınıfı" },
+                  { value: "1. Sınıf", label: "1. Sınıf" },
+                  { value: "2. Sınıf", label: "2. Sınıf" },
+                  { value: "3. Sınıf", label: "3. Sınıf" },
+                  { value: "4. Sınıf", label: "4. Sınıf" },
+                  { value: "Yüksek Lisans / Doktora", label: "Yüksek Lisans / Doktora" },
+                  { value: "Mezun", label: "Mezun" },
+                ]}
               />
               <Input
                 label="YKS Sıralaması"
@@ -611,6 +657,57 @@ export default function TeacherProfilePage() {
               />
             </div>
 
+            {/* Web Sitesinde Fotoğraf Görünürlüğü Toggle Switch (Önemli Özellik) */}
+            <div style={{ 
+              marginBottom: "16px", 
+              padding: "14px 16px", 
+              backgroundColor: editFormData.showPhotoOnWeb ? "#F0FDF4" : "#F8FAFC", 
+              borderRadius: "10px", 
+              border: editFormData.showPhotoOnWeb ? "1.5px solid #86EFAC" : "1.5px solid #CBD5E1",
+              transition: "all 0.2s ease"
+            }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
+                <div>
+                  <div style={{ fontSize: "14px", fontWeight: "700", color: "#0F2645", display: "flex", alignItems: "center", gap: "6px" }}>
+                    <span>{editFormData.showPhotoOnWeb ? "👁️" : "🙈"}</span> Profil Fotoğrafımı Web Sitesinde Göster
+                  </div>
+                  <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "#64748B", lineHeight: "1.4" }}>
+                    {editFormData.showPhotoOnWeb 
+                      ? "Fotoğrafınız ana sayfadaki 'Uzman Kadromuz' bölümünde ziyaretçilere açık olarak sergilenir." 
+                      : "Fotoğrafınız web sitesinde gizlenir, ziyaretçilere sadece adınızın baş harfleri ve şık avatar rozeti gösterilir (Adminler fotoğrafınızı görebilir)."}
+                  </p>
+                </div>
+                <label style={{ position: "relative", display: "inline-block", width: "48px", height: "26px", flexShrink: 0, cursor: "pointer" }}>
+                  <input
+                    type="checkbox"
+                    checked={editFormData.showPhotoOnWeb}
+                    onChange={(e) => setEditFormData({ ...editFormData, showPhotoOnWeb: e.target.checked })}
+                    style={{ opacity: 0, width: 0, height: 0 }}
+                  />
+                  <span style={{
+                    position: "absolute",
+                    cursor: "pointer",
+                    top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: editFormData.showPhotoOnWeb ? "#16A34A" : "#CBD5E1",
+                    transition: "0.2s",
+                    borderRadius: "26px",
+                  }}>
+                    <span style={{
+                      position: "absolute",
+                      height: "20px",
+                      width: "20px",
+                      left: editFormData.showPhotoOnWeb ? "24px" : "3px",
+                      bottom: "3px",
+                      backgroundColor: "white",
+                      transition: "0.2s",
+                      borderRadius: "50%",
+                      boxShadow: "0 2px 4px rgba(0,0,0,0.2)"
+                    }} />
+                  </span>
+                </label>
+              </div>
+            </div>
+
             {/* Online Available Toggle */}
             <div style={{ marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
               <input
@@ -618,7 +715,7 @@ export default function TeacherProfilePage() {
                 id="onlineAvailable"
                 checked={editFormData.onlineAvailable}
                 onChange={(e) => setEditFormData({ ...editFormData, onlineAvailable: e.target.checked })}
-                style={{ width: "16px", height: "16px" }}
+                style={{ width: "16px", height: "16px", cursor: "pointer" }}
               />
               <label htmlFor="onlineAvailable" style={{ fontSize: "13px", fontWeight: "600", color: "#0F2645", cursor: "pointer" }}>
                 Online (Zoom/Meet üzerinden) ders ve koçluk verebilirim.

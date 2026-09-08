@@ -553,7 +553,7 @@ export default function MatchesPage() {
                     <td style={{ padding: "14px 18px" }}>
                       <div style={{ fontWeight: "700", color: "#0F2645" }}>{m.teacher?.name || "Bilinmiyor"}</div>
                       <div style={{ fontSize: "12px", color: "#64748B" }}>
-                        {m.teacher?.email} {m.teacher?.teacherProfile?.school ? `• ${m.teacher.teacherProfile.school}` : ""}
+                        {m.teacher?.email} {m.teacher?.teacherProfile?.school ? `• ${m.teacher.teacherProfile.school}${m.teacher.teacherProfile.department ? ` - ${m.teacher.teacherProfile.department}` : ""}` : ""}
                       </div>
                       {(m.teacher?.teacherProfile?.currentDistrict || m.teacher?.teacherProfile?.districts) && (
                         <div style={{ fontSize: "11px", color: "#2563EB", fontWeight: "600", marginTop: "2px" }}>
@@ -822,10 +822,14 @@ export default function MatchesPage() {
                 onChange={(e) => setNewMatchTeacherId(e.target.value)}
                 options={[
                   { value: "", label: `-- Öğretmen Seçin (${teachers.length} Kayıtlı Eğitmen) --` },
-                  ...teachers.map((t) => ({
-                    value: t.id,
-                    label: `${t.name} (${t.email}) ${t.teacherProfile?.school ? `- ${t.teacherProfile.school}` : ""}`
-                  }))
+                  ...teachers.map((t) => {
+                    const prof = t.teacherProfile;
+                    const uniInfo = prof?.school ? (prof?.department ? `${prof.school} • ${prof.department}` : prof.school) : "";
+                    return {
+                      value: t.id,
+                      label: `${t.name} (${t.email}) ${uniInfo ? `- ${uniInfo}` : ""}`
+                    };
+                  })
                 ]}
                 required
               />
@@ -834,7 +838,7 @@ export default function MatchesPage() {
               {selectedTeacher && (
                 <div style={{ fontSize: "12px", color: "#475569", marginTop: "-8px", marginBottom: "16px", backgroundColor: "#F8FAFC", padding: "8px 12px", borderRadius: "6px", border: "1px solid #E2E8F0" }}>
                   <div style={{ color: "#1E293B", fontWeight: "600" }}>
-                    🏫 <strong>Üniversite / Bölüm:</strong> {selectedTeacher.teacherProfile?.school || "Belirtilmedi"}
+                    🏫 <strong>Üniversite / Bölüm:</strong> {selectedTeacher.teacherProfile?.school ? `${selectedTeacher.teacherProfile.school}${selectedTeacher.teacherProfile.department ? ` • ${selectedTeacher.teacherProfile.department}` : ""}` : "Belirtilmedi"}
                   </div>
                   {(selectedTeacher.teacherProfile?.currentDistrict || selectedTeacher.teacherProfile?.districts) && (
                     <div style={{ marginTop: "4px", color: "#2563EB", fontWeight: "600" }}>
@@ -1024,10 +1028,14 @@ export default function MatchesPage() {
                   onChange={(e) => setEditTeacherId(e.target.value)}
                   options={[
                     { value: "", label: "-- Eğitmen Seçiniz --" },
-                    ...teachers.map((t) => ({
-                      value: t.id,
-                      label: `${t.name} (${t.email})${t.id === editingMatch.teacherId ? " 👈 (Mevcut Eğitmen)" : ""} ${t.teacherProfile?.school ? `- ${t.teacherProfile.school}` : ""}`
-                    }))
+                    ...teachers.map((t) => {
+                      const prof = t.teacherProfile;
+                      const uniInfo = prof?.school ? (prof?.department ? `${prof.school} • ${prof.department}` : prof.school) : "";
+                      return {
+                        value: t.id,
+                        label: `${t.name} (${t.email})${t.id === editingMatch.teacherId ? " 👈 (Mevcut Eğitmen)" : ""} ${uniInfo ? `- ${uniInfo}` : ""}`
+                      };
+                    })
                   ]}
                   required
                 />
@@ -1046,7 +1054,7 @@ export default function MatchesPage() {
                         ✨ Yeni Seçilen Eğitmen: <span style={{ color: "#1D4ED8" }}>{editSelectedTeacher.name}</span>
                       </div>
                       <div style={{ color: "#475569" }}>
-                        🏫 <strong>Üniversite / Bölüm:</strong> {editSelectedTeacher.teacherProfile?.school || "Belirtilmedi"}
+                        🏫 <strong>Üniversite / Bölüm:</strong> {editSelectedTeacher.teacherProfile?.school ? `${editSelectedTeacher.teacherProfile.school}${editSelectedTeacher.teacherProfile.department ? ` • ${editSelectedTeacher.teacherProfile.department}` : ""}` : "Belirtilmedi"}
                       </div>
                       {(editSelectedTeacher.teacherProfile?.currentDistrict || editSelectedTeacher.teacherProfile?.districts) && (
                         <div style={{ marginTop: "3px", color: "#2563EB", fontWeight: "600" }}>

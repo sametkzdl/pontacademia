@@ -290,7 +290,10 @@ export default function TeacherApplicationsPage() {
                       <div style={{ fontSize: "12px", color: "#64748B" }}>{app.phone}</div>
                     </td>
                     <td style={{ padding: "14px 18px" }}>
-                      <div style={{ fontWeight: "600", color: "#0F2645" }}>{app.school}</div>
+                      <div style={{ fontWeight: "700", color: "#0F2645" }}>{app.school}</div>
+                      {app.department && (
+                        <div style={{ fontSize: "12px", color: "#475569", fontWeight: "600" }}>{app.department}</div>
+                      )}
                       <div style={{ fontSize: "12px", color: "#C8952A", fontWeight: "700" }}>
                         {app.scoreType} &bull; {app.yksRank ? `${app.yksRank}. Sıralama` : "Derece Belirtilmedi"}
                       </div>
@@ -411,7 +414,9 @@ export default function TeacherApplicationsPage() {
 
                 <div style={{ marginTop: "6px", fontSize: "13px", color: "#64748B", display: "flex", flexDirection: "column", gap: "4px" }}>
                   <div>
-                    <strong style={{ color: "#0F2645" }}>{selectedApp.school}</strong> • {selectedApp.classStatus}
+                    <strong style={{ color: "#0F2645" }}>{selectedApp.school}</strong>
+                    {selectedApp.department ? ` • ${selectedApp.department}` : ""}
+                    {selectedApp.classStatus ? ` (${selectedApp.classStatus})` : ""}
                   </div>
                   <div>
                     <span style={{ color: "#C8952A", fontWeight: "700" }}>{selectedApp.scoreType}</span> &bull; {selectedApp.yksRank ? `YKS Sıralaması: ${selectedApp.yksRank}` : "Derece Belirtilmedi"}
@@ -430,8 +435,12 @@ export default function TeacherApplicationsPage() {
                 <strong style={{ color: "#0F2645" }}>{selectedApp.phone}</strong>
               </div>
               <div>
-                <span style={{ fontSize: "12px", color: "#64748B", fontWeight: "600", display: "block" }}>Okul / Üniversite</span>
+                <span style={{ fontSize: "12px", color: "#64748B", fontWeight: "600", display: "block" }}>Üniversite</span>
                 <strong style={{ color: "#0F2645" }}>{selectedApp.school}</strong>
+              </div>
+              <div>
+                <span style={{ fontSize: "12px", color: "#64748B", fontWeight: "600", display: "block" }}>Bölüm</span>
+                <strong style={{ color: "#0F2645" }}>{selectedApp.department || "Belirtilmedi"}</strong>
               </div>
               <div>
                 <span style={{ fontSize: "12px", color: "#64748B", fontWeight: "600", display: "block" }}>Sınıf Durumu</span>
