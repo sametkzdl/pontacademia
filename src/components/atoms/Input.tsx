@@ -21,9 +21,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             {props.required && <span style={{ color: "#DC2626", marginLeft: "4px" }}>*</span>}
           </label>
         )}
-        <div style={{ position: "relative", width: "100%" }}>
+        <div style={{ position: "relative", width: "100%", boxSizing: "border-box" }}>
           {leftIcon && (
-            <div style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#94A3B8", display: "flex", alignItems: "center", pointerEvents: "none" }}>
+            <div style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", color: "#94A3B8", display: "flex", alignItems: "center", pointerEvents: "none" }}>
               {leftIcon}
             </div>
           )}
@@ -32,22 +32,23 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             className={`form-input ${className}`}
             style={{
               width: "100%",
+              minHeight: "48px",
               backgroundColor: "#FFFFFF",
               color: "#0F2645",
-              border: error ? "1.5px solid #EF4444" : "1px solid #CBD5E1",
-              borderRadius: "8px",
-              padding: leftIcon ? "10px 14px 10px 38px" : rightIcon ? "10px 38px 10px 14px" : "10px 14px",
-              fontSize: "14px",
-              fontWeight: "600",
+              border: error ? "1.5px solid #EF4444" : "1.5px solid #CBD5E1",
+              borderRadius: "10px",
+              padding: leftIcon ? "12px 14px 12px 42px" : rightIcon ? "12px 42px 12px 14px" : "12px 16px",
+              fontSize: "15px",
+              fontWeight: "500",
               outline: "none",
-              transition: "all 0.2s ease",
+              transition: "border-color 0.2s ease, box-shadow 0.2s ease",
               boxSizing: "border-box",
               ...style,
             }}
             {...props}
           />
           {rightIcon && (
-            <div style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", color: "#94A3B8", display: "flex", alignItems: "center" }}>
+            <div style={{ position: "absolute", right: "14px", top: "50%", transform: "translateY(-50%)", color: "#94A3B8", display: "flex", alignItems: "center" }}>
               {rightIcon}
             </div>
           )}

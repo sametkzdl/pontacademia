@@ -347,11 +347,13 @@ export default function KoclukBasvuruClient() {
 
           {/* Form Card Container */}
           <div style={{ 
-            padding: "40px", 
+            padding: "clamp(20px, 4vw, 40px)", 
             borderRadius: "16px", 
             backgroundColor: "#FFFFFF", 
             border: "1px solid #DDE6F0", 
-            boxShadow: "0 12px 36px rgba(15, 38, 69, 0.06)" 
+            boxShadow: "0 12px 36px rgba(15, 38, 69, 0.06)",
+            width: "100%",
+            boxSizing: "border-box"
           }}>
             
             {formSubmitted ? (
@@ -964,12 +966,11 @@ export default function KoclukBasvuruClient() {
                 {/* 6. MEVCUT DURUM & NOTLAR */}
                 <div style={{ marginBottom: "36px" }}>
                   <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label" style={{ color: "#1C2B3A", fontWeight: "700", fontSize: "13px" }} htmlFor="notes">
+                    <label className="form-label" style={{ color: "#1C2B3A", fontWeight: "700", fontSize: "13.5px" }} htmlFor="notes">
                       Mevcut Netleriniz veya Koçunuza İletmek İstediğiniz Notlar
                     </label>
                     <textarea 
                       className="form-textarea" 
-                      style={{ backgroundColor: "#FFFFFF", color: "#0F2645", borderColor: "#CBD5E1", minHeight: "100px" }}
                       id="notes" 
                       name="notes"
                       rows={3}
@@ -979,12 +980,27 @@ export default function KoclukBasvuruClient() {
                 </div>
 
                 {/* Butonlar */}
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "12px", borderTop: "1px solid #E2E8F0" }}>
+                <div style={{ 
+                  display: "flex", 
+                  flexWrap: "wrap", 
+                  gap: "14px", 
+                  justifyContent: "space-between", 
+                  alignItems: "center", 
+                  paddingTop: "20px", 
+                  borderTop: "1.5px solid #E2E8F0" 
+                }}>
                   <button 
                     type="button" 
                     onClick={() => setStep(1)}
                     className="btn btn-secondary"
-                    style={{ padding: "12px 24px", fontSize: "14px" }}
+                    style={{ 
+                      flex: "1 1 180px", 
+                      minHeight: "48px",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "8px"
+                    }}
                   >
                     ← Koç Seçimine Dön
                   </button>
@@ -994,13 +1010,15 @@ export default function KoclukBasvuruClient() {
                     disabled={isPending}
                     className="btn btn-primary"
                     style={{ 
-                      padding: "14px 36px", 
-                      fontSize: "16px", 
+                      flex: "2 1 240px",
+                      minHeight: "48px",
+                      padding: "14px 28px", 
+                      fontSize: "15px", 
                       fontWeight: "700", 
-                      borderRadius: "8px", 
                       boxShadow: "0 6px 18px rgba(200, 149, 42, 0.3)",
                       display: "inline-flex",
                       alignItems: "center",
+                      justifyContent: "center",
                       gap: "10px",
                       cursor: isPending ? "not-allowed" : "pointer"
                     }}

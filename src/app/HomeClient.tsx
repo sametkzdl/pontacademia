@@ -18,7 +18,9 @@ import {
   CheckCircle2,
   Calculator,
   GraduationCap,
-  MapPin
+  MapPin,
+  Compass,
+  LogIn
 } from "lucide-react";
 
 interface CountdownTime {
@@ -37,6 +39,18 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
   // Mobile Nav State
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+
+  // Lock body scroll on mobile when menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileMenuOpen]);
 
   // Countdown States
   const [yksTime, setYksTime] = useState<CountdownTime>({ days: 287, hours: 0, minutes: 0, seconds: 0 });
@@ -256,31 +270,124 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
         </header>
       </div>
 
-      {/* Mobile Menu Overlay */}
-      <div className={`mobile-menu ${mobileMenuOpen ? "open" : ""}`}>
-        <button className="mobile-menu-close" onClick={() => setMobileMenuOpen(false)} aria-label="Menüyü Kapat">
-          <X size={28} />
-        </button>
-        <a href="/" style={{ display: "flex", alignItems: "center", marginBottom: "24px" }} onClick={() => setMobileMenuOpen(false)}>
-          <Image 
-            src="/pont_logo.png" 
-            alt="Pont Academy Logo" 
-            width={185} 
-            height={50} 
-            style={{ objectFit: "contain", height: "46px", width: "auto" }}
-            priority
-          />
-        </a>
-        <a href="#ozel-ders" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Özel Ders</a>
-        <a href="#kocluk" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Koçluk</a>
-        <a href="#ekibimiz" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Eğitmenlerimiz</a>
-        <a href="/tyt-puan-hesaplama" className="nav-link" onClick={() => setMobileMenuOpen(false)}>TYT Puan Hesaplama</a>
-        <a href="/yks-puan-hesaplama" className="nav-link" onClick={() => setMobileMenuOpen(false)}>YKS Puan Hesaplama</a>
-        <a href="/teacherApplicationForm" className="nav-link" style={{ color: "var(--color-gold)", fontWeight: "700" }} onClick={() => setMobileMenuOpen(false)}>Eğitmen & Koç Başvurusu</a>
-        <a href="#iletisim" className="nav-link" onClick={() => setMobileMenuOpen(false)}>İletişim</a>
-        <a href="/kocluk-basvuru" className="btn btn-primary" style={{ width: "100%", maxWidth: "250px", marginTop: "20px" }} onClick={() => setMobileMenuOpen(false)}>
-          Koçluk Başlat
-        </a>
+      {/* Mobile Menu Backdrop & Sliding Drawer */}
+      <div 
+        className={`mobile-menu-backdrop ${mobileMenuOpen ? "open" : ""}`}
+        onClick={() => setMobileMenuOpen(false)}
+        aria-hidden={!mobileMenuOpen}
+      />
+
+      <div className={`mobile-menu-drawer ${mobileMenuOpen ? "open" : ""}`}>
+        <div className="mobile-menu-header">
+          <a href="/" style={{ display: "inline-flex", alignItems: "center" }} onClick={() => setMobileMenuOpen(false)}>
+            <Image 
+              src="/pont_logo.png" 
+              alt="Pont Academy Logo" 
+              width={150} 
+              height={40} 
+              style={{ objectFit: "contain", height: "36px", width: "auto" }}
+              priority
+            />
+          </a>
+          <button className="mobile-menu-close" onClick={() => setMobileMenuOpen(false)} aria-label="Menüyü Kapat">
+            <X size={22} />
+          </button>
+        </div>
+
+        <div className="mobile-menu-content">
+          <div>
+            <div className="mobile-nav-group-title">Eğitim Programları</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              <a href="#ozel-ders" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>
+                <div className="mobile-nav-link-inner">
+                  <GraduationCap size={18} color="#C8952A" />
+                  <span>Birebir Özel Ders</span>
+                </div>
+                <ArrowRight size={15} color="#C8952A" />
+              </a>
+              <a href="#kocluk" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>
+                <div className="mobile-nav-link-inner">
+                  <Compass size={18} color="#C8952A" />
+                  <span>Kişisel Sınav Koçluğu</span>
+                </div>
+                <ArrowRight size={15} color="#C8952A" />
+              </a>
+              <a href="#ekibimiz" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>
+                <div className="mobile-nav-link-inner">
+                  <Brain size={18} color="#C8952A" />
+                  <span>Dereceli Eğitmen Kadromuz</span>
+                </div>
+                <ArrowRight size={15} color="#C8952A" />
+              </a>
+            </div>
+          </div>
+
+          <div>
+            <div className="mobile-nav-group-title">Sınav Hesaplama Araçları</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              <a href="/tyt-puan-hesaplama" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>
+                <div className="mobile-nav-link-inner">
+                  <Calculator size={18} color="#38BDF8" />
+                  <span>TYT Puan Hesaplama</span>
+                </div>
+                <ArrowRight size={15} color="#38BDF8" />
+              </a>
+              <a href="/yks-puan-hesaplama" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>
+                <div className="mobile-nav-link-inner">
+                  <Calculator size={18} color="#34D399" />
+                  <span>YKS (TYT-AYT) Hesaplama</span>
+                </div>
+                <ArrowRight size={15} color="#34D399" />
+              </a>
+            </div>
+          </div>
+
+          <div>
+            <div className="mobile-nav-group-title">Hızlı İşlemler & İletişim</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              <a href="/teacherApplicationForm" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>
+                <div className="mobile-nav-link-inner">
+                  <Sparkles size={18} color="#F59E0B" />
+                  <span>Eğitmen & Koç Başvurusu</span>
+                </div>
+                <span style={{ fontSize: "11px", backgroundColor: "rgba(245, 158, 11, 0.2)", color: "#FDE68A", padding: "2px 8px", borderRadius: "6px", fontWeight: "700" }}>Katıl</span>
+              </a>
+              <a href="/login" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>
+                <div className="mobile-nav-link-inner">
+                  <LogIn size={18} color="#A78BFA" />
+                  <span>Öğrenci / Eğitmen Girişi</span>
+                </div>
+                <ArrowRight size={15} color="#A78BFA" />
+              </a>
+              <a href="#iletisim" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>
+                <div className="mobile-nav-link-inner">
+                  <Mail size={18} color="#94A3B8" />
+                  <span>İletişim & Danışmanlık</span>
+                </div>
+                <ArrowRight size={15} color="#94A3B8" />
+              </a>
+            </div>
+          </div>
+
+          <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "10px" }}>
+            <a 
+              href="/kocluk-basvuru" 
+              className="btn btn-primary btn-block" 
+              style={{ minHeight: "48px", fontSize: "15px", fontWeight: "700" }}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Hemen Koçluk Başvurusu Yap
+            </a>
+            <a 
+              href="/ozel-ders-basvuru" 
+              className="btn btn-secondary btn-block" 
+              style={{ minHeight: "48px", fontSize: "15px", fontWeight: "700" }}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Birebir Özel Ders Başvurusu
+            </a>
+          </div>
+        </div>
       </div>
 
       {/* HERO SECTION */}
@@ -890,50 +997,30 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
                   )}
 
                   <div style={{ marginBottom: "18px" }}>
-                    <label style={{ display: "block", fontSize: "13px", fontWeight: "700", color: "#0F2645", marginBottom: "6px" }} htmlFor="name">
+                    <label className="form-label" htmlFor="name">
                       Adınız Soyadınız *
                     </label>
                     <input 
                       type="text" 
                       id="name" 
+                      className="form-input"
                       placeholder="Örn: Mehmet Can"
-                      style={{ 
-                        width: "100%", 
-                        padding: "11px 14px", 
-                        borderRadius: "8px", 
-                        border: "1.5px solid #CBD5E1", 
-                        backgroundColor: "#FFFFFF", 
-                        color: "#0F2645", 
-                        fontSize: "14px", 
-                        fontWeight: "500",
-                        outline: "none" 
-                      }}
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       required
                     />
                   </div>
 
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px", marginBottom: "18px" }}>
+                  <div className="form-grid-2col" style={{ marginBottom: "18px" }}>
                     <div>
-                      <label style={{ display: "block", fontSize: "13px", fontWeight: "700", color: "#0F2645", marginBottom: "6px" }} htmlFor="email">
+                      <label className="form-label" htmlFor="email">
                         E-Posta Adresiniz *
                       </label>
                       <input 
                         type="email" 
                         id="email" 
+                        className="form-input"
                         placeholder="ad@email.com"
-                        style={{ 
-                          width: "100%", 
-                          padding: "11px 14px", 
-                          borderRadius: "8px", 
-                          border: "1.5px solid #CBD5E1", 
-                          backgroundColor: "#FFFFFF", 
-                          color: "#0F2645", 
-                          fontSize: "14px", 
-                          fontWeight: "500",
-                          outline: "none" 
-                        }}
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         required
@@ -941,24 +1028,14 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
                     </div>
 
                     <div>
-                      <label style={{ display: "block", fontSize: "13px", fontWeight: "700", color: "#0F2645", marginBottom: "6px" }} htmlFor="phone">
+                      <label className="form-label" htmlFor="phone">
                         Telefon Numaranız
                       </label>
                       <input 
                         type="tel" 
                         id="phone" 
-                        placeholder="05xx ..."
-                        style={{ 
-                          width: "100%", 
-                          padding: "11px 14px", 
-                          borderRadius: "8px", 
-                          border: "1.5px solid #CBD5E1", 
-                          backgroundColor: "#FFFFFF", 
-                          color: "#0F2645", 
-                          fontSize: "14px", 
-                          fontWeight: "500",
-                          outline: "none" 
-                        }}
+                        className="form-input"
+                        placeholder="05xx xxx xx xx"
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       />
@@ -966,23 +1043,12 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
                   </div>
 
                   <div style={{ marginBottom: "18px" }}>
-                    <label style={{ display: "block", fontSize: "13px", fontWeight: "700", color: "#0F2645", marginBottom: "6px" }} htmlFor="exam">
+                    <label className="form-label" htmlFor="exam">
                       İlgilendiğiniz Alan / Sınav Programı
                     </label>
                     <select 
                       id="exam"
-                      style={{ 
-                        width: "100%", 
-                        padding: "11px 14px", 
-                        borderRadius: "8px", 
-                        border: "1.5px solid #CBD5E1", 
-                        backgroundColor: "#FFFFFF", 
-                        color: "#0F2645", 
-                        fontSize: "14px", 
-                        fontWeight: "600",
-                        outline: "none",
-                        cursor: "pointer"
-                      }}
+                      className="form-select"
                       value={formData.exam}
                       onChange={(e) => setFormData({ ...formData, exam: e.target.value })}
                     >
@@ -994,25 +1060,14 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
                   </div>
 
                   <div style={{ marginBottom: "24px" }}>
-                    <label style={{ display: "block", fontSize: "13px", fontWeight: "700", color: "#0F2645", marginBottom: "6px" }} htmlFor="message">
+                    <label className="form-label" htmlFor="message">
                       Mesajınız / Notunuz *
                     </label>
                     <textarea
                       id="message"
                       rows={3}
+                      className="form-input"
                       placeholder="Hedefleriniz, sınıf düzeyiniz veya ders/koçluk talebiniz..."
-                      style={{ 
-                        width: "100%", 
-                        padding: "11px 14px", 
-                        borderRadius: "8px", 
-                        border: "1.5px solid #CBD5E1", 
-                        backgroundColor: "#FFFFFF", 
-                        color: "#0F2645", 
-                        fontSize: "14px", 
-                        fontWeight: "500",
-                        outline: "none",
-                        resize: "vertical"
-                      }}
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                       required
@@ -1021,25 +1076,14 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
 
                   <button 
                     type="submit"
-                    className="btn btn-primary" 
+                    className="btn btn-primary form-submit-btn" 
                     disabled={formLoading}
-                    style={{ 
-                      width: "100%", 
-                      justifyContent: "center", 
-                      fontSize: "15px", 
-                      fontWeight: "700",
-                      padding: "13px 24px",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      boxShadow: "0 4px 14px rgba(200, 149, 42, 0.25)"
-                    }}
                   >
                     {formLoading ? (
                       "İletiliyor..."
                     ) : (
                       <>
-                        <Send size={16} /> Mesaj Gönder & Bilgi Al
+                        <Send size={18} /> Mesaj Gönder & Bilgi Al
                       </>
                     )}
                   </button>

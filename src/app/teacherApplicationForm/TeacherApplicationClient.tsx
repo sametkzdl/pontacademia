@@ -313,11 +313,13 @@ export default function TeacherApplicationClient() {
 
           {/* Form Card Container (Açık Beyaz Kart & Yüksek Netlik) */}
           <div style={{ 
-            padding: "40px", 
+            padding: "clamp(20px, 4vw, 40px)", 
             borderRadius: "16px", 
             backgroundColor: "#FFFFFF", 
             border: "1px solid #DDE6F0", 
-            boxShadow: "0 12px 36px rgba(15, 38, 69, 0.06)" 
+            boxShadow: "0 12px 36px rgba(15, 38, 69, 0.06)",
+            width: "100%",
+            boxSizing: "border-box"
           }}>
             
             {formSubmitted ? (

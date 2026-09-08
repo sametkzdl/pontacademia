@@ -24,12 +24,13 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           className={`form-input ${className}`}
           style={{
             width: "100%",
+            minHeight: "100px",
             backgroundColor: "#FFFFFF",
             color: "#0F2645",
-            border: error ? "1.5px solid #EF4444" : "1px solid #CBD5E1",
-            borderRadius: "8px",
-            padding: "10px 14px",
-            fontSize: "14px",
+            border: error ? "1.5px solid #EF4444" : "1.5px solid #CBD5E1",
+            borderRadius: "10px",
+            padding: "12px 16px",
+            fontSize: "15px",
             fontWeight: "500",
             outline: "none",
             resize: "vertical",

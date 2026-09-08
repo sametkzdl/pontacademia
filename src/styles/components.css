@@ -52,41 +52,47 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
-  padding: 14px 28px;
+  border-radius: 10px;
+  min-height: 48px;
+  padding: 12px 24px;
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   text-decoration: none;
   gap: 8px;
   box-sizing: border-box;
+  max-width: 100%;
+  user-select: none;
+  border: none;
+  text-align: center;
+  line-height: 1.3;
 }
 
 /* Primary (Gold Filled) */
 .btn-primary {
   background-color: var(--color-gold);
-  color: var(--color-white);
-  border: none;
-  box-shadow: 0 4px 14px rgba(200, 149, 42, 0.2);
+  color: #0F2645;
+  box-shadow: 0 4px 14px rgba(200, 149, 42, 0.25);
 }
 
 .btn-primary:hover {
-  transform: translateY(-1px) scale(1.01);
-  box-shadow: 0 6px 20px rgba(200, 149, 42, 0.35);
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 6px 20px rgba(200, 149, 42, 0.38);
   filter: brightness(1.08);
 }
 
 /* Secondary (White / Ghost) */
 .btn-secondary {
-  background-color: transparent;
-  border: 1.5px solid var(--color-white);
-  color: var(--color-white);
+  background-color: #FFFFFF;
+  border: 1.5px solid #CBD5E1;
+  color: #0F2645;
 }
 
 .btn-secondary:hover {
-  background-color: rgba(255, 255, 255, 0.08);
-  transform: translateY(-1px);
+  background-color: #F8FAFC;
+  border-color: #0F2645;
+  transform: translateY(-2px);
 }
 
 /* Dark Ghost (for light background sections) */
@@ -97,8 +103,19 @@
 }
 
 .btn-dark-ghost:hover {
-  background-color: rgba(15, 38, 69, 0.06);
-  transform: translateY(-1px);
+  background-color: rgba(15, 38, 69, 0.08);
+  transform: translateY(-2px);
+}
+
+/* Full Width Button Modifier */
+.btn-block {
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .btn-mobile-full {
+    width: 100% !important;
+  }
 }
 
 /* Text links */
@@ -119,10 +136,14 @@
 
 /* Form Groups & Controls */
 .form-card {
-  background-color: var(--color-navy-mid);
-  padding: 40px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: #FFFFFF;
+  padding: clamp(20px, 4vw, 40px);
+  border-radius: 16px;
+  border: 1px solid #DDE6F0;
+  box-shadow: 0 8px 30px rgba(15, 38, 69, 0.06);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .form-group {
@@ -130,47 +151,76 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .form-label {
   display: block;
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 700;
   margin-bottom: 6px;
   color: #0F2645;
+  letter-spacing: -0.01em;
 }
 
-/* Default / Light Form Inputs (High Contrast) */
-.form-input, .form-select, textarea.form-input {
+/* Default / Light Form Inputs (Generous Touch Size & Zero Overflow) */
+.form-input, .form-select, .form-textarea, textarea.form-input, textarea.form-textarea {
   width: 100%;
+  min-height: 48px;
   background-color: #FFFFFF;
-  border: 1px solid #CBD5E1;
-  border-radius: 8px;
-  padding: 10px 14px;
+  border: 1.5px solid #CBD5E1;
+  border-radius: 10px;
+  padding: 12px 16px;
   color: #0F2645;
   font-family: inherit;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   outline: none;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
   box-sizing: border-box;
+  max-width: 100%;
+  display: block;
 }
 
-.form-input::placeholder {
+.form-textarea, textarea.form-input, textarea.form-textarea {
+  min-height: 100px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.form-input::placeholder, .form-textarea::placeholder, textarea.form-input::placeholder {
   color: #94A3B8;
 }
 
-.form-input:focus, .form-select:focus, textarea.form-input:focus {
+.form-input:focus, .form-select:focus, .form-textarea:focus, textarea.form-input:focus {
   border-color: #C8952A;
-  box-shadow: 0 0 0 3px rgba(200, 149, 42, 0.15);
+  box-shadow: 0 0 0 3.5px rgba(200, 149, 42, 0.18);
+}
+
+.form-select {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%230F2645' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 16px;
+  padding-right: 40px;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 .form-select option {
   background-color: #FFFFFF;
   color: #0F2645;
+  padding: 8px;
 }
 
-/* Dark Form Inputs (Specifically scoped to dark cards) */
+/* Dark Form Card Scoped Inputs */
+[data-theme="dark"] .form-card {
+  background-color: var(--color-navy-mid);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
 [data-theme="dark"] .form-card .form-label {
   color: var(--color-text-soft);
   font-size: 12px;
@@ -178,35 +228,29 @@
   letter-spacing: 0.08em;
 }
 
-[data-theme="dark"] .form-card .form-input,
-[data-theme="dark"] .form-card .form-select {
-  background-color: transparent;
-  border: none;
-  border-bottom: 1.5px solid rgba(255, 255, 255, 0.2);
-  border-radius: 0;
-  padding: 12px 0;
-  color: #FFFFFF;
-  font-size: 15px;
-}
-
-[data-theme="dark"] .form-card .form-input::placeholder {
-  color: rgba(255, 255, 255, 0.4);
-}
-
-[data-theme="dark"] .form-card .form-input:focus,
-[data-theme="dark"] .form-card .form-select:focus {
-  border-bottom-color: var(--color-gold);
-  box-shadow: 0 4px 12px -4px rgba(200, 149, 42, 0.3);
-}
-
-[data-theme="dark"] .form-card .form-select option {
-  background-color: var(--color-navy-mid);
-  color: var(--color-white);
-}
-
 .form-submit-btn {
   width: 100%;
-  margin-top: 12px;
+  min-height: 50px;
+  font-size: 16px;
+  font-weight: 700;
+  margin-top: 14px;
+}
+
+/* Responsive Form Grids */
+.form-grid-2col {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-grid-3col {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* =========================================
