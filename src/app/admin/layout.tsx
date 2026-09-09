@@ -13,7 +13,9 @@ import {
   MessageSquare, 
   Shield, 
   LogOut,
-  Calendar
+  Calendar,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -25,6 +27,38 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     unreadMessages: 0,
     pendingRequests: 0,
   });
+
+  const tabsRef = React.useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const checkScroll = () => {
+    if (!tabsRef.current) return;
+    const { scrollLeft, scrollWidth, clientWidth } = tabsRef.current;
+    setCanScrollLeft(scrollLeft > 4);
+    setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 4);
+  };
+
+  useEffect(() => {
+    checkScroll();
+    const el = tabsRef.current;
+    if (!el) return;
+    el.addEventListener("scroll", checkScroll, { passive: true });
+    window.addEventListener("resize", checkScroll);
+    return () => {
+      el.removeEventListener("scroll", checkScroll);
+      window.removeEventListener("resize", checkScroll);
+    };
+  }, [pathname]);
+
+  const handleScrollNav = (direction: "left" | "right") => {
+    if (!tabsRef.current) return;
+    const scrollAmount = 240;
+    tabsRef.current.scrollBy({
+      left: direction === "left" ? -scrollAmount : scrollAmount,
+      behavior: "smooth",
+    });
+  };
 
   useEffect(() => {
     const fetchCounts = async () => {
@@ -175,41 +209,65 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Main Container */}
       <main className="admin-main-container">
-        {/* Navigation Tabs (Smooth Horizontal Scroll on Mobile) */}
-        <div className="admin-tabs-nav">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href || (item.href !== "/admin" && pathname?.startsWith(item.href));
-            const Icon = item.icon;
+        {/* Navigation Tabs with Left/Right Slider Controls */}
+        <div className="tabs-slider-wrapper">
+          <button
+            type="button"
+            onClick={() => handleScrollNav("left")}
+            disabled={!canScrollLeft}
+            className={`tabs-scroll-btn ${!canScrollLeft ? "disabled" : ""}`}
+            title="Sola kaydır"
+            aria-label="Sola kaydır"
+          >
+            <ChevronLeft size={16} />
+          </button>
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="admin-tab-link"
-                style={{
-                  backgroundColor: isActive ? "#0F2645" : "#FFFFFF",
-                  color: isActive ? "#FFFFFF" : "#475569",
-                  border: isActive ? "1px solid #0F2645" : "1px solid #DDE6F0",
-                  boxShadow: isActive ? "0 4px 12px rgba(15, 38, 69, 0.15)" : "0 1px 3px rgba(0,0,0,0.02)",
-                }}
-              >
-                <Icon size={15} color={isActive ? "#C8952A" : "#64748B"} />
-                {item.label}
-                {item.badge !== undefined && item.badge > 0 && (
-                  <span style={{
-                    backgroundColor: item.badgeColor || "#C8952A",
-                    color: item.badgeColor === "#EF4444" ? "#FFFFFF" : "#0F2645",
-                    fontSize: "11px",
-                    fontWeight: "800",
-                    padding: "1px 6px",
-                    borderRadius: "10px"
-                  }}>
-                    {item.badge}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
+          <div ref={tabsRef} className="tabs-slider-track">
+            {navItems.map((item) => {
+              const isActive = pathname === item.href || (item.href !== "/admin" && pathname?.startsWith(item.href));
+              const Icon = item.icon;
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="admin-tab-link"
+                  style={{
+                    backgroundColor: isActive ? "#0F2645" : "#FFFFFF",
+                    color: isActive ? "#FFFFFF" : "#475569",
+                    border: isActive ? "1px solid #0F2645" : "1px solid #DDE6F0",
+                    boxShadow: isActive ? "0 4px 12px rgba(15, 38, 69, 0.15)" : "0 1px 3px rgba(0,0,0,0.02)",
+                  }}
+                >
+                  <Icon size={15} color={isActive ? "#C8952A" : "#64748B"} />
+                  {item.label}
+                  {item.badge !== undefined && item.badge > 0 && (
+                    <span style={{
+                      backgroundColor: item.badgeColor || "#C8952A",
+                      color: item.badgeColor === "#EF4444" ? "#FFFFFF" : "#0F2645",
+                      fontSize: "11px",
+                      fontWeight: "800",
+                      padding: "1px 6px",
+                      borderRadius: "10px"
+                    }}>
+                      {item.badge}
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => handleScrollNav("right")}
+            disabled={!canScrollRight}
+            className={`tabs-scroll-btn ${!canScrollRight ? "disabled" : ""}`}
+            title="Sağa kaydır"
+            aria-label="Sağa kaydır"
+          >
+            <ChevronRight size={16} />
+          </button>
         </div>
 
         {/* Content of the active nested route with smooth animation */}

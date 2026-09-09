@@ -53,7 +53,7 @@ export const SearchFilterBar: React.FC<SearchFilterBarProps> = ({
   const currentSearch = searchValue !== undefined ? searchValue : (searchQuery || "");
 
   return (
-    <div style={{ backgroundColor: "#FFFFFF", padding: "16px 20px", borderRadius: "12px", border: "1px solid #DDE6F0", boxShadow: "0 2px 8px rgba(15, 38, 69, 0.04)", marginBottom: "20px" }}>
+    <div className="search-filter-bar-card" style={{ backgroundColor: "#FFFFFF", padding: "16px 20px", borderRadius: "12px", border: "1px solid #DDE6F0", boxShadow: "0 2px 8px rgba(15, 38, 69, 0.04)", marginBottom: "20px" }}>
       {(title || extraActions) && (
         <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: "12px", marginBottom: "16px", borderBottom: (filterOptions || sortOptions || extraControls) ? "1px solid #F1F5F9" : "none", paddingBottom: (filterOptions || sortOptions || extraControls) ? "14px" : "0" }}>
           <div style={{ flex: "1 1 auto", minWidth: "200px" }}>
