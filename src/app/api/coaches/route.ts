@@ -33,7 +33,7 @@ export async function GET() {
       orderBy: { createdAt: "asc" },
     });
 
-    const coaches = teachers.map((t) => {
+    const coaches = teachers.map((t: any) => {
       const p = t.teacherProfile;
       const formattedUni = p?.school
         ? (p?.department ? `${p.school} • ${p.department}` : p.school)
