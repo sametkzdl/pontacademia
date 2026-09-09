@@ -755,10 +755,10 @@ export default function TeacherLessonsPage() {
                           <span style={{ color: "#059669", fontWeight: "600" }}>✅ Tamamlama onayınız verildi. Öğrencinin onayı bekleniyor.</span>
                         )}
                         {!myCompleted && studentCompleted && (
-                          <span style={{ color: "#D97706", fontWeight: "700" }}>⚡ Öğrenci dersi işlendi olarak onayladı! Siz de onaylayarak dersi tamamlayabilirsiniz.</span>
+                          <span style={{ color: "#D97706", fontWeight: "700" }}>⚡ Öğrenci dersi işlendi olarak onayladı! Lütfen ders yapıldıysa onaylayınız veya yapılmadıysa itiraz/ret bildiriniz.</span>
                         )}
                         {!myCompleted && !studentCompleted && (
-                          <span style={{ color: "#475569" }}>Ders yapıldıktan sonra lütfen "Ders İşlendi" onayı veriniz.</span>
+                          <span style={{ color: "#475569" }}>Ders yapıldıktan sonra lütfen "Dersi İşlendi Olarak Onayla" butonuna basınız. Ders yapılmadıysa ret bildirimi yapabilirsiniz.</span>
                         )}
                       </div>
                     )}
@@ -771,7 +771,7 @@ export default function TeacherLessonsPage() {
 
                     {lesson.status === "REJECTED" && (
                       <span style={{ color: "#DC2626", fontWeight: "700", display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                        <XCircle size={14} /> Oturum Talebi Reddedildi (İşlem Sonlandırıldı)
+                        <XCircle size={14} /> Oturum Talebi Reddedildi / İptal Edildi
                       </span>
                     )}
                   </div>
@@ -826,27 +826,52 @@ export default function TeacherLessonsPage() {
                       </>
                     )}
 
-                    {/* Complete Button for Scheduled Lessons */}
+                    {/* Complete & Reject/Dispute Buttons for Scheduled Lessons */}
                     {lesson.status === "SCHEDULED" && !myCompleted && (
-                      <button
-                        onClick={() => handleComplete(lesson.id)}
-                        disabled={submitting}
-                        style={{
-                          backgroundColor: "#0F2645",
-                          color: "#FFFFFF",
-                          border: "none",
-                          borderRadius: "6px",
-                          padding: "7px 14px",
-                          fontSize: "12px",
-                          fontWeight: "700",
-                          cursor: "pointer",
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: "5px",
-                        }}
-                      >
-                        <CheckCircle2 size={14} color="#C8952A" /> Dersi İşlendi Olarak Onayla
-                      </button>
+                      <>
+                        <button
+                          onClick={() => handleComplete(lesson.id)}
+                          disabled={submitting}
+                          style={{
+                            backgroundColor: "#0F2645",
+                            color: "#FFFFFF",
+                            border: "none",
+                            borderRadius: "6px",
+                            padding: "7px 14px",
+                            fontSize: "12px",
+                            fontWeight: "700",
+                            cursor: "pointer",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "5px",
+                          }}
+                        >
+                          <CheckCircle2 size={14} color="#C8952A" /> Dersi İşlendi Olarak Onayla
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            setSelectedLesson(lesson);
+                            setShowRejectModal(true);
+                          }}
+                          disabled={submitting}
+                          style={{
+                            backgroundColor: "#FFFFFF",
+                            color: "#DC2626",
+                            border: "1px solid #FECACA",
+                            borderRadius: "6px",
+                            padding: "6px 12px",
+                            fontSize: "12px",
+                            fontWeight: "700",
+                            cursor: "pointer",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "4px",
+                          }}
+                        >
+                          <XCircle size={14} /> {studentCompleted ? "Ders İşlenmedi / İtiraz Et" : "Ders Yapılmadı / Reddet"}
+                        </button>
+                      </>
                     )}
 
                     {/* Feedback Button for Completed Lessons */}
@@ -1128,27 +1153,43 @@ export default function TeacherLessonsPage() {
         </form>
       </Modal>
 
-      {/* REJECT MODAL */}
+      {/* REJECT / DISPUTE MODAL */}
       <Modal
         isOpen={showRejectModal && !!selectedLesson}
         onClose={() => setShowRejectModal(false)}
-        title="Dersi Reddet"
+        title={
+          selectedLesson?.status === "SCHEDULED"
+            ? (selectedLesson?.studentCompleted ? "Ders İşlenmedi / İtiraz Bildirimi" : "Ders Yapılmadı / Ret Bildirimi")
+            : "Ders Talebini Reddet"
+        }
         icon={<XCircle size={18} color="#DC2626" />}
         maxWidth="480px"
       >
         <p style={{ fontSize: "13px", color: "#64748B", marginTop: 0 }}>
-          Öğrencinin talep ettiği dersi reddetmek üzeresiniz. Lütfen öğrencinin ve yöneticinin görebileceği bir <strong>ret gerekçesi</strong> belirtiniz.
+          {selectedLesson?.status === "SCHEDULED" ? (
+            <>
+              Dersin işlenmediğini veya yapılmadığını bildirmek üzeresiniz. Lütfen öğrencinin ve yöneticinin görebileceği bir <strong>gerekçe</strong> belirtiniz (İşlem yönetici paneline yansıtılacaktır).
+            </>
+          ) : (
+            <>
+              Öğrencinin talep ettiği dersi reddetmek üzeresiniz. Lütfen öğrencinin ve yöneticinin görebileceği bir <strong>ret gerekçesi</strong> belirtiniz.
+            </>
+          )}
         </p>
 
         <form onSubmit={handleReject}>
           <div style={{ marginBottom: "16px" }}>
             <label style={{ display: "block", fontSize: "12px", fontWeight: "700", color: "#0F2645", marginBottom: "4px" }}>
-              Reddetme Gerekçesi *
+              {selectedLesson?.status === "SCHEDULED" ? "Dersin Yapılmama / İtiraz Gerekçesi *" : "Reddetme Gerekçesi *"}
             </label>
             <textarea
               rows={3}
               required
-              placeholder="Örn: O saatte üniversite laboratuvar dersim var, 2 saat sonrasına planlayabiliriz."
+              placeholder={
+                selectedLesson?.status === "SCHEDULED"
+                  ? "Örn: Öğrenci derse bağlanamadı, ders başka bir tarihe ertelenecek..."
+                  : "Örn: O saatte üniversite laboratuvar dersim var, 2 saat sonrasına planlayabiliriz."
+              }
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
               style={{ width: "100%", padding: "9px 12px", borderRadius: "8px", border: "1px solid #CBD5E1", fontSize: "13px", color: "#0F2645", outline: "none", resize: "vertical" }}
@@ -1168,7 +1209,7 @@ export default function TeacherLessonsPage() {
               disabled={submitting}
               style={{ padding: "8px 18px", borderRadius: "6px", border: "none", backgroundColor: "#DC2626", color: "#FFFFFF", fontSize: "13px", fontWeight: "700", cursor: "pointer" }}
             >
-              {submitting ? "İşleniyor..." : "Reddi Onayla"}
+              {submitting ? "İşleniyor..." : selectedLesson?.status === "SCHEDULED" ? "Ders İşlenmedi Olarak Kaydet" : "Reddi Onayla"}
             </button>
           </div>
         </form>

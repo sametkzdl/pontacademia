@@ -285,6 +285,9 @@ export class LessonService {
       throw new Error("Bu dersi reddetme yetkiniz bulunmamaktadır.");
     }
 
+    const isScheduled = lesson.status === "SCHEDULED";
+    const hadPartialCompletion = lesson.teacherCompleted || lesson.studentCompleted;
+
     const updated = await db.lesson.update({
       where: { id: lessonId },
       data: {
@@ -297,7 +300,12 @@ export class LessonService {
 
     // Log Ekle
     const roleTitle = isAdmin ? "Yönetici" : isTeacher ? "Öğretmen" : "Öğrenci";
-    const logMsg = `${roleTitle} (${user.name}) dersi reddetti.`;
+    let logMsg = `${roleTitle} (${user.name}) ders talebini reddetti.`;
+    if (isScheduled && hadPartialCompletion) {
+      logMsg = `${roleTitle} (${user.name}) dersin işlenmediğini / yapılmadığını belirterek tamamlanma onayına itiraz etti / reddetti.`;
+    } else if (isScheduled) {
+      logMsg = `${roleTitle} (${user.name}) planlanmış dersin işlenmediğini / iptal edildiğini bildirdi.`;
+    }
 
     await db.lessonLog.create({
       data: {

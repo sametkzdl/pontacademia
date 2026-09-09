@@ -1224,25 +1224,50 @@ export default function AdminLessonsPage() {
                     )}
 
                     {lesson.status === "SCHEDULED" && (
-                      <button
-                        onClick={() => handleComplete(lesson.id)}
-                        disabled={submitting}
-                        style={{
-                          backgroundColor: "#0F2645",
-                          color: "#FFFFFF",
-                          border: "none",
-                          borderRadius: "6px",
-                          padding: "6px 12px",
-                          fontSize: "12px",
-                          fontWeight: "700",
-                          cursor: "pointer",
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: "4px",
-                        }}
-                      >
-                        <CheckCircle2 size={13} color="#C8952A" /> Tamamlandı Olarak İşaretle
-                      </button>
+                      <>
+                        <button
+                          onClick={() => handleComplete(lesson.id)}
+                          disabled={submitting}
+                          style={{
+                            backgroundColor: "#0F2645",
+                            color: "#FFFFFF",
+                            border: "none",
+                            borderRadius: "6px",
+                            padding: "6px 12px",
+                            fontSize: "12px",
+                            fontWeight: "700",
+                            cursor: "pointer",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "4px",
+                          }}
+                        >
+                          <CheckCircle2 size={13} color="#C8952A" /> Tamamlandı Olarak İşaretle
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            setSelectedLesson(lesson);
+                            setShowRejectModal(true);
+                          }}
+                          disabled={submitting}
+                          style={{
+                            backgroundColor: "#FFFFFF",
+                            color: "#DC2626",
+                            border: "1px solid #FECACA",
+                            borderRadius: "6px",
+                            padding: "6px 10px",
+                            fontSize: "12px",
+                            fontWeight: "700",
+                            cursor: "pointer",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "4px",
+                          }}
+                        >
+                          <XCircle size={13} /> Reddet / İptal Et
+                        </button>
+                      </>
                     )}
 
                     {/* History Button */}
