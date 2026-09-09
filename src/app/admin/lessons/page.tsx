@@ -28,6 +28,7 @@ import {
   Check,
   X
 } from "lucide-react";
+import { Modal } from "@/components";
 
 export default function AdminLessonsPage() {
   const [lessons, setLessons] = useState<any[]>([]);
@@ -1304,274 +1305,254 @@ export default function AdminLessonsPage() {
       )}
 
       {/* CREATE LESSON MODAL (ADMIN) */}
-      {showCreateModal && (
-        <div className="fixed-modal-overlay">
-          <div className="modal-container-card">
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", borderBottom: "1px solid #E2E8F0", paddingBottom: "12px" }}>
-              <h3 style={{ margin: 0, fontSize: "17px", fontWeight: "800", color: "#0F2645", display: "flex", alignItems: "center", gap: "8px" }}>
-                <Calendar size={20} color="#C8952A" /> Yönetici Ders Planlama
-              </h3>
-              <button onClick={() => setShowCreateModal(false)} style={{ background: "none", border: "none", fontSize: "18px", cursor: "pointer", color: "#94A3B8" }}>
-                ✕
+      <Modal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        title="Yönetici Ders Planlama"
+        icon={<Calendar size={20} color="#C8952A" />}
+        maxWidth="560px"
+      >
+        <p style={{ fontSize: "12px", color: "#64748B", marginTop: 0 }}>
+          Yönetici olarak oluşturulan dersler <strong>doğrudan onaylı ve planlanmış (SCHEDULED)</strong> olarak açılır.
+        </p>
+
+        <form onSubmit={handleCreateLesson}>
+          {/* Match Select */}
+          <div style={{ marginBottom: "14px" }}>
+            <label style={{ display: "block", fontSize: "12px", fontWeight: "700", color: "#0F2645", marginBottom: "4px" }}>
+              Eşleştirme Seçiniz *
+            </label>
+            <select
+              value={createForm.matchId}
+              onChange={(e) => setCreateForm({ ...createForm, matchId: e.target.value })}
+              required
+              style={{ width: "100%", padding: "9px 12px", borderRadius: "8px", border: "1px solid #CBD5E1", fontSize: "13px", color: "#0F2645", outline: "none" }}
+            >
+              <option value="">-- Öğrenci & Eğitmen Eşleştirmesi Seçiniz --</option>
+              {matches.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.student?.name} ↔ {m.teacher?.name} ({m.type === "KOCLUK" ? "Koçluk" : `Özel Ders - ${m.subject || "Genel"}`})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Date & Time */}
+          <div style={{ marginBottom: "14px" }}>
+            <label style={{ display: "block", fontSize: "12px", fontWeight: "700", color: "#0F2645", marginBottom: "4px" }}>
+              Tarih ve Saat *
+            </label>
+            <input
+              type="datetime-local"
+              value={createForm.scheduledDate}
+              onChange={(e) => setCreateForm({ ...createForm, scheduledDate: e.target.value })}
+              required
+              style={{ width: "100%", padding: "9px 12px", borderRadius: "8px", border: "1px solid #CBD5E1", fontSize: "13px", color: "#0F2645", outline: "none" }}
+            />
+          </div>
+
+          {/* Duration */}
+          <div style={{ marginBottom: "14px" }}>
+            <label style={{ display: "block", fontSize: "12px", fontWeight: "700", color: "#0F2645", marginBottom: "4px" }}>
+              Ders Süresi
+            </label>
+            <select
+              value={createForm.durationMinutes}
+              onChange={(e) => setCreateForm({ ...createForm, durationMinutes: Number(e.target.value) })}
+              style={{ width: "100%", padding: "9px 12px", borderRadius: "8px", border: "1px solid #CBD5E1", fontSize: "13px", color: "#0F2645", outline: "none" }}
+            >
+              <option value={40}>40 Dakika</option>
+              <option value={60}>60 Dakika (1 Saat)</option>
+              <option value={90}>90 Dakika (1.5 Saat)</option>
+              <option value={120}>120 Dakika (2 Saat)</option>
+            </select>
+          </div>
+
+          {/* Location Type */}
+          <div style={{ marginBottom: "14px" }}>
+            <label style={{ display: "block", fontSize: "12px", fontWeight: "700", color: "#0F2645", marginBottom: "6px" }}>
+              Ders Konumu *
+            </label>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <button
+                type="button"
+                onClick={() => setCreateForm({ ...createForm, locationType: "ONLINE" })}
+                style={{
+                  flex: 1,
+                  padding: "10px",
+                  borderRadius: "8px",
+                  border: createForm.locationType === "ONLINE" ? "2px solid #2563EB" : "1px solid #CBD5E1",
+                  backgroundColor: createForm.locationType === "ONLINE" ? "#EFF6FF" : "#FFFFFF",
+                  color: createForm.locationType === "ONLINE" ? "#1E40AF" : "#475569",
+                  fontWeight: "700",
+                  fontSize: "13px",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "6px",
+                }}
+              >
+                <Video size={16} /> Online Görüşme
+              </button>
+              <button
+                type="button"
+                onClick={() => setCreateForm({ ...createForm, locationType: "YUZ_YUZE" })}
+                style={{
+                  flex: 1,
+                  padding: "10px",
+                  borderRadius: "8px",
+                  border: createForm.locationType === "YUZ_YUZE" ? "2px solid #DC2626" : "1px solid #CBD5E1",
+                  backgroundColor: createForm.locationType === "YUZ_YUZE" ? "#FEF2F2" : "#FFFFFF",
+                  color: createForm.locationType === "YUZ_YUZE" ? "#991B1B" : "#475569",
+                  fontWeight: "700",
+                  fontSize: "13px",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "6px",
+                }}
+              >
+                <MapPin size={16} /> Yüz Yüze
               </button>
             </div>
-
-            <p style={{ fontSize: "12px", color: "#64748B", marginTop: 0 }}>
-              Yönetici olarak oluşturulan dersler <strong>doğrudan onaylı ve planlanmış (SCHEDULED)</strong> olarak açılır.
-            </p>
-
-            <form onSubmit={handleCreateLesson}>
-              {/* Match Select */}
-              <div style={{ marginBottom: "14px" }}>
-                <label style={{ display: "block", fontSize: "12px", fontWeight: "700", color: "#0F2645", marginBottom: "4px" }}>
-                  Eşleştirme Seçiniz *
-                </label>
-                <select
-                  value={createForm.matchId}
-                  onChange={(e) => setCreateForm({ ...createForm, matchId: e.target.value })}
-                  required
-                  style={{ width: "100%", padding: "9px 12px", borderRadius: "8px", border: "1px solid #CBD5E1", fontSize: "13px", color: "#0F2645", outline: "none" }}
-                >
-                  <option value="">-- Öğrenci & Eğitmen Eşleştirmesi Seçiniz --</option>
-                  {matches.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.student?.name} ↔ {m.teacher?.name} ({m.type === "KOCLUK" ? "Koçluk" : `Özel Ders - ${m.subject || "Genel"}`})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Date & Time */}
-              <div style={{ marginBottom: "14px" }}>
-                <label style={{ display: "block", fontSize: "12px", fontWeight: "700", color: "#0F2645", marginBottom: "4px" }}>
-                  Tarih ve Saat *
-                </label>
-                <input
-                  type="datetime-local"
-                  value={createForm.scheduledDate}
-                  onChange={(e) => setCreateForm({ ...createForm, scheduledDate: e.target.value })}
-                  required
-                  style={{ width: "100%", padding: "9px 12px", borderRadius: "8px", border: "1px solid #CBD5E1", fontSize: "13px", color: "#0F2645", outline: "none" }}
-                />
-              </div>
-
-              {/* Duration */}
-              <div style={{ marginBottom: "14px" }}>
-                <label style={{ display: "block", fontSize: "12px", fontWeight: "700", color: "#0F2645", marginBottom: "4px" }}>
-                  Ders Süresi
-                </label>
-                <select
-                  value={createForm.durationMinutes}
-                  onChange={(e) => setCreateForm({ ...createForm, durationMinutes: Number(e.target.value) })}
-                  style={{ width: "100%", padding: "9px 12px", borderRadius: "8px", border: "1px solid #CBD5E1", fontSize: "13px", color: "#0F2645", outline: "none" }}
-                >
-                  <option value={40}>40 Dakika</option>
-                  <option value={60}>60 Dakika (1 Saat)</option>
-                  <option value={90}>90 Dakika (1.5 Saat)</option>
-                  <option value={120}>120 Dakika (2 Saat)</option>
-                </select>
-              </div>
-
-              {/* Location Type */}
-              <div style={{ marginBottom: "14px" }}>
-                <label style={{ display: "block", fontSize: "12px", fontWeight: "700", color: "#0F2645", marginBottom: "6px" }}>
-                  Ders Konumu *
-                </label>
-                <div style={{ display: "flex", gap: "10px" }}>
-                  <button
-                    type="button"
-                    onClick={() => setCreateForm({ ...createForm, locationType: "ONLINE" })}
-                    style={{
-                      flex: 1,
-                      padding: "10px",
-                      borderRadius: "8px",
-                      border: createForm.locationType === "ONLINE" ? "2px solid #2563EB" : "1px solid #CBD5E1",
-                      backgroundColor: createForm.locationType === "ONLINE" ? "#EFF6FF" : "#FFFFFF",
-                      color: createForm.locationType === "ONLINE" ? "#1E40AF" : "#475569",
-                      fontWeight: "700",
-                      fontSize: "13px",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "6px",
-                    }}
-                  >
-                    <Video size={16} /> Online Görüşme
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setCreateForm({ ...createForm, locationType: "YUZ_YUZE" })}
-                    style={{
-                      flex: 1,
-                      padding: "10px",
-                      borderRadius: "8px",
-                      border: createForm.locationType === "YUZ_YUZE" ? "2px solid #DC2626" : "1px solid #CBD5E1",
-                      backgroundColor: createForm.locationType === "YUZ_YUZE" ? "#FEF2F2" : "#FFFFFF",
-                      color: createForm.locationType === "YUZ_YUZE" ? "#991B1B" : "#475569",
-                      fontWeight: "700",
-                      fontSize: "13px",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "6px",
-                    }}
-                  >
-                    <MapPin size={16} /> Yüz Yüze
-                  </button>
-                </div>
-              </div>
-
-              {/* Location Details */}
-              <div style={{ marginBottom: "14px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                  <label style={{ fontSize: "12px", fontWeight: "700", color: "#0F2645" }}>
-                    {createForm.locationType === "ONLINE" ? "Toplantı Linki veya Platformu (Opsiyonel)" : "Buluşma Yeri / Adresi (Opsiyonel)"}
-                  </label>
-                  {createForm.locationType === "YUZ_YUZE" && (() => {
-                    const selMatch = matches.find((m) => m.id === createForm.matchId);
-                    const prof = selMatch?.student?.studentProfile;
-                    const addr = [prof?.currentDistrict, prof?.currentAddress].filter(Boolean).join(" - ");
-                    if (!addr) return null;
-                    return (
-                      <button
-                        type="button"
-                        onClick={() => setCreateForm({ ...createForm, locationDetails: addr })}
-                        style={{
-                          background: "none",
-                          border: "none",
-                          color: "#2563EB",
-                          fontSize: "11px",
-                          fontWeight: "700",
-                          cursor: "pointer",
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: "3px",
-                        }}
-                      >
-                        <MapPin size={12} /> Öğrencinin Adresini Getir ({prof?.currentDistrict || "Ev"})
-                      </button>
-                    );
-                  })()}
-                </div>
-                <input
-                  type="text"
-                  placeholder={createForm.locationType === "ONLINE" ? "Örn: Zoom / Meet linki" : "Örn: Pont Akademi Merkez, Öğrenci Evi..."}
-                  value={createForm.locationDetails}
-                  onChange={(e) => setCreateForm({ ...createForm, locationDetails: e.target.value })}
-                  style={{ width: "100%", padding: "9px 12px", borderRadius: "8px", border: "1px solid #CBD5E1", fontSize: "13px", color: "#0F2645", outline: "none" }}
-                />
-              </div>
-
-              {/* Notes */}
-              <div style={{ marginBottom: "18px" }}>
-                <label style={{ display: "block", fontSize: "12px", fontWeight: "700", color: "#0F2645", marginBottom: "4px" }}>
-                  Ders Notu / Yönetici Açıklaması
-                </label>
-                <textarea
-                  rows={2}
-                  placeholder="Ders hakkında yöneticinin eklemek istediği not..."
-                  value={createForm.notes}
-                  onChange={(e) => setCreateForm({ ...createForm, notes: e.target.value })}
-                  style={{ width: "100%", padding: "9px 12px", borderRadius: "8px", border: "1px solid #CBD5E1", fontSize: "13px", color: "#0F2645", outline: "none", resize: "vertical" }}
-                />
-              </div>
-
-              {/* Buttons */}
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
-                <button
-                  type="button"
-                  onClick={() => setShowCreateModal(false)}
-                  style={{ padding: "8px 14px", borderRadius: "6px", border: "1px solid #CBD5E1", backgroundColor: "#FFFFFF", color: "#475569", fontSize: "13px", fontWeight: "700", cursor: "pointer" }}
-                >
-                  İptal
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  style={{ padding: "8px 18px", borderRadius: "6px", border: "none", backgroundColor: "#0F2645", color: "#FFFFFF", fontSize: "13px", fontWeight: "700", cursor: "pointer" }}
-                >
-                  {submitting ? "Planlanıyor..." : "Dersi Planla ve Onayla"}
-                </button>
-              </div>
-            </form>
           </div>
-        </div>
-      )}
+
+          {/* Location Details */}
+          <div style={{ marginBottom: "14px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+              <label style={{ fontSize: "12px", fontWeight: "700", color: "#0F2645" }}>
+                {createForm.locationType === "ONLINE" ? "Toplantı Linki veya Platformu (Opsiyonel)" : "Buluşma Yeri / Adresi (Opsiyonel)"}
+              </label>
+              {createForm.locationType === "YUZ_YUZE" && (() => {
+                const selMatch = matches.find((m) => m.id === createForm.matchId);
+                const prof = selMatch?.student?.studentProfile;
+                const addr = [prof?.currentDistrict, prof?.currentAddress].filter(Boolean).join(" - ");
+                if (!addr) return null;
+                return (
+                  <button
+                    type="button"
+                    onClick={() => setCreateForm({ ...createForm, locationDetails: addr })}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "#2563EB",
+                      fontSize: "11px",
+                      fontWeight: "700",
+                      cursor: "pointer",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "3px",
+                    }}
+                  >
+                    <MapPin size={12} /> Öğrencinin Adresini Getir ({prof?.currentDistrict || "Ev"})
+                  </button>
+                );
+              })()}
+            </div>
+            <input
+              type="text"
+              placeholder={createForm.locationType === "ONLINE" ? "Örn: Zoom / Meet linki" : "Örn: Pont Akademi Merkez, Öğrenci Evi..."}
+              value={createForm.locationDetails}
+              onChange={(e) => setCreateForm({ ...createForm, locationDetails: e.target.value })}
+              style={{ width: "100%", padding: "9px 12px", borderRadius: "8px", border: "1px solid #CBD5E1", fontSize: "13px", color: "#0F2645", outline: "none" }}
+            />
+          </div>
+
+          {/* Notes */}
+          <div style={{ marginBottom: "18px" }}>
+            <label style={{ display: "block", fontSize: "12px", fontWeight: "700", color: "#0F2645", marginBottom: "4px" }}>
+              Ders Notu / Yönetici Açıklaması
+            </label>
+            <textarea
+              rows={2}
+              placeholder="Ders hakkında yöneticinin eklemek istediği not..."
+              value={createForm.notes}
+              onChange={(e) => setCreateForm({ ...createForm, notes: e.target.value })}
+              style={{ width: "100%", padding: "9px 12px", borderRadius: "8px", border: "1px solid #CBD5E1", fontSize: "13px", color: "#0F2645", outline: "none", resize: "vertical" }}
+            />
+          </div>
+
+          {/* Buttons */}
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+            <button
+              type="button"
+              onClick={() => setShowCreateModal(false)}
+              style={{ padding: "8px 14px", borderRadius: "6px", border: "1px solid #CBD5E1", backgroundColor: "#FFFFFF", color: "#475569", fontSize: "13px", fontWeight: "700", cursor: "pointer" }}
+            >
+              İptal
+            </button>
+            <button
+              type="submit"
+              disabled={submitting}
+              style={{ padding: "8px 18px", borderRadius: "6px", border: "none", backgroundColor: "#0F2645", color: "#FFFFFF", fontSize: "13px", fontWeight: "700", cursor: "pointer" }}
+            >
+              {submitting ? "Planlanıyor..." : "Dersi Planla ve Onayla"}
+            </button>
+          </div>
+        </form>
+      </Modal>
 
       {/* REJECT MODAL (ADMIN) */}
-      {showRejectModal && selectedLesson && (
-        <div className="fixed-modal-overlay">
-          <div className="modal-container-card">
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px", borderBottom: "1px solid #E2E8F0", paddingBottom: "10px" }}>
-              <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "800", color: "#DC2626", display: "flex", alignItems: "center", gap: "8px" }}>
-                <XCircle size={18} /> Dersi Reddet / İptal Et (Admin)
-              </h3>
-              <button onClick={() => setShowRejectModal(false)} style={{ background: "none", border: "none", fontSize: "18px", cursor: "pointer", color: "#94A3B8" }}>
-                ✕
-              </button>
-            </div>
+      <Modal
+        isOpen={showRejectModal && !!selectedLesson}
+        onClose={() => setShowRejectModal(false)}
+        title="Dersi Reddet / İptal Et (Admin)"
+        icon={<XCircle size={18} color="#DC2626" />}
+        maxWidth="480px"
+      >
+        <p style={{ fontSize: "13px", color: "#64748B", marginTop: 0 }}>
+          Ders talebini yönetici yetkisiyle reddetmek üzeresiniz. Lütfen tarafların göreceği bir <strong>ret gerekçesi</strong> belirtiniz.
+        </p>
 
-            <p style={{ fontSize: "13px", color: "#64748B", marginTop: 0 }}>
-              Ders talebini yönetici yetkisiyle reddetmek üzeresiniz. Lütfen tarafların göreceği bir <strong>ret gerekçesi</strong> belirtiniz.
-            </p>
-
-            <form onSubmit={handleReject}>
-              <div style={{ marginBottom: "16px" }}>
-                <label style={{ display: "block", fontSize: "12px", fontWeight: "700", color: "#0F2645", marginBottom: "4px" }}>
-                  Reddetme Gerekçesi *
-                </label>
-                <textarea
-                  rows={3}
-                  required
-                  placeholder="Yönetici ret sebebi..."
-                  value={rejectReason}
-                  onChange={(e) => setRejectReason(e.target.value)}
-                  style={{ width: "100%", padding: "9px 12px", borderRadius: "8px", border: "1px solid #CBD5E1", fontSize: "13px", color: "#0F2645", outline: "none", resize: "vertical" }}
-                />
-              </div>
-
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
-                <button
-                  type="button"
-                  onClick={() => setShowRejectModal(false)}
-                  style={{ padding: "8px 14px", borderRadius: "6px", border: "1px solid #CBD5E1", backgroundColor: "#FFFFFF", color: "#475569", fontSize: "13px", fontWeight: "700", cursor: "pointer" }}
-                >
-                  Vazgeç
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  style={{ padding: "8px 18px", borderRadius: "6px", border: "none", backgroundColor: "#DC2626", color: "#FFFFFF", fontSize: "13px", fontWeight: "700", cursor: "pointer" }}
-                >
-                  {submitting ? "İşleniyor..." : "Reddi Onayla"}
-                </button>
-              </div>
-            </form>
+        <form onSubmit={handleReject}>
+          <div style={{ marginBottom: "16px" }}>
+            <label style={{ display: "block", fontSize: "12px", fontWeight: "700", color: "#0F2645", marginBottom: "4px" }}>
+              Reddetme Gerekçesi *
+            </label>
+            <textarea
+              rows={3}
+              required
+              placeholder="Yönetici ret sebebi..."
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              style={{ width: "100%", padding: "9px 12px", borderRadius: "8px", border: "1px solid #CBD5E1", fontSize: "13px", color: "#0F2645", outline: "none", resize: "vertical" }}
+            />
           </div>
-        </div>
-      )}
+
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+            <button
+              type="button"
+              onClick={() => setShowRejectModal(false)}
+              style={{ padding: "8px 14px", borderRadius: "6px", border: "1px solid #CBD5E1", backgroundColor: "#FFFFFF", color: "#475569", fontSize: "13px", fontWeight: "700", cursor: "pointer" }}
+            >
+              Vazgeç
+            </button>
+            <button
+              type="submit"
+              disabled={submitting}
+              style={{ padding: "8px 18px", borderRadius: "6px", border: "none", backgroundColor: "#DC2626", color: "#FFFFFF", fontSize: "13px", fontWeight: "700", cursor: "pointer" }}
+            >
+              {submitting ? "İşleniyor..." : "Reddi Onayla"}
+            </button>
+          </div>
+        </form>
+      </Modal>
 
       {/* PAYMENT MODAL (ADMIN) */}
-      {showPaymentModal && paymentLesson && (
-        <div className="fixed-modal-overlay">
-          <div className="modal-container-card">
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px", borderBottom: "1px solid #E2E8F0", paddingBottom: "10px" }}>
-              <h3 style={{ margin: 0, fontSize: "17px", fontWeight: "800", color: "#0F2645", display: "flex", alignItems: "center", gap: "8px" }}>
-                <CreditCard size={20} color="#C8952A" /> Ders Ödeme Onayı & Tahsilat Kaydı
-              </h3>
-              <button
-                onClick={() => {
-                  setShowPaymentModal(false);
-                  setPaymentLesson(null);
-                }}
-                style={{ background: "none", border: "none", fontSize: "18px", cursor: "pointer", color: "#94A3B8" }}
-              >
-                ✕
-              </button>
-            </div>
-
+      <Modal
+        isOpen={showPaymentModal && !!paymentLesson}
+        onClose={() => {
+          setShowPaymentModal(false);
+          setPaymentLesson(null);
+        }}
+        title="Ders Ödeme Onayı & Tahsilat Kaydı"
+        icon={<CreditCard size={20} color="#C8952A" />}
+        maxWidth="560px"
+      >
+        {paymentLesson && (
+          <>
             {/* Lesson summary banner */}
             <div style={{ backgroundColor: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: "10px", padding: "12px 14px", marginBottom: "16px", fontSize: "12px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
@@ -1806,29 +1787,23 @@ export default function AdminLessonsPage() {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </Modal>
 
       {/* TEACHER PAYOUT MODAL (ADMIN -> TEACHER) */}
-      {showTeacherPaymentModal && teacherPaymentLesson && (
-        <div className="fixed-modal-overlay">
-          <div className="modal-container-card">
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px", borderBottom: "1px solid #E2E8F0", paddingBottom: "10px" }}>
-              <h3 style={{ margin: 0, fontSize: "17px", fontWeight: "800", color: "#6D28D9", display: "flex", alignItems: "center", gap: "8px" }}>
-                <Sparkles size={20} color="#7C3AED" /> Eğitmen Ücret Transferi
-              </h3>
-              <button
-                onClick={() => {
-                  setShowTeacherPaymentModal(false);
-                  setTeacherPaymentLesson(null);
-                }}
-                style={{ background: "none", border: "none", fontSize: "18px", cursor: "pointer", color: "#94A3B8" }}
-              >
-                ✕
-              </button>
-            </div>
-
+      <Modal
+        isOpen={showTeacherPaymentModal && !!teacherPaymentLesson}
+        onClose={() => {
+          setShowTeacherPaymentModal(false);
+          setTeacherPaymentLesson(null);
+        }}
+        title="Eğitmen Ücret Transferi"
+        icon={<Sparkles size={20} color="#7C3AED" />}
+        maxWidth="560px"
+      >
+        {teacherPaymentLesson && (
+          <>
             {/* Lesson summary banner */}
             <div style={{ backgroundColor: "#F5F3FF", border: "1px solid #DDD6FE", borderRadius: "10px", padding: "12px 14px", marginBottom: "16px", fontSize: "12px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
@@ -2052,36 +2027,9 @@ export default function AdminLessonsPage() {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
-
-      {/* Global CSS for modals */}
-      <style jsx>{`
-        .fixed-modal-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background-color: rgba(15, 38, 69, 0.6);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 99999;
-          padding: 16px;
-        }
-        .modal-container-card {
-          background-color: #ffffff;
-          border-radius: 14px;
-          padding: 24px;
-          width: 100%;
-          max-width: 550px;
-          max-height: 90vh;
-          overflow-y: auto;
-          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-        }
-      `}</style>
+          </>
+        )}
+      </Modal>
     </div>
   );
 }

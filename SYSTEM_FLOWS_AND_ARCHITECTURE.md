@@ -73,3 +73,9 @@ graph TD
 - Profil ve başvuru fotoğrafları `/api/storage/upload` ve `/api/storage/file` üzerinden Cloudflare R2 / Local fallback mekanizması ile işlenir.
 - `next.config.ts` içinde `serverActions.bodySizeLimit: "10mb"` tanımlıdır.
 - `Avatar` atom bileşeni hatalı/eksik URL'lerde Pont Academy kurumsal baş harf avatarına yumuşak fallback yapar.
+
+### E. Evrensel Modal & Z-Index Standardı (React Portal)
+- Sayfalarda `.page-transition` CSS animasyonları (`transform: translateY`) olduğundan, yerel `position: fixed; z-index: 99999` kapsayıcıları CSS Stacking Context tuzağına düşer.
+- Bu nedenle projedeki **TÜM** modal işlemleri istisnasız `@/components` içerisindeki `<Modal>` bileşeniyle yapılır.
+- `<Modal>` bileşeni `createPortal(..., document.body)` kullanarak `<body>` altına render edilir, `z-index: 999999` seviyesinde çalışır, scroll lock ve mobil ekran taşma korumasını (`maxHeight: calc(100vh - 48px)`) otomatik sağlar.
+

@@ -163,3 +163,29 @@ Tüm medya ve profil fotoğrafları Cloudflare R2 üzerinde yönetilir:
 - **Güvenli Proxy**: `/api/storage/file?key=...` proxy uç noktası üzerinden `Cache-Control: public, max-age=31536000` önbellek başlıklarıyla sunulur.
 - **Fotoğraf Gizlilik Tercihi**: Eğitmen `showPhotoOnWeb: false` seçtiğinde genel `/api/coaches` rotasında fotoğraf gizlenir, admin ve öğretmen panellerinde güvenle gösterilir.
 
+---
+
+## 🪟 6. Evrensel Modal & Z-Index Mimarisi (React Portal & Stacking Context Standartları)
+
+### ⚠️ Kritik Mimari Kural: Inline Modal ve Özel Overlay Kesinlikle Yasaktır!
+Projeye eklenen veya düzenlenen hiçbir sayfada yerel `<div className="fixed-modal-overlay">` veya inline modal yazılmaz. Her zaman `@/components` içerisindeki evrensel `<Modal>` bileşeni kullanılmalıdır.
+
+### 🔍 Kök Neden (Stacking Context & Transform Tuzağı):
+Panel layout'larımızda (`TeacherLayout`, `StudentLayout`, `AdminLayout`) sayfa geçişleri için kullanılan `.page-transition` CSS sınıfı `transform: translateY(...)` ve `animation` barındırır. CSS standartları gereği bir kapsayıcıda `transform` veya `animation` bulunması yeni bir **Stacking Context (İstifleme Bağlamı)** ve içeren blok oluşturur. Bu durum, içindeki `position: fixed; z-index: 99999` elemanlarının bile sayfa hiyerarşisine hapsolmasına, header altında kalmasına veya ekran dışına taşmasına yol açar.
+
+### 🛡️ Evrensel Çözüm (`src/components/molecules/Modal.tsx`):
+- **React Portal**: Modal bileşeni `createPortal(modalElement, document.body)` kullanarak DOM ağacında doğrudan `<body>` etiketinin altına taşınır ve layout stacking context'inden tamamen kurtulur.
+- **Scroll Lock & Escape**: Açıldığında `document.body.style.overflow = "hidden"` uygular, kapandığında temizler. `Escape` tuşu dinleyicisi otomatik olarak çalışır.
+- **Z-Index Standardı**: Evrensel olarak `z-index: 999999` seviyesinde render edilir.
+- **Mobil Uyum**: `maxHeight: calc(100vh - 48px)`, esnek scroll gövdesi (`overflowY: auto`) ve dokunmatik kaydırma (`-webkit-overflow-scrolling: touch`) ile küçük ekranlarda asla taşma yapmaz.
+
+### 📊 Z-Index Hiyerarşi Tablosu:
+| Katman | Z-Index Değeri | Kullanım Alanı |
+|---|---|---|
+| Sayfa İçeriği & Kartlar | `0 - 10` | Normal sayfa akışı, tablolar, form alanları |
+| Sticky Filtre / Tab Bar | `20 - 50` | Tablo filtre çubukları, alt gezinme butonları |
+| Sabit Üst Bar (Header) | `100` | Admin, öğretmen ve öğrenci portal header'ı |
+| Toast & Bildirimler | `1000` | Anlık başarı / hata uyarıları |
+| **Evrensel Modallar (`<Modal />`)** | **`999999`** | **Tüm popup, onay, düzenleme ve detay modalları (Portal)** |
+
+
