@@ -17,8 +17,11 @@ import {
   Plus,
   X,
   Sparkles,
-  GraduationCap
+  GraduationCap,
+  Info,
+  Lock
 } from "lucide-react";
+import Link from "next/link";
 import { Button, Input, Select, Modal, Avatar } from "@/components";
 import { ISTANBUL_DISTRICTS, ALL_ISTANBUL_DISTRICTS as ALL_DISTRICTS } from "@/constants";
 
@@ -76,14 +79,12 @@ export default function StudentProfilePage() {
   const [editSuccessMsg, setEditSuccessMsg] = useState("");
   const [editErrorMsg, setEditErrorMsg] = useState("");
 
-  // Subject Management Modal State
+  // Subject Selection Modal State
   const [isSubjectModalOpen, setIsSubjectModalOpen] = useState(false);
-  const [tempSubjects, setTempSubjects] = useState<string[]>([]);
+  const [newSubjectsToAdd, setNewSubjectsToAdd] = useState<string[]>([]);
   const [subjectSaveLoading, setSubjectSaveLoading] = useState(false);
   const [subjectSuccessMsg, setSubjectSuccessMsg] = useState("");
   const [subjectErrorMsg, setSubjectErrorMsg] = useState("");
-  const [cardSubjectError, setCardSubjectError] = useState("");
-  const [cardSubjectSuccess, setCardSubjectSuccess] = useState("");
 
   const fetchUser = async () => {
     setIsLoading(true);
@@ -121,16 +122,17 @@ export default function StudentProfilePage() {
   };
 
   const openSubjectModal = () => {
-    setTempSubjects(getInitialSubjects());
+    setNewSubjectsToAdd([]);
     setSubjectSuccessMsg("");
     setSubjectErrorMsg("");
-    setCardSubjectError("");
-    setCardSubjectSuccess("");
     setIsSubjectModalOpen(true);
   };
 
-  const handleToggleSubject = (subjectLabel: string) => {
-    setTempSubjects(prev => 
+  const handleToggleNewSubject = (subjectLabel: string) => {
+    const existing = getInitialSubjects();
+    if (existing.includes(subjectLabel)) return; // Mükerrer seçim engelle
+
+    setNewSubjectsToAdd(prev => 
       prev.includes(subjectLabel)
         ? prev.filter(s => s !== subjectLabel)
         : [...prev, subjectLabel]
@@ -138,11 +140,20 @@ export default function StudentProfilePage() {
   };
 
   const handleSaveSubjects = async () => {
+    if (newSubjectsToAdd.length === 0) {
+      setSubjectErrorMsg("Lütfen eklemek istediğiniz en az bir yeni ders seçiniz.");
+      return;
+    }
+
     setSubjectSaveLoading(true);
     setSubjectSuccessMsg("");
     setSubjectErrorMsg("");
     try {
-      const formatted = tempSubjects.join(", ");
+      const existing = getInitialSubjects();
+      // Var olan dersler ile yeni seçilenleri birleştir (asla mevcut dersleri ezmez)
+      const combined = Array.from(new Set([...existing, ...newSubjectsToAdd]));
+      const formatted = combined.join(", ");
+
       const res = await fetch("/api/student/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -153,7 +164,7 @@ export default function StudentProfilePage() {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        setSubjectSuccessMsg("Almak istediğiniz dersler başarıyla güncellendi!");
+        setSubjectSuccessMsg("Yeni dersler profilinize başarıyla eklendi!");
         setUser((prev: any) => ({
           ...prev,
           studentProfile: {
@@ -165,51 +176,16 @@ export default function StudentProfilePage() {
         setTimeout(() => {
           setIsSubjectModalOpen(false);
           setSubjectSuccessMsg("");
+          setNewSubjectsToAdd([]);
         }, 1200);
       } else {
-        setSubjectErrorMsg(data.error || "Dersler güncellenemedi.");
+        setSubjectErrorMsg(data.error || "Dersler eklenemedi.");
       }
     } catch (err) {
       console.error("Save subjects error:", err);
       setSubjectErrorMsg("Bir hata oluştu.");
     } finally {
       setSubjectSaveLoading(false);
-    }
-  };
-
-  const handleRemoveSubjectDirectly = async (subjectToRemove: string) => {
-    setCardSubjectError("");
-    setCardSubjectSuccess("");
-    const current = getInitialSubjects();
-    const next = current.filter(s => s !== subjectToRemove);
-    const formatted = next.join(", ");
-    try {
-      const res = await fetch("/api/student/profile", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          selectedSubjects: formatted,
-          subject: formatted,
-        }),
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        setCardSubjectSuccess(`"${subjectToRemove}" ders talebi profilinizden kaldırıldı.`);
-        setUser((prev: any) => ({
-          ...prev,
-          studentProfile: {
-            ...(prev?.studentProfile || {}),
-            selectedSubjects: formatted,
-            subject: formatted,
-          },
-        }));
-        setTimeout(() => setCardSubjectSuccess(""), 3500);
-      } else {
-        setCardSubjectError(data.error || `"${subjectToRemove}" dersi kaldırılamadı.`);
-      }
-    } catch (err) {
-      console.error("Direct remove subject error:", err);
-      setCardSubjectError("Bağlantı hatası oluştu.");
     }
   };
 
@@ -405,10 +381,10 @@ export default function StudentProfilePage() {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "10px", borderBottom: "1px solid #F1F5F9", paddingBottom: "12px" }}>
           <div>
             <h3 style={{ fontSize: "16px", fontWeight: "800", color: "#0F2645", margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
-              <BookOpen size={20} color="#C8952A" /> Almak İstediğim Dersler & Destek Taleplerim
+              <BookOpen size={20} color="#C8952A" /> Almak İstediğim Dersler & Koçluk Branşlarım
             </h3>
             <p style={{ fontSize: "13px", color: "#64748B", margin: "4px 0 0 0" }}>
-              Özel ders veya koçluk desteği almak istediğiniz branşları ekleyip çıkarabilirsiniz
+              Özel ders veya koçluk desteği almak istediğiniz branşları profilinize ekleyebilirsiniz
             </p>
           </div>
 
@@ -418,26 +394,11 @@ export default function StudentProfilePage() {
             onClick={openSubjectModal}
             leftIcon={<Plus size={14} />}
           >
-            Ders Ekle / Düzenle
+            Yeni Ders Ekle
           </Button>
         </div>
 
-        {/* Feedback Banners for Direct Removal */}
-        {cardSubjectError && (
-          <div style={{ backgroundColor: "#FEF2F2", border: "1px solid #FCA5A5", color: "#B91C1C", padding: "12px 16px", borderRadius: "8px", fontSize: "13px", marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px", lineHeight: "1.4" }}>
-            <AlertCircle size={18} style={{ flexShrink: 0 }} />
-            <span>{cardSubjectError}</span>
-          </div>
-        )}
-
-        {cardSubjectSuccess && (
-          <div style={{ backgroundColor: "#DCFCE7", border: "1px solid #86EFAC", color: "#15803D", padding: "12px 16px", borderRadius: "8px", fontSize: "13px", marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
-            <CheckCircle2 size={18} style={{ flexShrink: 0 }} />
-            <span>{cardSubjectSuccess}</span>
-          </div>
-        )}
-
-        {/* Selected Subjects Badges */}
+        {/* Selected Subjects Badges (Protected from direct deletion) */}
         <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>
           {getInitialSubjects().length > 0 ? (
             getInitialSubjects().map((sub, idx) => (
@@ -446,7 +407,7 @@ export default function StudentProfilePage() {
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
-                  gap: "8px",
+                  gap: "6px",
                   padding: "6px 14px",
                   borderRadius: "20px",
                   backgroundColor: "#F0F5FB",
@@ -458,34 +419,58 @@ export default function StudentProfilePage() {
                 }}
               >
                 <span>📘 {sub}</span>
-                <button
-                  type="button"
-                  onClick={() => handleRemoveSubjectDirectly(sub)}
-                  title={`"${sub}" dersini kaldır`}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    padding: "2px",
-                    display: "flex",
-                    alignItems: "center",
-                    color: "#94A3B8",
-                    borderRadius: "50%",
-                    transition: "color 0.15s ease"
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "#DC2626")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "#94A3B8")}
-                >
-                  <X size={14} />
-                </button>
               </span>
             ))
           ) : (
             <div style={{ padding: "20px 0", color: "#94A3B8", fontSize: "14px", textAlign: "center", width: "100%" }}>
-              Henüz destek almak istediğiniz bir ders eklemediniz. <strong>&ldquo;Ders Ekle / Düzenle&rdquo;</strong> butonuna tıklayarak istediğiniz branşları ekleyebilirsiniz.
+              Henüz destek almak istediğiniz bir ders eklemediniz. <strong>&ldquo;Yeni Ders Ekle&rdquo;</strong> butonuna tıklayarak istediğiniz branşları ekleyebilirsiniz.
             </div>
           )}
         </div>
+
+        {/* Informative Guidance Banner for Dropping Subjects via Requests */}
+        {getInitialSubjects().length > 0 && (
+          <div style={{ 
+            marginTop: "16px", 
+            backgroundColor: "#F8FAFC", 
+            border: "1px solid #E2E8F0", 
+            borderRadius: "10px", 
+            padding: "12px 14px", 
+            display: "flex", 
+            alignItems: "center", 
+            justifyContent: "space-between", 
+            flexWrap: "wrap", 
+            gap: "10px", 
+            fontSize: "12.5px", 
+            color: "#475569" 
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <Info size={16} color="#C8952A" style={{ flexShrink: 0 }} />
+              <span>
+                Kayıtlı bir dersi bırakmak veya iptal etmek istiyorsanız yönetim onaylı <strong>Ders Bırakma Talebi</strong> oluşturmalısınız.
+              </span>
+            </div>
+            <Link 
+              href="/student/requests" 
+              style={{ 
+                color: "#0F2645", 
+                fontWeight: "700", 
+                textDecoration: "none", 
+                whiteSpace: "nowrap",
+                backgroundColor: "#FEF3C7",
+                padding: "4px 10px",
+                borderRadius: "6px",
+                border: "1px solid #FCD34D",
+                fontSize: "12px",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px"
+              }}
+            >
+              Ders Bırakma Talebi Oluştur →
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Edit Modal */}
@@ -630,23 +615,26 @@ export default function StudentProfilePage() {
         </div>
       </Modal>
 
-      {/* Subject Selection Modal */}
+      {/* Subject Selection Modal (Add New Subjects Only) */}
       <Modal
         isOpen={isSubjectModalOpen}
         onClose={() => setIsSubjectModalOpen(false)}
-        title="Almak İstediğiniz Dersleri Düzenleyin"
+        title="Profilinize Yeni Ders Ekleyin"
         titleIcon={<BookOpen size={20} color="#C8952A" />}
         footer={
           <>
             <Button variant="secondary" onClick={() => setIsSubjectModalOpen(false)}>
-              İptal
+              Vazgeç
             </Button>
             <Button
               variant="primary"
               onClick={handleSaveSubjects}
               loading={subjectSaveLoading}
+              disabled={newSubjectsToAdd.length === 0}
             >
-              💾 Ders Listesini Kaydet
+              {newSubjectsToAdd.length > 0 
+                ? `+ ${newSubjectsToAdd.length} Yeni Dersi Ekle` 
+                : "Yeni Ders Seçiniz"}
             </Button>
           </>
         }
@@ -664,17 +652,49 @@ export default function StudentProfilePage() {
             </div>
           )}
 
+          {/* Current Registered Subjects Summary */}
+          {getInitialSubjects().length > 0 && (
+            <div style={{ backgroundColor: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: "10px", padding: "12px 14px", marginBottom: "16px" }}>
+              <div style={{ fontSize: "12px", fontWeight: "700", color: "#64748B", marginBottom: "8px", display: "flex", alignItems: "center", gap: "6px" }}>
+                <Lock size={13} color="#C8952A" /> Mevcut Kayıtlı Dersleriniz ({getInitialSubjects().length}):
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                {getInitialSubjects().map((sub, idx) => (
+                  <span
+                    key={idx}
+                    style={{
+                      backgroundColor: "#E2E8F0",
+                      color: "#334155",
+                      fontSize: "11.5px",
+                      fontWeight: "700",
+                      padding: "3px 8px",
+                      borderRadius: "6px",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "4px"
+                    }}
+                  >
+                    🔒 {sub}
+                  </span>
+                ))}
+              </div>
+              <p style={{ fontSize: "11px", color: "#94A3B8", margin: "6px 0 0 0" }}>
+                * Kayıtlı dersleriniz kilitlidir ve mükerrer eklenemez. Dersi bırakmak için Talepler sayfasını kullanabilirsiniz.
+              </p>
+            </div>
+          )}
+
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px", flexWrap: "wrap", gap: "8px" }}>
-            <span style={{ fontSize: "13px", color: "#64748B" }}>
-              Özel ders veya koçluk talep ettiğiniz branşları tıklayarak seçebilir veya kaldırabilirsiniz:
+            <span style={{ fontSize: "13px", color: "#0F2645", fontWeight: "700" }}>
+              Eklemek İstediğiniz Yeni Branşları Seçiniz:
             </span>
-            <span style={{ fontSize: "12px", fontWeight: "800", color: "#0F2645", backgroundColor: "#FEF3C7", padding: "4px 10px", borderRadius: "12px", border: "1px solid #FCD34D" }}>
-              Seçili: {tempSubjects.length} Ders
+            <span style={{ fontSize: "12px", fontWeight: "800", color: newSubjectsToAdd.length > 0 ? "#15803D" : "#64748B", backgroundColor: newSubjectsToAdd.length > 0 ? "#DCFCE7" : "#F1F5F9", padding: "4px 10px", borderRadius: "12px", border: newSubjectsToAdd.length > 0 ? "1px solid #86EFAC" : "1px solid #E2E8F0" }}>
+              {newSubjectsToAdd.length} Yeni Ders Seçildi
             </span>
           </div>
 
           {/* Categorized Subject Grid */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "18px", maxHeight: "420px", overflowY: "auto", paddingRight: "4px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "14px", maxHeight: "380px", overflowY: "auto", paddingRight: "4px" }}>
             {[
               { cat: "TYT", title: "📘 TYT Dersleri", color: "#0F2645" },
               { cat: "AYT", title: "📙 AYT & Alan Dersleri", color: "#7E22CE" },
@@ -684,26 +704,55 @@ export default function StudentProfilePage() {
             ].map((section) => {
               const items = ALL_AVAILABLE_SUBJECTS.filter(s => s.category === section.cat);
               if (items.length === 0) return null;
+              const existingSubjects = getInitialSubjects();
+
               return (
-                <div key={section.cat} style={{ backgroundColor: "#F8FAFC", padding: "14px", borderRadius: "10px", border: "1px solid #E2E8F0" }}>
-                  <div style={{ fontSize: "12px", fontWeight: "800", color: section.color, marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                <div key={section.cat} style={{ backgroundColor: "#F8FAFC", padding: "12px 14px", borderRadius: "10px", border: "1px solid #E2E8F0" }}>
+                  <div style={{ fontSize: "12px", fontWeight: "800", color: section.color, marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
                     {section.title}
                   </div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                     {items.map((sub) => {
-                      const isSelected = tempSubjects.includes(sub.label);
+                      const isAlreadyRegistered = existingSubjects.includes(sub.label);
+                      const isSelected = newSubjectsToAdd.includes(sub.label);
+
+                      if (isAlreadyRegistered) {
+                        return (
+                          <span
+                            key={sub.id}
+                            title="Bu ders zaten profilinizde kayıtlıdır."
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "4px",
+                              padding: "6px 12px",
+                              borderRadius: "16px",
+                              fontSize: "12px",
+                              fontWeight: "600",
+                              backgroundColor: "#F1F5F9",
+                              color: "#94A3B8",
+                              border: "1px solid #E2E8F0",
+                              cursor: "not-allowed",
+                              userSelect: "none"
+                            }}
+                          >
+                            <Lock size={12} /> {sub.label} <span style={{ fontSize: "10px", color: "#CBD5E1" }}>(Kayıtlı)</span>
+                          </span>
+                        );
+                      }
+
                       return (
                         <button
                           type="button"
                           key={sub.id}
-                          onClick={() => handleToggleSubject(sub.label)}
+                          onClick={() => handleToggleNewSubject(sub.label)}
                           style={{
                             display: "inline-flex",
                             alignItems: "center",
                             gap: "6px",
                             padding: "6px 12px",
                             borderRadius: "16px",
-                            fontSize: "13px",
+                            fontSize: "12.5px",
                             fontWeight: isSelected ? "700" : "500",
                             backgroundColor: isSelected ? "#0F2645" : "#FFFFFF",
                             color: isSelected ? "#FFFFFF" : "#334155",
@@ -713,7 +762,7 @@ export default function StudentProfilePage() {
                             boxShadow: isSelected ? "0 2px 6px rgba(15, 38, 69, 0.2)" : "none"
                           }}
                         >
-                          {isSelected ? `✓ ${sub.label}` : sub.label}
+                          {isSelected ? `✓ ${sub.label}` : `+ ${sub.label}`}
                         </button>
                       );
                     })}

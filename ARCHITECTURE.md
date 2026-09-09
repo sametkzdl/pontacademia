@@ -153,6 +153,10 @@ Platformda bir öğrenci hem Eğitim Koçluğu hem de birden fazla branştan Bir
 - **Çoklu Branş Eşleştirme**: Admin bir öğrenciye Matematik için ayrı, Fizik için ayrı öğretmen atayabilir.
 - **Ders Rozetleri (`SubjectTagSlider`)**: Tablolarda çok sayıda seçilen ders satır yüksekliğini ve tablo kolonlarını bozmadan yatay kaydırılabilir butonlarla gösterilir.
 - **Mevcut Hesap Koruma**: Onaylanan öğrencinin sistemde zaten bir hesabı varsa şifresi sıfırlanmaz, mevcut hesabına bağlanır.
+- **Öğrenci Profil Ders Yönetimi & Talep Zorunluluğu**:
+  - Öğrenci kendi profilinden (`/student/profile`) yeni dersler ekleyebilir; ekleme modalında mevcut kayıtlı dersler kilitli (`🔒`) sunulur ve mükerrer seçim engellenir.
+  - Öğrencinin aktif kayıtlı dersleri profilden doğrudan "X" ile silmesi engellenmiştir.
+  - Kayıtlı bir dersi bırakmak veya iptal etmek isteyen öğrenci `/student/requests` üzerinden onaylı **Ders Bırakma Talebi** oluşturmak zorundadır; bu sayede işlenmemiş dersler ve finansal süreçler idari koruma altına alınır.
 
 ---
 
