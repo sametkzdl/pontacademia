@@ -121,6 +121,41 @@ export class LessonController {
   }
 
   /**
+   * Dersi 'İşlenmedi' Olarak Bildir
+   */
+  static async markUnattended(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    try {
+      const user = await getSessionUser();
+      if (!user) {
+        return ApiResponse.unauthorized("Giriş yapmalısınız.");
+      }
+
+      const resolvedParams = await params;
+      const lessonId = resolvedParams.id;
+      const body = await req.json();
+
+      if (!body.reason || !body.reason.trim()) {
+        return ApiResponse.error("İşlenmedi bildirim gerekçesi belirtilmelidir.", 400);
+      }
+
+      const lesson = await LessonService.markLessonUnattended(
+        lessonId,
+        {
+          id: user.userId,
+          name: user.name || user.email,
+          role: user.role,
+        },
+        body.reason
+      );
+
+      return ApiResponse.success({ lesson, message: "Dersin işlenmediği bildirildi." });
+    } catch (error: any) {
+      console.error("Lesson unattended error:", error);
+      return ApiResponse.error(error.message || "İşlem gerçekleştirilemedi", 400);
+    }
+  }
+
+  /**
    * Ders Sonu İşlendi Onayı
    */
   static async completeLesson(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

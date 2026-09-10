@@ -769,6 +769,12 @@ export default function TeacherLessonsPage() {
                       </span>
                     )}
 
+                    {lesson.status === "ISLENMEDI" && (
+                      <span style={{ color: "#DC2626", fontWeight: "700", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                        <XCircle size={14} /> Dersin işlenmediği bildirildi (İnceleme sürecinde)
+                      </span>
+                    )}
+
                     {lesson.status === "REJECTED" && (
                       <span style={{ color: "#DC2626", fontWeight: "700", display: "inline-flex", alignItems: "center", gap: "4px" }}>
                         <XCircle size={14} /> Oturum Talebi Reddedildi / İptal Edildi
@@ -1094,18 +1100,22 @@ export default function TeacherLessonsPage() {
                     type="button"
                     onClick={() => setCreateForm({ ...createForm, locationDetails: addr })}
                     style={{
-                      background: "none",
-                      border: "none",
-                      color: "#2563EB",
+                      backgroundColor: "#EFF6FF",
+                      border: "1px solid #93C5FD",
+                      color: "#1D4ED8",
                       fontSize: "11px",
                       fontWeight: "700",
+                      padding: "4px 9px",
+                      borderRadius: "6px",
                       cursor: "pointer",
                       display: "inline-flex",
                       alignItems: "center",
-                      gap: "3px",
+                      gap: "5px",
+                      transition: "all 0.15s ease",
+                      boxShadow: "0 1px 2px rgba(37, 99, 235, 0.08)",
                     }}
                   >
-                    <MapPin size={12} /> Öğrencinin Adresini Getir ({prof?.currentDistrict || "Ev"})
+                    <MapPin size={12} color="#2563EB" /> 📍 Öğrencinin Kayıtlı Adresini Ekle ({prof?.currentDistrict || "Ev"})
                   </button>
                 );
               })()}

@@ -369,6 +369,7 @@ export default function AdminLessonsPage() {
   const pendingCount = lessons.filter((l) => l.status === "PENDING_APPROVAL").length;
   const scheduledCount = lessons.filter((l) => l.status === "SCHEDULED").length;
   const completedCount = lessons.filter((l) => l.status === "COMPLETED").length;
+  const unattendedCount = lessons.filter((l) => l.status === "ISLENMEDI").length;
   const rejectedCount = lessons.filter((l) => l.status === "REJECTED").length;
   const paidCount = lessons.filter((l) => l.paymentStatus === "PAID").length;
 
@@ -449,7 +450,7 @@ export default function AdminLessonsPage() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
           gap: "12px",
           marginBottom: "20px",
         }}
@@ -473,6 +474,15 @@ export default function AdminLessonsPage() {
           <div style={{ fontSize: "12px", color: "#065F46", fontWeight: "600" }}>Tamamlanan Ders</div>
           <div style={{ fontSize: "22px", fontWeight: "800", color: "#059669", marginTop: "2px" }}>{completedCount}</div>
         </div>
+
+        {unattendedCount > 0 && (
+          <div style={{ backgroundColor: "#FEF2F2", padding: "14px 16px", borderRadius: "10px", border: "1.5px solid #F87171" }}>
+            <div style={{ fontSize: "12px", color: "#991B1B", fontWeight: "800", display: "flex", alignItems: "center", gap: "4px" }}>
+              🚩 İşlenmedi Bildirimi
+            </div>
+            <div style={{ fontSize: "22px", fontWeight: "800", color: "#DC2626", marginTop: "2px" }}>{unattendedCount}</div>
+          </div>
+        )}
 
         <div style={{ backgroundColor: "#F0FDF4", padding: "14px 16px", borderRadius: "10px", border: "1.5px solid #86EFAC" }}>
           <div style={{ fontSize: "12px", color: "#166534", fontWeight: "700", display: "flex", alignItems: "center", gap: "4px" }}>
@@ -511,6 +521,7 @@ export default function AdminLessonsPage() {
               <option value="PENDING_APPROVAL">⏳ Onay Bekleyenler ({pendingCount})</option>
               <option value="SCHEDULED">📅 Planlananlar ({scheduledCount})</option>
               <option value="COMPLETED">✅ Tamamlananlar ({completedCount})</option>
+              <option value="ISLENMEDI">🚩 İşlenmedi Olarak Bildirilenler ({unattendedCount})</option>
               <option value="REJECTED">❌ Reddedilenler ({rejectedCount})</option>
             </select>
           </div>
@@ -607,6 +618,8 @@ export default function AdminLessonsPage() {
               statusBadge = { bg: "#EFF6FF", color: "#1E40AF", border: "#BFDBFE", text: "📅 Planlandı" };
             } else if (lesson.status === "COMPLETED") {
               statusBadge = { bg: "#ECFDF5", color: "#065F46", border: "#A7F3D0", text: "✅ Ders İşlendi (Tamamlandı)" };
+            } else if (lesson.status === "ISLENMEDI") {
+              statusBadge = { bg: "#FEF2F2", color: "#991B1B", border: "#EF4444", text: "🚩 DERS İŞLENMEDİ (FLAG)" };
             } else if (lesson.status === "REJECTED") {
               statusBadge = { bg: "#FEF2F2", color: "#991B1B", border: "#FECACA", text: "❌ Reddedildi" };
             }
@@ -738,6 +751,38 @@ export default function AdminLessonsPage() {
                     <span>Oluşturan: <strong>{lesson.createdBy?.name} ({lesson.createdBy?.role})</strong></span>
                   </div>
                 </div>
+
+                {/* ISLENMEDI ADMIN FLAG ALERT BANNER */}
+                {lesson.status === "ISLENMEDI" && (
+                  <div
+                    style={{
+                      backgroundColor: "#FEF2F2",
+                      border: "1.5px solid #F87171",
+                      borderRadius: "10px",
+                      padding: "12px 16px",
+                      marginBottom: "14px",
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: "10px",
+                      boxShadow: "0 2px 8px rgba(239, 68, 68, 0.08)",
+                    }}
+                  >
+                    <AlertCircle size={20} color="#DC2626" style={{ flexShrink: 0, marginTop: "2px" }} />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: "13px", fontWeight: "800", color: "#991B1B", display: "flex", alignItems: "center", gap: "6px" }}>
+                        <span>🚩 YÖNETİCİ DİKKATİNE (FLAG): DERSİN İŞLENMEDİĞİ BİLDİRİLDİ</span>
+                      </div>
+                      <div style={{ fontSize: "12px", color: "#7F1D1D", marginTop: "4px" }}>
+                        <strong>Bildiren Taraf:</strong> {lesson.rejectedBy ? `${lesson.rejectedBy.name} (${lesson.rejectedBy.role === "TEACHER" ? "Eğitmen" : lesson.rejectedBy.role === "STUDENT" ? "Öğrenci" : "Yönetici"})` : "Katılımcı"} {lesson.rejectedAt ? `• ${new Date(lesson.rejectedAt).toLocaleString("tr-TR")}` : ""}
+                      </div>
+                      {lesson.rejectionReason && (
+                        <div style={{ fontSize: "12px", color: "#991B1B", marginTop: "6px", backgroundColor: "#FFFFFF", padding: "8px 12px", borderRadius: "6px", border: "1px solid #FECACA" }}>
+                          <strong>İşlenmedi Bildirim Gerekçesi:</strong> {lesson.rejectionReason}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {/* Main Info Grid (Teacher & Student & Schedule) */}
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "16px", marginBottom: "16px" }}>
@@ -1092,6 +1137,12 @@ export default function AdminLessonsPage() {
                       </span>
                     )}
 
+                    {lesson.status === "ISLENMEDI" && (
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", color: "#DC2626", fontWeight: "800" }}>
+                        <AlertCircle size={14} color="#DC2626" /> İşlenmedi Bildirildi (Yönetici İncelemesinde)
+                      </span>
+                    )}
+
                     {lesson.status === "REJECTED" && (
                       <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", color: "#DC2626", fontWeight: "700" }}>
                         <XCircle size={14} /> Oturum Reddedildi • {lesson.rejectedBy?.name || "Kullanıcı"} ({lesson.rejectedBy?.role === "TEACHER" ? "Eğitmen" : lesson.rejectedBy?.role === "STUDENT" ? "Öğrenci" : "Yönetici"}) tarafından reddedildi
@@ -1223,7 +1274,7 @@ export default function AdminLessonsPage() {
                       </>
                     )}
 
-                    {lesson.status === "SCHEDULED" && (
+                    {(lesson.status === "SCHEDULED" || lesson.status === "ISLENMEDI") && (
                       <>
                         <button
                           onClick={() => handleComplete(lesson.id)}
@@ -1242,7 +1293,7 @@ export default function AdminLessonsPage() {
                             gap: "4px",
                           }}
                         >
-                          <CheckCircle2 size={13} color="#C8952A" /> Tamamlandı Olarak İşaretle
+                          <CheckCircle2 size={13} color="#C8952A" /> {lesson.status === "ISLENMEDI" ? "Yönetici Yetkisiyle İşlendi Onayla" : "Tamamlandı Olarak İşaretle"}
                         </button>
 
                         <button
@@ -1265,7 +1316,7 @@ export default function AdminLessonsPage() {
                             gap: "4px",
                           }}
                         >
-                          <XCircle size={13} /> Reddet / İptal Et
+                          <XCircle size={13} /> {lesson.status === "ISLENMEDI" ? "İptali Kesinleştir" : "Reddet / İptal Et"}
                         </button>
                       </>
                     )}
@@ -1460,18 +1511,22 @@ export default function AdminLessonsPage() {
                     type="button"
                     onClick={() => setCreateForm({ ...createForm, locationDetails: addr })}
                     style={{
-                      background: "none",
-                      border: "none",
-                      color: "#2563EB",
+                      backgroundColor: "#EFF6FF",
+                      border: "1px solid #93C5FD",
+                      color: "#1D4ED8",
                       fontSize: "11px",
                       fontWeight: "700",
+                      padding: "4px 9px",
+                      borderRadius: "6px",
                       cursor: "pointer",
                       display: "inline-flex",
                       alignItems: "center",
-                      gap: "3px",
+                      gap: "5px",
+                      transition: "all 0.15s ease",
+                      boxShadow: "0 1px 2px rgba(37, 99, 235, 0.08)",
                     }}
                   >
-                    <MapPin size={12} /> Öğrencinin Adresini Getir ({prof?.currentDistrict || "Ev"})
+                    <MapPin size={12} color="#2563EB" /> 📍 Öğrencinin Kayıtlı Adresini Ekle ({prof?.currentDistrict || "Ev"})
                   </button>
                 );
               })()}

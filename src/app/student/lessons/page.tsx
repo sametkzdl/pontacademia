@@ -651,6 +651,12 @@ export default function StudentLessonsPage() {
                       </span>
                     )}
 
+                    {lesson.status === "ISLENMEDI" && (
+                      <span style={{ color: "#DC2626", fontWeight: "700", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                        <XCircle size={14} /> Dersin işlenmediği bildirildi (İnceleme sürecinde)
+                      </span>
+                    )}
+
                     {lesson.status === "REJECTED" && (
                       <span style={{ color: "#DC2626", fontWeight: "700", display: "inline-flex", alignItems: "center", gap: "4px" }}>
                         <XCircle size={14} /> Oturum Talebi Reddedildi / İptal Edildi

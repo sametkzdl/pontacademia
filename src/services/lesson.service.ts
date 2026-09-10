@@ -140,7 +140,7 @@ export class LessonService {
 
     const lessons = await db.lesson.findMany({
       where: whereClause,
-      orderBy: { scheduledDate: "desc" },
+      orderBy: { createdAt: "desc" },
       include: {
         match: {
           include: {
@@ -257,6 +257,57 @@ export class LessonService {
   }
 
   /**
+   * Dersi 'İşlenmedi' Olarak Bildir / Flag'le (Öğrenci veya Öğretmen veya Admin)
+   */
+  static async markLessonUnattended(lessonId: string, user: { id: string; name: string; role: string }, reason: string) {
+    if (!reason || !reason.trim()) {
+      throw new Error("Lütfen dersin işlenmediğini belirtme gerekçenizi yazınız.");
+    }
+
+    const lesson = await db.lesson.findUnique({
+      where: { id: lessonId },
+      include: { match: true },
+    });
+
+    if (!lesson) {
+      throw new Error("Ders bulunamadı.");
+    }
+
+    const isStudent = lesson.match.studentId === user.id;
+    const isTeacher = lesson.match.teacherId === user.id;
+    const isAdmin = user.role === "ADMIN";
+
+    if (!isStudent && !isTeacher && !isAdmin) {
+      throw new Error("Bu dersi işlenmedi olarak bildirme yetkiniz bulunmamaktadır.");
+    }
+
+    const roleTitle = isAdmin ? "Yönetici" : isTeacher ? "Öğretmen" : "Öğrenci";
+
+    const updated = await db.lesson.update({
+      where: { id: lessonId },
+      data: {
+        status: "ISLENMEDI",
+        rejectedById: user.id,
+        rejectionReason: reason.trim(),
+        rejectedAt: new Date(),
+      },
+    });
+
+    // Log Ekle
+    await db.lessonLog.create({
+      data: {
+        lessonId,
+        userId: user.id,
+        action: "ISLENMEDI",
+        message: `${roleTitle} (${user.name}) dersin işlenmediğini / yapılmadığını bildirdi. Yalnızca yöneticiye açık inceleme flag'i eklendi.`,
+        reason: reason.trim(),
+      },
+    });
+
+    return updated;
+  }
+
+  /**
    * Dersi Reddet (Zorunlu Gerekçe İle)
    */
   static async rejectLesson(lessonId: string, user: { id: string; name: string; role: string }, reason: string) {
@@ -287,11 +338,14 @@ export class LessonService {
 
     const isScheduled = lesson.status === "SCHEDULED";
     const hadPartialCompletion = lesson.teacherCompleted || lesson.studentCompleted;
+    
+    // Planlanmış veya tamamlama aşamasındaki ders reddedildiğinde veya itiraz edildiğinde ISLENMEDI olarak flagle
+    const nextStatus = (isScheduled || hadPartialCompletion) ? "ISLENMEDI" : "REJECTED";
 
     const updated = await db.lesson.update({
       where: { id: lessonId },
       data: {
-        status: "REJECTED",
+        status: nextStatus,
         rejectedById: user.id,
         rejectionReason: reason.trim(),
         rejectedAt: new Date(),
@@ -301,17 +355,18 @@ export class LessonService {
     // Log Ekle
     const roleTitle = isAdmin ? "Yönetici" : isTeacher ? "Öğretmen" : "Öğrenci";
     let logMsg = `${roleTitle} (${user.name}) ders talebini reddetti.`;
-    if (isScheduled && hadPartialCompletion) {
-      logMsg = `${roleTitle} (${user.name}) dersin işlenmediğini / yapılmadığını belirterek tamamlanma onayına itiraz etti / reddetti.`;
-    } else if (isScheduled) {
-      logMsg = `${roleTitle} (${user.name}) planlanmış dersin işlenmediğini / iptal edildiğini bildirdi.`;
+    let logAction = "REJECTED";
+
+    if (nextStatus === "ISLENMEDI") {
+      logAction = "ISLENMEDI";
+      logMsg = `${roleTitle} (${user.name}) dersin işlenmediğini bildirdi. Yönetici inceleme flag'i oluşturuldu.`;
     }
 
     await db.lessonLog.create({
       data: {
         lessonId,
         userId: user.id,
-        action: "REJECTED",
+        action: logAction,
         message: logMsg,
         reason: reason.trim(),
       },

@@ -20,7 +20,8 @@ import {
   GraduationCap,
   MapPin,
   Compass,
-  LogIn
+  LogIn,
+  UserPlus
 } from "lucide-react";
 
 interface CountdownTime {
@@ -66,9 +67,37 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
     setMobileMenuOpen(false);
   };
 
+  // Helper to compute upcoming exam date
+  const getNextExamDate = (month: number, day: number, hour: number, minute: number): Date => {
+    const now = new Date();
+    let year = now.getFullYear();
+    let target = new Date(year, month - 1, day, hour, minute, 0);
+    if (target.getTime() <= now.getTime()) {
+      target = new Date(year + 1, month - 1, day, hour, minute, 0);
+    }
+    return target;
+  };
+
+  const calculateTimeRemaining = (target: Date): CountdownTime => {
+    const difference = +target - +new Date();
+    if (difference <= 0) {
+      return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+    }
+    return {
+      days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+      hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+      minutes: Math.floor((difference / 1000 / 60) % 60),
+      seconds: Math.floor((difference / 1000) % 60),
+    };
+  };
+
+  // Setup Countdown Timer Target Dates (YKS: June 19, 10:15 | LGS: June 6, 09:30)
+  const yksTargetDate = useRef(getNextExamDate(6, 19, 10, 15));
+  const lgsTargetDate = useRef(getNextExamDate(6, 6, 9, 30));
+
   // Countdown States
-  const [yksTime, setYksTime] = useState<CountdownTime>({ days: 287, hours: 0, minutes: 0, seconds: 0 });
-  const [lgsTime, setLgsTime] = useState<CountdownTime>({ days: 220, hours: 0, minutes: 0, seconds: 0 });
+  const [yksTime, setYksTime] = useState<CountdownTime>(() => calculateTimeRemaining(yksTargetDate.current));
+  const [lgsTime, setLgsTime] = useState<CountdownTime>(() => calculateTimeRemaining(lgsTargetDate.current));
 
   // Dynamic Settings & Coaches
   const [coaches, setCoaches] = useState<any[]>(initialCoaches || []);
@@ -131,10 +160,6 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [formError, setFormError] = useState("");
 
-  // Setup Countdown Timer Target Dates
-  const yksTargetDate = useRef(new Date("2027-04-09T10:00:00"));
-  const lgsTargetDate = useRef(new Date("2027-01-31T09:00:00"));
-
   // Pulse animation states for timers
   const [yksPulse, setYksPulse] = useState(false);
   const [lgsPulse, setLgsPulse] = useState(false);
@@ -154,41 +179,21 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
 
   // Update Countdown Timers
   useEffect(() => {
-    const calculateTimeRemaining = (target: Date): CountdownTime => {
-      const difference = +target - +new Date();
-      if (difference <= 0) {
-        return { days: 0, hours: 0, minutes: 0, seconds: 0 };
-      }
-      return {
-        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-        minutes: Math.floor((difference / 1000 / 60) % 60),
-        seconds: Math.floor((difference / 1000) % 60),
-      };
-    };
-
     const interval = setInterval(() => {
-      const yksPrev = yksTime.seconds;
-      const lgsPrev = lgsTime.seconds;
-
       const newYks = calculateTimeRemaining(yksTargetDate.current);
       const newLgs = calculateTimeRemaining(lgsTargetDate.current);
 
       setYksTime(newYks);
       setLgsTime(newLgs);
 
-      if (newYks.seconds !== yksPrev) {
-        setYksPulse(true);
-        setTimeout(() => setYksPulse(false), 80);
-      }
-      if (newLgs.seconds !== lgsPrev) {
-        setLgsPulse(true);
-        setTimeout(() => setLgsPulse(false), 80);
-      }
+      setYksPulse(true);
+      setTimeout(() => setYksPulse(false), 80);
+      setLgsPulse(true);
+      setTimeout(() => setLgsPulse(false), 80);
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [yksTime.seconds, lgsTime.seconds]);
+  }, []);
 
   // Intersection Observer for Scroll Reveal
   useEffect(() => {
@@ -301,14 +306,14 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
             {/* Desktop Nav Actions */}
             <div className="desktop-actions">
               <a href="#ozel-ders" className="nav-link">Özel Ders</a>
-              <a href="#kocluk" className="nav-link">Koçluk</a>
+              <a href="#paketler" className="nav-link">Paketimiz</a>
               <a href="#ekibimiz" className="nav-link">Eğitmenlerimiz</a>
               <a href="/tyt-puan-hesaplama" className="nav-link">TYT Hesapla</a>
               <a href="/yks-puan-hesaplama" className="nav-link">YKS Hesapla</a>
               <a href="/teacherApplicationForm" className="nav-link" style={{ textDecoration: "none" }}>
                 <span style={{ backgroundColor: "#FEF3C7", color: "#92400E", padding: "5px 12px", borderRadius: "6px", border: "1px solid #FCD34D", fontSize: "13px", fontWeight: "700" }}>Eğitmen Ol</span>
               </a>
-              <a href="/kocluk-basvuru" className="btn btn-primary" style={{ padding: "8px 20px", fontSize: "14px", fontWeight: "700", boxShadow: "0 2px 8px rgba(200, 149, 42, 0.25)" }}>
+              <a href="/ozel-ders-basvuru" className="btn btn-primary" style={{ padding: "8px 20px", fontSize: "14px", fontWeight: "700", boxShadow: "0 2px 8px rgba(200, 149, 42, 0.25)" }}>
                 Hemen Başla
               </a>
             </div>
@@ -324,131 +329,131 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
             </button>
           </div>
         </header>
-      </div>
 
-      {/* Mobile Menu Backdrop & Sliding Drawer */}
-      <div 
-        className={`mobile-menu-backdrop ${mobileMenuOpen ? "open" : ""}`}
-        onClick={handleMobileNavClick}
-        aria-hidden={!mobileMenuOpen}
-        role="button"
-        tabIndex={-1}
-      />
+        {/* Mobile Menu Backdrop & Sliding Drawer */}
+        <div 
+          className={`mobile-menu-backdrop ${mobileMenuOpen ? "open" : ""}`}
+          onClick={handleMobileNavClick}
+          aria-hidden={!mobileMenuOpen}
+          role="button"
+          tabIndex={-1}
+        />
 
-      <div className={`mobile-menu-drawer ${mobileMenuOpen ? "open" : ""}`}>
-        <div className="mobile-menu-header">
-          <a href="/" style={{ display: "inline-flex", alignItems: "center" }} onClick={handleMobileNavClick}>
-            <Image 
-              src="/pont_logo.png" 
-              alt="Pont Academy Logo" 
-              width={150} 
-              height={40} 
-              style={{ objectFit: "contain", height: "36px", width: "auto" }}
-              priority
-            />
-          </a>
-          <button 
-            type="button"
-            className="mobile-menu-close" 
-            onClick={handleMobileNavClick} 
-            aria-label="Menüyü Kapat"
-          >
-            <X size={22} />
-          </button>
-        </div>
-
-        <div className="mobile-menu-content">
-          <div>
-            <div className="mobile-nav-group-title">Eğitim Programları</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              <a href="#ozel-ders" className="mobile-nav-link" onClick={handleMobileNavClick}>
-                <div className="mobile-nav-link-inner">
-                  <GraduationCap size={18} color="#C8952A" />
-                  <span>Birebir Özel Ders</span>
-                </div>
-                <ArrowRight size={15} color="#C8952A" />
-              </a>
-              <a href="#kocluk" className="mobile-nav-link" onClick={handleMobileNavClick}>
-                <div className="mobile-nav-link-inner">
-                  <Compass size={18} color="#C8952A" />
-                  <span>Kişisel Sınav Koçluğu</span>
-                </div>
-                <ArrowRight size={15} color="#C8952A" />
-              </a>
-              <a href="#ekibimiz" className="mobile-nav-link" onClick={handleMobileNavClick}>
-                <div className="mobile-nav-link-inner">
-                  <Brain size={18} color="#C8952A" />
-                  <span>Dereceli Eğitmen Kadromuz</span>
-                </div>
-                <ArrowRight size={15} color="#C8952A" />
-              </a>
-            </div>
-          </div>
-
-          <div>
-            <div className="mobile-nav-group-title">Sınav Hesaplama Araçları</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              <a href="/tyt-puan-hesaplama" className="mobile-nav-link" onClick={handleMobileNavClick}>
-                <div className="mobile-nav-link-inner">
-                  <Calculator size={18} color="#38BDF8" />
-                  <span>TYT Puan Hesaplama</span>
-                </div>
-                <ArrowRight size={15} color="#38BDF8" />
-              </a>
-              <a href="/yks-puan-hesaplama" className="mobile-nav-link" onClick={handleMobileNavClick}>
-                <div className="mobile-nav-link-inner">
-                  <Calculator size={18} color="#34D399" />
-                  <span>YKS (TYT-AYT) Hesaplama</span>
-                </div>
-                <ArrowRight size={15} color="#34D399" />
-              </a>
-            </div>
-          </div>
-
-          <div>
-            <div className="mobile-nav-group-title">Hızlı İşlemler & İletişim</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              <a href="/teacherApplicationForm" className="mobile-nav-link" onClick={handleMobileNavClick}>
-                <div className="mobile-nav-link-inner">
-                  <Sparkles size={18} color="#F59E0B" />
-                  <span>Eğitmen & Koç Başvurusu</span>
-                </div>
-                <span style={{ fontSize: "11px", backgroundColor: "rgba(245, 158, 11, 0.2)", color: "#FDE68A", padding: "2px 8px", borderRadius: "6px", fontWeight: "700" }}>Katıl</span>
-              </a>
-              <a href="/login" className="mobile-nav-link" onClick={handleMobileNavClick}>
-                <div className="mobile-nav-link-inner">
-                  <LogIn size={18} color="#A78BFA" />
-                  <span>Öğrenci / Eğitmen Girişi</span>
-                </div>
-                <ArrowRight size={15} color="#A78BFA" />
-              </a>
-              <a href="#iletisim" className="mobile-nav-link" onClick={handleMobileNavClick}>
-                <div className="mobile-nav-link-inner">
-                  <Mail size={18} color="#94A3B8" />
-                  <span>İletişim & Danışmanlık</span>
-                </div>
-                <ArrowRight size={15} color="#94A3B8" />
-              </a>
-            </div>
-          </div>
-
-          <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "10px" }}>
-            <a 
-              href="/kocluk-basvuru" 
-              className="btn btn-primary btn-block" 
-              style={{ minHeight: "48px", fontSize: "15px", fontWeight: "700" }}
-              onClick={handleMobileNavClick}
-            >
-              Hemen Koçluk Başvurusu Yap
+        <div className={`mobile-menu-drawer ${mobileMenuOpen ? "open" : ""}`}>
+          <div className="mobile-menu-header">
+            <a href="/" style={{ display: "inline-flex", alignItems: "center" }} onClick={handleMobileNavClick}>
+              <Image 
+                src="/pont_logo.png" 
+                alt="Pont Academy Logo" 
+                width={150} 
+                height={40} 
+                style={{ objectFit: "contain", height: "36px", width: "auto" }}
+                priority
+              />
             </a>
-            <a 
-              href="/ozel-ders-basvuru" 
-              className="btn btn-secondary btn-block" 
-              style={{ minHeight: "48px", fontSize: "15px", fontWeight: "700" }}
-              onClick={handleMobileNavClick}
+            <button 
+              type="button"
+              className="mobile-menu-close" 
+              onClick={handleMobileNavClick} 
+              aria-label="Menüyü Kapat"
             >
-              Birebir Özel Ders Başvurusu
-            </a>
+              <X size={22} />
+            </button>
+          </div>
+
+          <div className="mobile-menu-content">
+            <div>
+              <div className="mobile-nav-group-title">Eğitim Programları</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                <a href="#ozel-ders" className="mobile-nav-link" onClick={handleMobileNavClick}>
+                  <div className="mobile-nav-link-inner">
+                    <BookOpen size={18} color="#C8952A" />
+                    <span>Birebir Özel Ders</span>
+                  </div>
+                  <ArrowRight size={15} color="#C8952A" />
+                </a>
+                <a href="#paketler" className="mobile-nav-link" onClick={handleMobileNavClick}>
+                  <div className="mobile-nav-link-inner">
+                    <Sparkles size={18} color="#C8952A" />
+                    <span>Özel Ders Paketimiz</span>
+                  </div>
+                  <ArrowRight size={15} color="#C8952A" />
+                </a>
+                <a href="#ekibimiz" className="mobile-nav-link" onClick={handleMobileNavClick}>
+                  <div className="mobile-nav-link-inner">
+                    <GraduationCap size={18} color="#C8952A" />
+                    <span>Dereceli Eğitmen Kadromuz</span>
+                  </div>
+                  <ArrowRight size={15} color="#C8952A" />
+                </a>
+              </div>
+            </div>
+
+            <div>
+              <div className="mobile-nav-group-title">Sınav Hesaplama Araçları</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                <a href="/tyt-puan-hesaplama" className="mobile-nav-link" onClick={handleMobileNavClick}>
+                  <div className="mobile-nav-link-inner">
+                    <Calculator size={18} color="#38BDF8" />
+                    <span>TYT Puan Hesaplama</span>
+                  </div>
+                  <ArrowRight size={15} color="#38BDF8" />
+                </a>
+                <a href="/yks-puan-hesaplama" className="mobile-nav-link" onClick={handleMobileNavClick}>
+                  <div className="mobile-nav-link-inner">
+                    <Calculator size={18} color="#34D399" />
+                    <span>YKS (TYT-AYT) Hesaplama</span>
+                  </div>
+                  <ArrowRight size={15} color="#34D399" />
+                </a>
+              </div>
+            </div>
+
+            <div>
+              <div className="mobile-nav-group-title">Hızlı İşlemler & İletişim</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                <a href="/teacherApplicationForm" className="mobile-nav-link" onClick={handleMobileNavClick}>
+                  <div className="mobile-nav-link-inner">
+                    <UserPlus size={18} color="#F59E0B" />
+                    <span>Eğitmen Başvurusu Yap</span>
+                  </div>
+                  <span style={{ fontSize: "11px", backgroundColor: "rgba(245, 158, 11, 0.2)", color: "#FDE68A", padding: "2px 8px", borderRadius: "6px", fontWeight: "700" }}>Katıl</span>
+                </a>
+                <a href="/login" className="mobile-nav-link" onClick={handleMobileNavClick}>
+                  <div className="mobile-nav-link-inner">
+                    <LogIn size={18} color="#A78BFA" />
+                    <span>Öğrenci / Eğitmen Girişi</span>
+                  </div>
+                  <ArrowRight size={15} color="#A78BFA" />
+                </a>
+                <a href="#iletisim" className="mobile-nav-link" onClick={handleMobileNavClick}>
+                  <div className="mobile-nav-link-inner">
+                    <Mail size={18} color="#94A3B8" />
+                    <span>İletişim & Danışmanlık</span>
+                  </div>
+                  <ArrowRight size={15} color="#94A3B8" />
+                </a>
+              </div>
+            </div>
+
+            <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "10px" }}>
+              <a 
+                href="/ozel-ders-basvuru" 
+                className="btn btn-primary btn-block" 
+                style={{ minHeight: "48px", fontSize: "15px", fontWeight: "700" }}
+                onClick={handleMobileNavClick}
+              >
+                Birebir Özel Ders Başvurusu
+              </a>
+              <a 
+                href="#iletisim" 
+                className="btn btn-secondary btn-block" 
+                style={{ minHeight: "48px", fontSize: "15px", fontWeight: "700", backgroundColor: "rgba(255, 255, 255, 0.08)", borderColor: "rgba(255, 255, 255, 0.2)" }}
+                onClick={handleMobileNavClick}
+              >
+                Bilgi Al & Danışmanlık
+              </a>
+            </div>
           </div>
         </div>
       </div>
@@ -477,19 +482,8 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
             </p>
             
             <div className="hero-ctas">
-              <a href="/kocluk-basvuru" className="btn btn-primary">Hemen Başla</a>
+              <a href="/ozel-ders-basvuru" className="btn btn-primary">Hemen Başla</a>
               <a href="#ekibimiz" className="btn btn-secondary">Eğitmenlerimizi Gör</a>
-            </div>
-          </div>
-          
-          <div className="hero-stats-grid">
-            <div className="card-glow hero-stat-card">
-              <div className="hero-stat-number">+500</div>
-              <div className="hero-stat-label">Mutlu Öğrenci</div>
-            </div>
-            <div className="card-glow hero-stat-card">
-              <div className="hero-stat-number">%94</div>
-              <div className="hero-stat-label">Hedef Puan</div>
             </div>
           </div>
         </div>
@@ -517,6 +511,10 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
                   <span className="timer-num numeric">{String(yksTime.minutes).padStart(2, "0")}</span>
                   <span className="timer-unit">Dakika</span>
                 </div>
+                <div className="timer-box">
+                  <span className="timer-num numeric">{String(yksTime.seconds).padStart(2, "0")}</span>
+                  <span className="timer-unit">Saniye</span>
+                </div>
               </div>
             </div>
 
@@ -538,11 +536,15 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
                   <span className="timer-num numeric">{String(lgsTime.minutes).padStart(2, "0")}</span>
                   <span className="timer-unit">Dakika</span>
                 </div>
+                <div className="timer-box">
+                  <span className="timer-num numeric">{String(lgsTime.seconds).padStart(2, "0")}</span>
+                  <span className="timer-unit">Saniye</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <a href="/kocluk-basvuru" className="link-gold countdown-cta">
+          <a href="/ozel-ders-basvuru" className="link-gold countdown-cta">
             Şimdi Hazırlanmaya Başla <ArrowRight size={16} />
           </a>
         </div>
@@ -595,7 +597,7 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
                 <li><Sparkles size={18} style={{ color: "var(--color-gold)" }} /> 7/24 Kesintisiz Rehberlik</li>
                 <li><Sparkles size={18} style={{ color: "var(--color-gold)" }} /> Veli Bilgilendirme Raporları</li>
               </ul>
-              <a href="/kocluk-basvuru" className="btn btn-primary" style={{ marginTop: "auto" }}>Koçluk Başlat</a>
+              <a href="#iletisim" className="btn btn-primary" style={{ marginTop: "auto" }}>Bilgi Al & Başvur</a>
             </div>
           </div>
         </div>
@@ -650,16 +652,16 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
                       </span>
                     </div>
                     <div className="teacher-btn-wrapper" style={{ marginTop: "12px", display: "flex", gap: "8px", justifyContent: "center" }}>
-                      <a href={`/kocluk-basvuru?coachId=${coach.id}`} className="link-gold">Koçluk Başlat <ArrowRight size={14} /></a>
+                      <a href={`/ozel-ders-basvuru?coachId=${coach.id}`} className="link-gold">Ders Talebi Oluştur <ArrowRight size={14} /></a>
                     </div>
                   </div>
                 ))
               ) : (
                 <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: "36px 20px", backgroundColor: "#FFFFFF", borderRadius: "14px", border: "1px solid #DDE6F0" }}>
                   <p style={{ color: "#64748B", fontSize: "15px", margin: "0 0 14px 0" }}>
-                    Eğitmen kadromuz güncelleniyor. Birebir özel ders veya koçluk talebiniz için hemen başvurabilirsiniz.
+                    Eğitmen kadromuz güncelleniyor. Birebir özel ders veya danışmanlık talebiniz için hemen başvurabilirsiniz.
                   </p>
-                  <a href="/kocluk-basvuru" className="btn btn-primary" style={{ display: "inline-flex" }}>
+                  <a href="/ozel-ders-basvuru" className="btn btn-primary" style={{ display: "inline-flex" }}>
                     Hemen Başvuru Yap <ArrowRight size={16} style={{ marginLeft: "6px" }} />
                   </a>
                 </div>
@@ -668,24 +670,24 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
           </div>
 
           <div style={{ textAlign: "center", marginTop: "28px" }} className="reveal">
-            <a href="/kocluk-basvuru" className="btn btn-secondary" style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
-              Tüm Eğitmenlerimizi Gör & Koçunu Seç <ArrowRight size={16} />
+            <a href="/ozel-ders-basvuru" className="btn btn-secondary" style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
+              Tüm Eğitmenlerimizi Gör & Ders Talebi Oluştur <ArrowRight size={16} />
             </a>
           </div>
         </div>
       </section>
 
       {/* PRICING SECTION (PAKETLERİMİZ) */}
-      <section id="kocluk" data-theme="light">
-        <div className="container">
+      <section id="paketler" data-theme="light">
+        <div className="container" style={{ maxWidth: "800px" }}>
           <div className="section-header reveal">
             <span className="section-subtitle">Net Fiyat, Sürpriz Yok.</span>
-            <h2 className="light-title">Paketlerimiz</h2>
+            <h2 className="light-title">Özel Ders Paketimiz</h2>
           </div>
 
-          <div className="pricing-grid">
+          <div style={{ display: "flex", justifyContent: "center" }}>
             {/* Birebir Özel Ders */}
-            <div className="pricing-card light reveal">
+            <div className="pricing-card light reveal" style={{ maxWidth: "480px", width: "100%" }}>
               <div className="pricing-title">Birebir Özel Ders</div>
               <div className="pricing-price-container">
                 <span className="price-symbol"></span>
@@ -697,127 +699,16 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
                 <li><Check size={16} /> Derece Yapmış Eğitmen Kadrosu</li>
                 <li><Check size={16} /> Birebir Soru Çözüm Desteği</li>
                 <li><Check size={16} /> Ders Notu ve Kaynak Paylaşımı</li>
-                <li className="disabled"><X size={16} /> Kişisel Eğitim Koçluğu</li>
+                <li><Check size={16} /> Kişiye Özel Eksik & Konu Takibi</li>
               </ul>
-              <a href="/ozel-ders-basvuru" className="btn btn-dark-ghost">Özel Ders Al</a>
-            </div>
-
-            {/* Birebir Eğitim Koçluğu */}
-            <div className="pricing-card dark card-glow reveal">
-              <div className="pricing-title">Birebir Eğitim Koçluğu</div>
-              <div className="pricing-price-container">
-                <span className="price-symbol"></span>
-                <span className="price-amount numeric" style={{ fontSize: "32px" }}>{settings.coachingPrice || ""}</span>
-                <span className="price-period">/ ay</span>
-              </div>
-              <ul className="pricing-list">
-                <li><Check size={16} style={{ color: "var(--color-gold)" }} /> Haftalık Kişiye Özel Çalışma Programı</li>
-                <li><Check size={16} style={{ color: "var(--color-gold)" }} /> 7/24 Koçluk ve Motivasyon Desteği</li>
-                <li><Check size={16} style={{ color: "var(--color-gold)" }} /> Birebir Haftalık Görüşme & Analiz</li>
-                <li><Check size={16} style={{ color: "var(--color-gold)" }} /> Online Deneme Sınav Takibi & Net Analizi</li>
-                <li><Check size={16} style={{ color: "var(--color-gold)" }} /> Aylık Düzenli Veli Bilgilendirme Raporu</li>
-              </ul>
-              <a href="/kocluk-basvuru" className="btn btn-primary">Koçluk Başlat</a>
+              <a href="/ozel-ders-basvuru" className="btn btn-primary" style={{ textAlign: "center", justifyContent: "center" }}>
+                Hemen Özel Ders Al
+              </a>
             </div>
           </div>
 
-          <div className="pricing-note reveal">
-            Fiyatlara KDV dahildir. İptal garantisi mevcuttur.
-          </div>
-        </div>
-      </section>
-
-      {/* STUDENT REVIEWS / TESTIMONIALS */}
-      <section data-theme="dark">
-        <div className="container">
-          <div className="section-header reveal">
-            <span className="section-subtitle">Başarı Hikayelerimiz</span>
-            <h2 className="dark-title">Öğrenci Deneyimleri</h2>
-          </div>
-
-          <div className="reviews-grid reveal">
-            {/* Review 1 */}
-            <div className="card-glow review-card">
-              <div className="review-stars">
-                {[...Array(5)].map((_, i) => <Star key={i} size={16} fill="var(--color-gold)" stroke="none" />)}
-              </div>
-              <blockquote className="review-quote">
-                &quot;Matematik korkumu Pont Academy sayesinde yendim. Koçumun verdiği çalışma programı hayatımı düzene soktu.&quot;
-              </blockquote>
-              <div className="review-author">
-                <div className="review-author-avatar">S</div>
-                <div>
-                  <div className="review-author-name">Selim Ak</div>
-                  <div className="review-author-meta">YKS 2024 Öğrencisi</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Review 2 */}
-            <div className="card-glow review-card">
-              <div className="review-stars">
-                {[...Array(5)].map((_, i) => <Star key={i} size={16} fill="var(--color-gold)" stroke="none" />)}
-              </div>
-              <blockquote className="review-quote">
-                &quot;Koçum sayesinde 3 ayda 40 net artırdım. Sınav stresini yönetmeyi ve verimli ders çalışmayı öğrendim. YKS&apos;de hedefimi tutturabildim.&quot;
-              </blockquote>
-              <div className="review-author">
-                <div className="review-author-avatar">A</div>
-                <div>
-                  <div className="review-author-name">Ahmet Y.</div>
-                  <div className="review-author-meta">12. Sınıf, YKS 2025</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Review 3 */}
-            <div className="card-glow review-card">
-              <div className="review-stars">
-                {[...Array(5)].map((_, i) => <Star key={i} size={16} fill="var(--color-gold)" stroke="none" />)}
-              </div>
-              <blockquote className="review-quote">
-                &quot;Hocalarımın ilgisi ve koçumun takibi ile kızım hedeflediği liseyi kazandı. Veliler için hazırlanan raporlama sistemi harika.&quot;
-              </blockquote>
-              <div className="review-author">
-                <div className="review-author-avatar">E</div>
-                <div>
-                  <div className="review-author-name">Elif K.</div>
-                  <div className="review-author-meta">Veli, LGS 2025</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* UNIVERSITY LOGOS SECTION */}
-      <section className="univ-logos-section">
-        <div className="container">
-          <div className="univ-logos-title reveal">Öğretmenlerimizin Mezun Olduğu Kurumlar</div>
-          
-          <div className="univ-logos-wrapper reveal">
-            <div className="univ-logos-track">
-              <div className="univ-logo-item">ODTÜ</div>
-              <div className="univ-logo-item">İTÜ</div>
-              <div className="univ-logo-item">KOÇ</div>
-              <div className="univ-logo-item">BİLKENT</div>
-              <div className="univ-logo-item">BOĞAZİÇİ</div>
-            </div>
-          </div>
-
-          <div className="stats-ribbon reveal">
-            <div className="stats-ribbon-item">
-              <div className="stats-ribbon-num numeric">500+</div>
-              <div className="stats-ribbon-label">Öğrenci Hazırlandı</div>
-            </div>
-            <div className="stats-ribbon-item">
-              <div className="stats-ribbon-num numeric">12</div>
-              <div className="stats-ribbon-label">Uzman Eğitmen</div>
-            </div>
-            <div className="stats-ribbon-item">
-              <div className="stats-ribbon-num numeric">%94</div>
-              <div className="stats-ribbon-label">Sınav Hedef Başarısı</div>
-            </div>
+          <div className="pricing-note reveal" style={{ textAlign: "center", marginTop: "24px" }}>
+            Fiyatlara KDV dahildir. İptal ve telafi garantisi mevcuttur.
           </div>
         </div>
       </section>
@@ -928,11 +819,11 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
                   Hızlı Başvuru ve Araçlar
                 </div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-                  <a href="/kocluk-basvuru" style={{ fontSize: "13px", padding: "6px 12px", borderRadius: "6px", backgroundColor: "#F0F5FB", color: "#0F2645", textDecoration: "none", fontWeight: "600", border: "1px solid #DDE6F0" }}>
-                    🎯 Koçluk Başvurusu
-                  </a>
                   <a href="/ozel-ders-basvuru" style={{ fontSize: "13px", padding: "6px 12px", borderRadius: "6px", backgroundColor: "#F0F5FB", color: "#0F2645", textDecoration: "none", fontWeight: "600", border: "1px solid #DDE6F0" }}>
-                    📚 Özel Ders Talebi
+                    📚 Birebir Özel Ders Talebi
+                  </a>
+                  <a href="#iletisim" style={{ fontSize: "13px", padding: "6px 12px", borderRadius: "6px", backgroundColor: "#F0F5FB", color: "#0F2645", textDecoration: "none", fontWeight: "600", border: "1px solid #DDE6F0" }}>
+                    💬 Bilgi & Danışmanlık
                   </a>
                   <a href="/tyt-puan-hesaplama" style={{ fontSize: "13px", padding: "6px 12px", borderRadius: "6px", backgroundColor: "#F0F5FB", color: "#0F2645", textDecoration: "none", fontWeight: "600", border: "1px solid #DDE6F0" }}>
                     🧮 TYT/YKS Hesaplama
@@ -1123,7 +1014,7 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
             <h5 className="footer-title">Hızlı Bağlantılar</h5>
             <ul className="footer-links">
               <li><a href="#ozel-ders" className="footer-link">Özel Ders Programları</a></li>
-              <li><a href="#kocluk" className="footer-link">Eğitim Koçluğu</a></li>
+              <li><a href="#paketler" className="footer-link">Özel Ders Paketimiz</a></li>
               <li><a href="/tyt-puan-hesaplama" className="footer-link">TYT Puan Hesaplama</a></li>
               <li><a href="/yks-puan-hesaplama" className="footer-link">YKS Puan Hesaplama</a></li>
               <li><a href="#ekibimiz" className="footer-link">Uzman Kadromuz</a></li>
@@ -1167,7 +1058,7 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
               {settings.contactPhone && (
                 <a href={`https://wa.me/${settings.contactPhone.replace(/[^0-9]/g, "")}`} className="footer-social-btn" title="WhatsApp" target="_blank" rel="noopener noreferrer"><Phone size={18} /></a>
               )}
-              <a href="/kocluk-basvuru" className="footer-social-btn" title="Hemen Başvur"><Sparkles size={18} /></a>
+              <a href="/ozel-ders-basvuru" className="footer-social-btn" title="Hemen Başvur"><Sparkles size={18} /></a>
             </div>
             <p style={{ fontSize: "13px", color: "var(--color-text-soft)" }}>
               YKS ve LGS sınav hazırlığında doğru adres.
