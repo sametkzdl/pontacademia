@@ -35,18 +35,21 @@ Pont Academy, YKS & LGS sınavlarına hazırlanan öğrenciler için birebir öz
 
 ---
 
-## 🧩 Yenilikçi Özellikler & Modüller
+## 🧩 Yenilikçi Özellikler & Son Geliştirmeler
 
 1. **Dinamik Sistem & Site Ayarları (`/admin/settings`)**:
-   - Ana sayfada gösterilen saatlik özel ders fiyatı, aylık koçluk fiyatı, üst kampanya bannerı ve iletişim bilgileri admin panelinden anlık güncellenir.
-2. **Rol Bazlı Otomatik Yönlendirme (Smart Login Redirect)**:
+   - Ana sayfada gösterilen saatlik özel ders fiyatı, aylık koçluk fiyatı, üst kampanya bannerı ve iletişim bilgileri admin panelinden anlık güncellenir ve veritabanına bağlıdır.
+2. **Admin Paneli Ders Sıralaması & 'İşlenmedi' Flag Sistemi**:
+   - Tüm ders listeleri varsayılan olarak en yeni oluşturulandan eskiye doğru (`createdAt: desc`) listelenir.
+   - Ders oturumunda taraflardan birinin 'İşlenmedi' bildirmesi durumunda `ISLENMEDI` statüsü verilir; bu durum yalnızca Admin Panelinde kırmızı yönetici dikkat bayrağı (`🚩 FLAG`) ve gerekçesiyle görünür.
+3. **Rol Bazlı Otomatik Yönlendirme (Smart Login Redirect)**:
    - Giriş yapıldığında kullanıcının rolüne göre (`ADMIN` → `/admin`, `TEACHER` → `/teacher`, `STUDENT` → `/student`) otomatik yönlendirme sağlanır.
-3. **Kaydırılabilir Çoklu Ders Rozetleri (`SubjectTagSlider`)**:
-   - Öğrencinin seçtiği çoklu dersler tablo kolonlarını bozmadan yatay kaydırılabilir amber rozetlerle sunulur.
-4. **Çoklu Branş Eşleştirme Sistemi (`StudentTeacherMatch`)**:
-   - Bir öğrenciye farklı branşlar için farklı öğretmenler atanabilir.
-5. **Gelişmiş Atomik Bileşen Kütüphanesi**:
-   - Tek tip `Input`, `PasswordInput`, `Button`, `Badge`, `Select`, `Textarea`, `Modal`, `SearchFilterBar` bileşenleriyle tam tutarlılık.
+4. **YKS & LGS Canlı Sınav Geri Sayımı**:
+   - Haziran ayı sınav takvimini dinamik hedefleyen hassas saniye sayaçları.
+5. **Mobil Optimize Puan Hesaplama Simülatörleri (`/tyt-puan-hesaplama`, `/yks-puan-hesaplama`)**:
+   - Mobilde taşmayan, modern ve sade kart tasarımlı net ve sıralama motoru.
+6. **Kaydırılabilir Çoklu Ders Rozetleri & Eşleştirme Sistemi**:
+   - Öğrencinin seçtiği çoklu dersler yatay kaydırılabilir rozetlerle sunulur, bir öğrenciye farklı branşlar için farklı eğitmenler atanabilir.
 
 ---
 

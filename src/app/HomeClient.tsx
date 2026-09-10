@@ -307,7 +307,6 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
             <div className="desktop-actions">
               <a href="#ozel-ders" className="nav-link">Özel Ders</a>
               <a href="#paketler" className="nav-link">Paketimiz</a>
-              <a href="#ekibimiz" className="nav-link">Eğitmenlerimiz</a>
               <a href="/tyt-puan-hesaplama" className="nav-link">TYT Hesapla</a>
               <a href="/yks-puan-hesaplama" className="nav-link">YKS Hesapla</a>
               <a href="/teacherApplicationForm" className="nav-link" style={{ textDecoration: "none" }}>
@@ -376,13 +375,6 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
                   <div className="mobile-nav-link-inner">
                     <Sparkles size={18} color="#C8952A" />
                     <span>Özel Ders Paketimiz</span>
-                  </div>
-                  <ArrowRight size={15} color="#C8952A" />
-                </a>
-                <a href="#ekibimiz" className="mobile-nav-link" onClick={handleMobileNavClick}>
-                  <div className="mobile-nav-link-inner">
-                    <GraduationCap size={18} color="#C8952A" />
-                    <span>Dereceli Eğitmen Kadromuz</span>
                   </div>
                   <ArrowRight size={15} color="#C8952A" />
                 </a>
@@ -483,7 +475,7 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
             
             <div className="hero-ctas">
               <a href="/ozel-ders-basvuru" className="btn btn-primary">Hemen Başla</a>
-              <a href="#ekibimiz" className="btn btn-secondary">Eğitmenlerimizi Gör</a>
+              <a href="#paketler" className="btn btn-secondary">Paketimizi İncele</a>
             </div>
           </div>
         </div>
@@ -599,80 +591,6 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
               </ul>
               <a href="#iletisim" className="btn btn-primary" style={{ marginTop: "auto" }}>Bilgi Al & Başvur</a>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* TEACHERS SHOWCASE (ÖĞRETMEN VİTRİNİ) */}
-      <section id="ekibimiz" data-theme="dark" style={{ position: "relative" }}>
-        {/* Alias target for #egitmenler */}
-        <span id="egitmenler" style={{ position: "absolute", top: "-80px", left: 0 }}></span>
-        
-        <div className="container">
-          <div className="section-header reveal">
-            <span className="section-subtitle">Alanında Uzman Ekibimiz</span>
-            <h2 className="dark-title">Uzman Kadromuz</h2>
-          </div>
-
-          <div className="teachers-container reveal">
-            <div className="teachers-grid">
-              {coaches.length > 0 ? (
-                coaches.map((coach) => (
-                  <div key={coach.id} className="card-glow teacher-card">
-                    <div className="teacher-img-wrapper">
-                      {coach.img && coach.showPhotoOnWeb !== false ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img 
-                          className="teacher-img" 
-                          src={coach.img} 
-                          alt={coach.name} 
-                          style={{ width: "96px", height: "96px", borderRadius: "50%", objectFit: "cover" }} 
-                        />
-                      ) : (
-                        <div style={{ width: "96px", height: "96px", borderRadius: "50%", backgroundColor: "#0F2645", display: "flex", alignItems: "center", justifyContent: "center", color: "#C8952A", border: "2px solid #C8952A", fontWeight: "800", fontSize: "30px" }}>
-                          {coach.name?.charAt(0) || <Brain size={38} />}
-                        </div>
-                      )}
-                      {coach.uni && (
-                        <div className="teacher-uni-badge" style={{ fontSize: "10px", padding: "3px 8px", maxWidth: "160px", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }} title={coach.uni}>
-                          {coach.uni}
-                        </div>
-                      )}
-                    </div>
-                    <h4 className="teacher-name">{coach.name}</h4>
-                    <div className="teacher-branch">
-                      {coach.subjects && coach.subjects.length > 0 ? coach.subjects.join(" & ") : (coach.branch || "Eğitim Koçu")}
-                    </div>
-                    <div className="teacher-badge-container">
-                      <span className="pill-badge pill-badge-blue" style={{ fontSize: "11px", padding: "4px 8px" }}>
-                        {coach.experienceYears ? `${coach.experienceYears} Yıl Deneyim` : "YKS & LGS"}
-                      </span>
-                      <span className="pill-badge pill-badge-gold" style={{ fontSize: "11px", padding: "4px 8px" }}>
-                        Özel Ders & Koçluk
-                      </span>
-                    </div>
-                    <div className="teacher-btn-wrapper" style={{ marginTop: "12px", display: "flex", gap: "8px", justifyContent: "center" }}>
-                      <a href={`/ozel-ders-basvuru?coachId=${coach.id}`} className="link-gold">Ders Talebi Oluştur <ArrowRight size={14} /></a>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: "36px 20px", backgroundColor: "#FFFFFF", borderRadius: "14px", border: "1px solid #DDE6F0" }}>
-                  <p style={{ color: "#64748B", fontSize: "15px", margin: "0 0 14px 0" }}>
-                    Eğitmen kadromuz güncelleniyor. Birebir özel ders veya danışmanlık talebiniz için hemen başvurabilirsiniz.
-                  </p>
-                  <a href="/ozel-ders-basvuru" className="btn btn-primary" style={{ display: "inline-flex" }}>
-                    Hemen Başvuru Yap <ArrowRight size={16} style={{ marginLeft: "6px" }} />
-                  </a>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div style={{ textAlign: "center", marginTop: "28px" }} className="reveal">
-            <a href="/ozel-ders-basvuru" className="btn btn-secondary" style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
-              Tüm Eğitmenlerimizi Gör & Ders Talebi Oluştur <ArrowRight size={16} />
-            </a>
           </div>
         </div>
       </section>
@@ -1017,7 +935,6 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
               <li><a href="#paketler" className="footer-link">Özel Ders Paketimiz</a></li>
               <li><a href="/tyt-puan-hesaplama" className="footer-link">TYT Puan Hesaplama</a></li>
               <li><a href="/yks-puan-hesaplama" className="footer-link">YKS Puan Hesaplama</a></li>
-              <li><a href="#ekibimiz" className="footer-link">Uzman Kadromuz</a></li>
               <li><a href="/teacherApplicationForm" className="footer-link">Eğitmen / Koç Başvurusu</a></li>
             </ul>
           </div>
