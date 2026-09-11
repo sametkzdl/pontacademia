@@ -16,7 +16,7 @@ import {
   Play,
   Pause
 } from "lucide-react";
-import { Button, Badge, Select, Input, Textarea, Modal, SearchFilterBar } from "@/components";
+import { Button, Badge, Select, Input, Textarea, Modal, SearchFilterBar, TagSlider } from "@/components";
 import { MATCH_SUBJECT_OPTIONS } from "@/constants";
 export { MATCH_SUBJECT_OPTIONS };
 
@@ -552,14 +552,19 @@ export default function MatchesPage() {
                     </td>
                     <td style={{ padding: "14px 18px" }}>
                       <div style={{ fontWeight: "700", color: "#0F2645" }}>{m.teacher?.name || "Bilinmiyor"}</div>
-                      <div style={{ fontSize: "12px", color: "#64748B" }}>
+                      <div style={{ fontSize: "12px", color: "#64748B", marginBottom: "4px" }}>
                         {m.teacher?.email} {m.teacher?.teacherProfile?.school ? `• ${m.teacher.teacherProfile.school}${m.teacher.teacherProfile.department ? ` - ${m.teacher.teacherProfile.department}` : ""}` : ""}
                       </div>
-                      {(m.teacher?.teacherProfile?.currentDistrict || m.teacher?.teacherProfile?.districts) && (
-                        <div style={{ fontSize: "11px", color: "#2563EB", fontWeight: "600", marginTop: "2px" }}>
-                          📍 {m.teacher.teacherProfile.currentDistrict || "İstanbul"} {m.teacher.teacherProfile.districts ? `• 🗺️ ${m.teacher.teacherProfile.districts}` : ""}
-                        </div>
-                      )}
+                      <TagSlider
+                        items={m.teacher?.teacherProfile?.districts}
+                        variant="blue"
+                        icon="map"
+                        itemCountLabel="Hizmet Bölgesi"
+                        subtitle={m.teacher?.teacherProfile?.currentDistrict ? `📍 İkamet: ${m.teacher.teacherProfile.currentDistrict}` : undefined}
+                        emptyText={m.teacher?.teacherProfile?.currentDistrict ? `📍 ${m.teacher.teacherProfile.currentDistrict} (Tüm İstanbul)` : undefined}
+                        maxWidth="260px"
+                        compact
+                      />
                     </td>
                     <td style={{ padding: "14px 18px" }}>
                       {m.status === "PASSIVE" ? (
@@ -836,16 +841,19 @@ export default function MatchesPage() {
 
               {/* Öğretmen Detay ve Konum Bilgisi */}
               {selectedTeacher && (
-                <div style={{ fontSize: "12px", color: "#475569", marginTop: "-8px", marginBottom: "16px", backgroundColor: "#F8FAFC", padding: "8px 12px", borderRadius: "6px", border: "1px solid #E2E8F0" }}>
-                  <div style={{ color: "#1E293B", fontWeight: "600" }}>
+                <div style={{ fontSize: "12px", color: "#475569", marginTop: "-8px", marginBottom: "16px", backgroundColor: "#F8FAFC", padding: "10px 12px", borderRadius: "8px", border: "1px solid #E2E8F0" }}>
+                  <div style={{ color: "#1E293B", fontWeight: "600", marginBottom: "6px" }}>
                     🏫 <strong>Üniversite / Bölüm:</strong> {selectedTeacher.teacherProfile?.school ? `${selectedTeacher.teacherProfile.school}${selectedTeacher.teacherProfile.department ? ` • ${selectedTeacher.teacherProfile.department}` : ""}` : "Belirtilmedi"}
                   </div>
-                  {(selectedTeacher.teacherProfile?.currentDistrict || selectedTeacher.teacherProfile?.districts) && (
-                    <div style={{ marginTop: "4px", color: "#2563EB", fontWeight: "600" }}>
-                      📍 <strong>İkamet:</strong> {selectedTeacher.teacherProfile.currentDistrict || "İstanbul"} 
-                      {selectedTeacher.teacherProfile.districts ? ` • 🗺️ Ders Bölgeleri: ${selectedTeacher.teacherProfile.districts}` : ""}
-                    </div>
-                  )}
+                  <TagSlider
+                    items={selectedTeacher.teacherProfile?.districts}
+                    variant="blue"
+                    icon="map"
+                    itemCountLabel="Hizmet Bölgesi"
+                    subtitle={`📍 İkamet: ${selectedTeacher.teacherProfile?.currentDistrict || "İstanbul"}`}
+                    emptyText={`📍 İkamet: ${selectedTeacher.teacherProfile?.currentDistrict || "İstanbul"} (Tüm İstanbul)`}
+                    maxWidth="100%"
+                  />
                 </div>
               )}
 
@@ -1053,15 +1061,18 @@ export default function MatchesPage() {
                       <div style={{ color: "#1E293B", fontWeight: "700", marginBottom: "3px" }}>
                         ✨ Yeni Seçilen Eğitmen: <span style={{ color: "#1D4ED8" }}>{editSelectedTeacher.name}</span>
                       </div>
-                      <div style={{ color: "#475569" }}>
+                      <div style={{ color: "#475569", marginBottom: "6px" }}>
                         🏫 <strong>Üniversite / Bölüm:</strong> {editSelectedTeacher.teacherProfile?.school ? `${editSelectedTeacher.teacherProfile.school}${editSelectedTeacher.teacherProfile.department ? ` • ${editSelectedTeacher.teacherProfile.department}` : ""}` : "Belirtilmedi"}
                       </div>
-                      {(editSelectedTeacher.teacherProfile?.currentDistrict || editSelectedTeacher.teacherProfile?.districts) && (
-                        <div style={{ marginTop: "3px", color: "#2563EB", fontWeight: "600" }}>
-                          📍 <strong>İkamet:</strong> {editSelectedTeacher.teacherProfile.currentDistrict || "İstanbul"}
-                          {editSelectedTeacher.teacherProfile.districts ? ` • 🗺️ Ders Bölgeleri: ${editSelectedTeacher.teacherProfile.districts}` : ""}
-                        </div>
-                      )}
+                      <TagSlider
+                        items={editSelectedTeacher.teacherProfile?.districts}
+                        variant="blue"
+                        icon="map"
+                        itemCountLabel="Hizmet Bölgesi"
+                        subtitle={`📍 İkamet: ${editSelectedTeacher.teacherProfile?.currentDistrict || "İstanbul"}`}
+                        emptyText={`📍 İkamet: ${editSelectedTeacher.teacherProfile?.currentDistrict || "İstanbul"} (Tüm İstanbul)`}
+                        maxWidth="100%"
+                      />
                     </>
                   )}
                 </div>

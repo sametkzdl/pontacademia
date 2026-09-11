@@ -8,7 +8,22 @@ export class UserService {
     const [teachers, students] = await Promise.all([
       db.user.findMany({
         where: { role: "TEACHER" },
-        include: { teacherProfile: true },
+        include: { 
+          teacherProfile: true,
+          teacherMatches: {
+            where: { status: "ACTIVE" },
+            include: {
+              student: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  studentProfile: true,
+                },
+              },
+            },
+          },
+        },
         orderBy: { createdAt: "desc" },
       }),
       db.user.findMany({

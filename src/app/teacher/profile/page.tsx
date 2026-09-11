@@ -13,7 +13,7 @@ import {
   AlertCircle,
   GraduationCap
 } from "lucide-react";
-import { Button, Input, Select, Modal, Avatar } from "@/components";
+import { Button, Input, Select, Modal, Avatar, TagSlider } from "@/components";
 import { ISTANBUL_DISTRICTS, ALL_ISTANBUL_DISTRICTS as ALL_DISTRICTS } from "@/constants";
 
 export default function TeacherProfilePage() {
@@ -380,24 +380,21 @@ export default function TeacherProfilePage() {
 
       {/* Card 3: Ders Verilebilen İlçeler */}
       <div style={{ backgroundColor: "#FFFFFF", borderRadius: "14px", border: "1px solid #DDE6F0", padding: "20px", marginBottom: "24px", boxShadow: "0 4px 16px rgba(15, 38, 69, 0.04)" }}>
-        <h3 style={{ fontSize: "16px", fontWeight: "800", color: "#0F2645", marginBottom: "12px", display: "flex", alignItems: "center", gap: "8px" }}>
+        <h3 style={{ fontSize: "16px", fontWeight: "800", color: "#0F2645", marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
           <MapPin size={18} color="#C8952A" /> Yüz Yüze Ders Verilebilen İlçeler
         </h3>
-        <p style={{ fontSize: "13px", color: "#64748B", margin: "0 0 16px 0" }}>
+        <p style={{ fontSize: "13px", color: "#64748B", margin: "0 0 14px 0" }}>
           Özel ders ve yüz yüze koçluk görüşmelerinde ders verebileceğiniz ilçeler
         </p>
 
-        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-          {profile?.districts ? (
-            profile.districts.split(",").map((d: string, idx: number) => (
-              <span key={idx} style={{ backgroundColor: "#F1F5F9", color: "#0F2645", padding: "6px 14px", borderRadius: "20px", fontSize: "13px", fontWeight: "600", border: "1px solid #CBD5E1" }}>
-                📍 {d.trim()}
-              </span>
-            ))
-          ) : (
-            <span style={{ color: "#94A3B8", fontSize: "13px" }}>Henüz ilçe seçilmedi (Tüm İstanbul / Online).</span>
-          )}
-        </div>
+        <TagSlider
+          items={profile?.districts}
+          variant="blue"
+          icon="map"
+          itemCountLabel="Hizmet Bölgesi"
+          emptyText="Henüz ilçe seçilmedi (Tüm İstanbul / Online)."
+          maxWidth="100%"
+        />
       </div>
 
       {/* Card 4: Ders Yetkinlik Puanlarım (1 - 10) */}

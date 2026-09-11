@@ -8,9 +8,19 @@ import {
   UserCheck, 
   X,
   AlertCircle, 
-  Sparkles
+  Sparkles,
+  BookOpen,
+  Target,
+  Phone,
+  Mail,
+  MapPin,
+  GraduationCap,
+  Calendar,
+  User,
+  Home
 } from "lucide-react";
-import { Button, Badge, PasswordInput, Modal, SearchFilterBar, SubjectTagSlider } from "@/components";
+import { Button, Badge, PasswordInput, Modal, SearchFilterBar, Avatar, SubjectTagSlider } from "@/components";
+import { getPhotoUrl } from "@/utils/media";
 
 export default function StudentApplicationsPage() {
   const [studentApps, setStudentApps] = useState<any[]>([]);
@@ -105,7 +115,9 @@ export default function StudentApplicationsPage() {
       const matchesSearch = 
         app.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (app.email && app.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (app.subject && app.subject.toLowerCase().includes(searchQuery.toLowerCase()));
+        (app.subject && app.subject.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (app.selectedSubjects && app.selectedSubjects.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (app.currentDistrict && app.currentDistrict.toLowerCase().includes(searchQuery.toLowerCase()));
       if (!matchesSearch) return false;
       if (statusFilter === "ALL") return true;
       return app.status === statusFilter;
@@ -124,9 +136,9 @@ export default function StudentApplicationsPage() {
       {/* Search & Filter Bar */}
       <SearchFilterBar
         title="Öğrenci & Koçluk Başvuruları"
-        subtitle="Koçluk veya özel ders başvuru formlarını dolduran öğrencilerin ve velilerin kayıtları"
+        subtitle="Özel ders veya koçluk başvuru formunu dolduran aday öğrencilerin ve velilerin tam kayıtları"
         titleIcon={<Users size={22} color="#C8952A" />}
-        searchPlaceholder="İsim, e-posta veya alan ara..."
+        searchPlaceholder="İsim, e-posta, ders veya ilçe ara..."
         searchValue={searchQuery}
         onSearchChange={setSearchQuery}
         filterLabel="Durum"
@@ -158,6 +170,7 @@ export default function StudentApplicationsPage() {
                 <th style={{ padding: "14px 18px", fontWeight: "700" }}>İletişim</th>
                 <th style={{ padding: "14px 18px", fontWeight: "700" }}>Sınıf & İlçe</th>
                 <th style={{ padding: "14px 18px", fontWeight: "700" }}>Talep & Hedef</th>
+                <th style={{ padding: "14px 18px", fontWeight: "700" }}>Tür</th>
                 <th style={{ padding: "14px 18px", fontWeight: "700" }}>Durum</th>
                 <th style={{ padding: "14px 18px", fontWeight: "700" }}>Tarih</th>
                 <th style={{ padding: "14px 18px", fontWeight: "700", textAlign: "right" }}>İşlemler</th>
@@ -166,13 +179,13 @@ export default function StudentApplicationsPage() {
             <tbody>
               {isLoading ? (
                 <tr>
-                  <td colSpan={7} style={{ padding: "40px 16px", textAlign: "center", color: "#94A3B8" }}>
+                  <td colSpan={8} style={{ padding: "40px 16px", textAlign: "center", color: "#94A3B8" }}>
                     Yükleniyor...
                   </td>
                 </tr>
               ) : filteredApps.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ padding: "40px 16px", textAlign: "center", color: "#94A3B8" }}>
+                  <td colSpan={8} style={{ padding: "40px 16px", textAlign: "center", color: "#94A3B8" }}>
                     Eşleşen öğrenci başvurusu bulunamadı.
                   </td>
                 </tr>
@@ -180,10 +193,21 @@ export default function StudentApplicationsPage() {
                 filteredApps.map((app) => (
                   <tr key={app.id} style={{ borderBottom: "1px solid #F1F5F9" }}>
                     <td style={{ padding: "14px 18px" }}>
-                      <div style={{ fontWeight: "700", color: "#0F2645" }}>{app.name}</div>
-                      {app.parentName && (
-                        <div style={{ fontSize: "12px", color: "#64748B" }}>Veli: {app.parentName}</div>
-                      )}
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <Avatar
+                          src={app.photoFileName || app.photoUrl}
+                          name={app.name}
+                          size={38}
+                          showBorder
+                          style={{ boxShadow: "0 2px 4px rgba(15, 38, 69, 0.08)" }}
+                        />
+                        <div>
+                          <div style={{ fontWeight: "700", color: "#0F2645" }}>{app.name}</div>
+                          {app.parentName && (
+                            <div style={{ fontSize: "12px", color: "#64748B" }}>Veli: {app.parentName}</div>
+                          )}
+                        </div>
+                      </div>
                     </td>
                     <td style={{ padding: "14px 18px" }}>
                       <div style={{ color: "#0F2645" }}>{app.email || "E-posta yok"}</div>
@@ -191,14 +215,27 @@ export default function StudentApplicationsPage() {
                     </td>
                     <td style={{ padding: "14px 18px" }}>
                       <div style={{ fontWeight: "600", color: "#0F2645" }}>{app.grade || "Sınıf Belirtilmedi"}</div>
-                      <div style={{ fontSize: "12px", color: "#64748B" }}>{app.city || app.district || "İstanbul"}</div>
+                      <div style={{ fontSize: "12px", color: "#64748B" }}>{app.currentDistrict || app.city || "İstanbul"}</div>
                     </td>
                     <td style={{ padding: "14px 18px", maxWidth: "260px" }}>
                       <SubjectTagSlider 
-                        subjects={app.subject || app.preferredService || "Eğitim Koçluğu"}
+                        subjects={app.selectedSubjects || app.subject || "Eğitim Koçluğu"}
                         target={app.target}
                         maxWidth="240px"
                       />
+                    </td>
+                    <td style={{ padding: "14px 18px" }}>
+                      <span style={{ 
+                        fontSize: "11px", 
+                        fontWeight: "700", 
+                        padding: "3px 8px", 
+                        borderRadius: "6px",
+                        backgroundColor: app.formType === "kocluk" ? "#EDE9FE" : "#EFF6FF",
+                        color: app.formType === "kocluk" ? "#6D28D9" : "#1D4ED8",
+                        border: app.formType === "kocluk" ? "1px solid #DDD6FE" : "1px solid #BFDBFE"
+                      }}>
+                        {app.formType === "kocluk" ? "🎓 Koçluk" : "📚 Özel Ders"}
+                      </span>
                     </td>
                     <td style={{ padding: "14px 18px" }}>
                       <Badge variant={app.status as any} />
@@ -244,12 +281,12 @@ export default function StudentApplicationsPage() {
         </div>
       </div>
 
-      {/* Detail Modal */}
+      {/* Comprehensive Detail Modal */}
       <Modal
         isOpen={modalType === "detail" && Boolean(selectedApp)}
         onClose={closeModal}
-        maxWidth="750px"
-        title={`${selectedApp?.name || ""} • Öğrenci Başvuru Detayı`}
+        maxWidth="820px"
+        title={`${selectedApp?.name || ""} • Başvuru Detayları`}
         titleIcon={<Users size={20} color="#C8952A" />}
         footer={
           <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", width: "100%" }}>
@@ -268,60 +305,204 @@ export default function StudentApplicationsPage() {
         }
       >
         {selectedApp && (
-          <div>
-            <div className="admin-grid-2col" style={{ marginBottom: "20px", fontSize: "14px" }}>
-              <div>
-                <span style={{ fontSize: "12px", color: "#64748B", fontWeight: "600", display: "block" }}>Öğrenci Adı</span>
-                <strong style={{ color: "#0F2645" }}>{selectedApp.name}</strong>
-              </div>
-              <div>
-                <span style={{ fontSize: "12px", color: "#64748B", fontWeight: "600", display: "block" }}>Veli Adı</span>
-                <strong style={{ color: "#0F2645" }}>{selectedApp.parentName || "Belirtilmedi"}</strong>
-              </div>
-              <div>
-                <span style={{ fontSize: "12px", color: "#64748B", fontWeight: "600", display: "block" }}>E-Posta</span>
-                <strong style={{ color: "#0F2645" }}>{selectedApp.email || "E-posta yok"}</strong>
-              </div>
-              <div>
-                <span style={{ fontSize: "12px", color: "#64748B", fontWeight: "600", display: "block" }}>Telefon</span>
-                <strong style={{ color: "#0F2645" }}>{selectedApp.phone}</strong>
-              </div>
-              <div>
-                <span style={{ fontSize: "12px", color: "#64748B", fontWeight: "600", display: "block" }}>Sınıf / Seviye</span>
-                <strong style={{ color: "#0F2645" }}>{selectedApp.grade || "Belirtilmedi"}</strong>
-              </div>
-              <div>
-                <span style={{ fontSize: "12px", color: "#64748B", fontWeight: "600", display: "block" }}>Şehir / İlçe</span>
-                <strong style={{ color: "#0F2645" }}>{selectedApp.city || selectedApp.district || "İstanbul"}</strong>
-              </div>
-              <div style={{ gridColumn: "1 / -1", backgroundColor: "#F8FAFC", padding: "14px 16px", borderRadius: "8px", border: "1px solid #E2E8F0" }}>
-                <span style={{ fontSize: "12px", color: "#64748B", fontWeight: "700", display: "block", marginBottom: "8px" }}>Talep Edilen Dersler & Hizmetler</span>
-                <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
-                  {(selectedApp.subject || selectedApp.preferredService || "Eğitim Koçluğu")
-                    .split(/[,;\n]+/)
-                    .map((s: string) => s.trim())
-                    .filter(Boolean)
-                    .map((sub: string, i: number) => (
-                      <span key={i} style={{ backgroundColor: "#FEF3C7", color: "#92400E", border: "1px solid #FCD34D", padding: "4px 10px", borderRadius: "6px", fontSize: "12px", fontWeight: "700" }}>
-                        {sub}
-                      </span>
-                    ))}
+          <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+            
+            {/* Header Banner */}
+            <div style={{ 
+              display: "flex", 
+              alignItems: "center", 
+              gap: "20px", 
+              padding: "16px 20px", 
+              backgroundColor: "#F8FAFC", 
+              borderRadius: "12px", 
+              border: "1px solid #E2E8F0",
+              flexWrap: "wrap"
+            }}>
+              <Avatar
+                src={selectedApp.photoFileName || selectedApp.photoUrl}
+                name={selectedApp.name}
+                size={80}
+                showBorder
+                style={{ boxShadow: "0 4px 12px rgba(15, 38, 69, 0.15)", border: "3px solid #C8952A" }}
+              />
+              <div style={{ flex: 1, minWidth: "220px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", marginBottom: "6px" }}>
+                  <h3 style={{ margin: 0, fontSize: "20px", fontWeight: "800", color: "#0F2645" }}>
+                    {selectedApp.name}
+                  </h3>
+                  <span style={{ 
+                    fontSize: "12px", 
+                    fontWeight: "800", 
+                    padding: "3px 10px", 
+                    borderRadius: "6px",
+                    backgroundColor: selectedApp.formType === "kocluk" ? "#EDE9FE" : "#EFF6FF",
+                    color: selectedApp.formType === "kocluk" ? "#6D28D9" : "#1D4ED8",
+                    border: selectedApp.formType === "kocluk" ? "1px solid #DDD6FE" : "1px solid #BFDBFE"
+                  }}>
+                    {selectedApp.formType === "kocluk" ? "🎓 Eğitim Koçluğu Başvurusu" : "📚 Birebir Özel Ders Başvurusu"}
+                  </span>
+                  <Badge variant={selectedApp.status as any} />
                 </div>
-              </div>
-              <div>
-                <span style={{ fontSize: "12px", color: "#64748B", fontWeight: "600", display: "block" }}>Hedef</span>
-                <span style={{ color: "#0F2645" }}>{selectedApp.target || "Belirtilmedi"}</span>
+                <div style={{ fontSize: "13px", color: "#64748B", display: "flex", flexWrap: "wrap", gap: "16px" }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                    <Calendar size={14} color="#C8952A" /> Başvuru: {new Date(selectedApp.createdAt).toLocaleDateString("tr-TR")}
+                  </span>
+                  {selectedApp.scoreType && (
+                    <span style={{ fontWeight: "700", color: "#C8952A" }}>
+                      Alan: {selectedApp.scoreType}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
+            {/* Grid 1: Öğrenci ve Veli Bilgileri */}
+            <div className="admin-grid-2col">
+              {/* Öğrenci Bilgileri */}
+              <div style={{ backgroundColor: "#FFFFFF", borderRadius: "10px", border: "1px solid #E2E8F0", padding: "16px" }}>
+                <div style={{ fontSize: "14px", fontWeight: "800", color: "#0F2645", marginBottom: "12px", display: "flex", alignItems: "center", gap: "6px", borderBottom: "1px solid #F1F5F9", paddingBottom: "8px" }}>
+                  <User size={16} color="#C8952A" /> 1. Öğrenci İletişim Bilgileri
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "10px", fontSize: "13px" }}>
+                  <div>
+                    <span style={{ fontSize: "11px", color: "#64748B", fontWeight: "700", display: "block" }}>Öğrenci Adı Soyadı</span>
+                    <strong style={{ color: "#0F2645" }}>{selectedApp.name}</strong>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: "11px", color: "#64748B", fontWeight: "700", display: "block" }}>E-Posta Adresi</span>
+                    <strong style={{ color: "#0F2645" }}>{selectedApp.email || "Belirtilmedi"}</strong>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: "11px", color: "#64748B", fontWeight: "700", display: "block" }}>Telefon Numarası</span>
+                    <strong style={{ color: "#0F2645" }}>{selectedApp.phone}</strong>
+                  </div>
+                </div>
+              </div>
+
+              {/* Veli Bilgileri */}
+              <div style={{ backgroundColor: "#FFFFFF", borderRadius: "10px", border: "1px solid #E2E8F0", padding: "16px" }}>
+                <div style={{ fontSize: "14px", fontWeight: "800", color: "#0F2645", marginBottom: "12px", display: "flex", alignItems: "center", gap: "6px", borderBottom: "1px solid #F1F5F9", paddingBottom: "8px" }}>
+                  <Users size={16} color="#C8952A" /> 2. Veli İletişim Bilgileri
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "10px", fontSize: "13px" }}>
+                  <div>
+                    <span style={{ fontSize: "11px", color: "#64748B", fontWeight: "700", display: "block" }}>Veli Adı Soyadı</span>
+                    <strong style={{ color: "#0F2645" }}>{selectedApp.parentName || "Belirtilmedi"}</strong>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: "11px", color: "#64748B", fontWeight: "700", display: "block" }}>Veli Telefon Numarası</span>
+                    <strong style={{ color: "#0F2645" }}>{selectedApp.parentPhone || "Belirtilmedi"}</strong>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: "11px", color: "#64748B", fontWeight: "700", display: "block" }}>İletişim Notu</span>
+                    <span style={{ color: "#64748B" }}>Özel ders ve koçluk planlaması için aranabilir.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Grid 2: Akademik Hedef & Konum Bilgileri */}
+            <div className="admin-grid-2col">
+              {/* Akademik & Hedef */}
+              <div style={{ backgroundColor: "#FFFFFF", borderRadius: "10px", border: "1px solid #E2E8F0", padding: "16px" }}>
+                <div style={{ fontSize: "14px", fontWeight: "800", color: "#0F2645", marginBottom: "12px", display: "flex", alignItems: "center", gap: "6px", borderBottom: "1px solid #F1F5F9", paddingBottom: "8px" }}>
+                  <GraduationCap size={16} color="#C8952A" /> 3. Akademik Durum & Hedef
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "10px", fontSize: "13px" }}>
+                  <div>
+                    <span style={{ fontSize: "11px", color: "#64748B", fontWeight: "700", display: "block" }}>Sınıf / Seviye</span>
+                    <strong style={{ color: "#0F2645" }}>{selectedApp.grade || "Belirtilmedi"}</strong>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: "11px", color: "#64748B", fontWeight: "700", display: "block" }}>Puan Türü / Alan</span>
+                    <strong style={{ color: "#0F2645" }}>{selectedApp.scoreType || "Genel"}</strong>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: "11px", color: "#64748B", fontWeight: "700", display: "block" }}>Hedeflenen Üniversite / Bölüm / Lise</span>
+                    <strong style={{ color: "#C8952A" }}>{selectedApp.target || "Belirtilmedi"}</strong>
+                  </div>
+                </div>
+              </div>
+
+              {/* Konum & Açık Adres */}
+              <div style={{ backgroundColor: "#FFFFFF", borderRadius: "10px", border: "1px solid #E2E8F0", padding: "16px" }}>
+                <div style={{ fontSize: "14px", fontWeight: "800", color: "#0F2645", marginBottom: "12px", display: "flex", alignItems: "center", gap: "6px", borderBottom: "1px solid #F1F5F9", paddingBottom: "8px" }}>
+                  <Home size={16} color="#C8952A" /> 4. Konum & İkametgah Adresi
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "10px", fontSize: "13px" }}>
+                  <div>
+                    <span style={{ fontSize: "11px", color: "#64748B", fontWeight: "700", display: "block" }}>İkamet Edilen İlçe / Şehir</span>
+                    <strong style={{ color: "#0F2645" }}>📍 {selectedApp.currentDistrict || selectedApp.city || "İstanbul"}</strong>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: "11px", color: "#64748B", fontWeight: "700", display: "block" }}>Açık Adres / Mahalle / Semt</span>
+                    <strong style={{ color: "#0F2645" }}>{selectedApp.currentAddress || "Belirtilmedi"}</strong>
+                  </div>
+                  {selectedApp.coachName && (
+                    <div>
+                      <span style={{ fontSize: "11px", color: "#64748B", fontWeight: "700", display: "block" }}>Tercih Edilen Koç</span>
+                      <strong style={{ color: "#C8952A" }}>{selectedApp.coachName}</strong>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Talep Edilen Dersler */}
+            <div style={{ backgroundColor: "#FFFFFF", borderRadius: "10px", border: "1px solid #E2E8F0", padding: "16px" }}>
+              <div style={{ fontSize: "14px", fontWeight: "800", color: "#0F2645", marginBottom: "12px", display: "flex", alignItems: "center", gap: "6px", borderBottom: "1px solid #F1F5F9", paddingBottom: "8px" }}>
+                <BookOpen size={16} color="#C8952A" /> 5. Destek Alınmak İstenen Dersler & Hizmetler
+              </div>
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                {(selectedApp.selectedSubjects || selectedApp.subject || "Eğitim Koçluğu")
+                  .split(/[,;\n]+/)
+                  .map((s: string) => s.trim())
+                  .filter(Boolean)
+                  .map((sub: string, i: number) => (
+                    <span key={i} style={{ backgroundColor: "#FEF3C7", color: "#92400E", border: "1px solid #FCD34D", padding: "6px 12px", borderRadius: "8px", fontSize: "13px", fontWeight: "700" }}>
+                      📘 {sub}
+                    </span>
+                  ))}
+              </div>
+            </div>
+
+            {/* Ek Notlar */}
             {selectedApp.notes && (
-              <div style={{ marginBottom: "20px" }}>
-                <span style={{ fontSize: "12px", color: "#64748B", fontWeight: "600", display: "block", marginBottom: "4px" }}>Öğrenci Notları / Ek Talepler</span>
-                <p style={{ backgroundColor: "#F8FAFC", padding: "12px", borderRadius: "8px", fontSize: "14px", color: "#334155", margin: 0, lineHeight: "1.5" }}>
+              <div style={{ backgroundColor: "#FFFFFF", borderRadius: "10px", border: "1px solid #E2E8F0", padding: "16px" }}>
+                <div style={{ fontSize: "14px", fontWeight: "800", color: "#0F2645", marginBottom: "8px" }}>
+                  📝 Öğrenci Notları / Özel İstekler
+                </div>
+                <p style={{ backgroundColor: "#F8FAFC", padding: "12px", borderRadius: "8px", fontSize: "13px", color: "#334155", margin: 0, lineHeight: "1.6", border: "1px solid #E2E8F0" }}>
                   {selectedApp.notes}
                 </p>
               </div>
             )}
+
+            {/* Profil Fotoğrafı Önizlemesi */}
+            {getPhotoUrl(selectedApp.photoFileName || selectedApp.photoUrl) && (
+              <div style={{ backgroundColor: "#FFFFFF", borderRadius: "10px", border: "1px solid #E2E8F0", padding: "16px" }}>
+                <div style={{ fontSize: "14px", fontWeight: "800", color: "#0F2645", marginBottom: "10px" }}>
+                  🖼️ Yüklenen Profil / Vesikalık Fotoğrafı
+                </div>
+                <div style={{ 
+                  borderRadius: "10px", 
+                  overflow: "hidden", 
+                  border: "1px solid #E2E8F0", 
+                  maxHeight: "300px", 
+                  display: "flex", 
+                  alignItems: "center", 
+                  justifyContent: "center",
+                  backgroundColor: "#0F2645"
+                }}>
+                  <img
+                    src={getPhotoUrl(selectedApp.photoFileName || selectedApp.photoUrl)!}
+                    alt={selectedApp.name}
+                    style={{ maxWidth: "100%", maxHeight: "300px", objectFit: "contain" }}
+                  />
+                </div>
+              </div>
+            )}
+
           </div>
         )}
       </Modal>
@@ -363,7 +544,7 @@ export default function StudentApplicationsPage() {
             <div style={{ backgroundColor: "#F8FAFC", padding: "12px 14px", borderRadius: "8px", border: "1px solid #E2E8F0", marginBottom: "16px" }}>
               <div style={{ fontSize: "12px", color: "#64748B", fontWeight: "700", marginBottom: "6px" }}>Öğrencinin Talep Ettiği Dersler:</div>
               <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
-                {(selectedApp.subject || selectedApp.preferredService || "Eğitim Koçluğu")
+                {(selectedApp.selectedSubjects || selectedApp.subject || "Eğitim Koçluğu")
                   .split(/[,;\n]+/)
                   .map((s: string) => s.trim())
                   .filter(Boolean)
@@ -408,4 +589,3 @@ export default function StudentApplicationsPage() {
     </div>
   );
 }
-

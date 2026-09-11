@@ -19,6 +19,7 @@ import {
   UserCheck
 } from "lucide-react";
 import { Button, Badge, PasswordInput, Modal, SearchFilterBar, Avatar, SubjectTagSlider } from "@/components";
+import { getPhotoUrl } from "@/utils/media";
 
 export default function StudentsListPage() {
   const [students, setStudents] = useState<any[]>([]);
@@ -516,6 +517,31 @@ export default function StudentsListPage() {
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* Direct High-Resolution Photo Preview if available */}
+            {getPhotoUrl(selectedStudent.studentProfile?.photoUrl) && (
+              <div style={{ backgroundColor: "#FFFFFF", borderRadius: "10px", border: "1px solid #E2E8F0", padding: "16px" }}>
+                <div style={{ fontSize: "14px", fontWeight: "800", color: "#0F2645", marginBottom: "10px" }}>
+                  🖼️ Öğrenci Profil Fotoğrafı Önizlemesi
+                </div>
+                <div style={{ 
+                  borderRadius: "10px", 
+                  overflow: "hidden", 
+                  border: "1px solid #E2E8F0", 
+                  maxHeight: "260px", 
+                  display: "flex", 
+                  alignItems: "center", 
+                  justifyContent: "center",
+                  backgroundColor: "#0F2645"
+                }}>
+                  <img
+                    src={getPhotoUrl(selectedStudent.studentProfile?.photoUrl)!}
+                    alt={selectedStudent.name}
+                    style={{ maxWidth: "100%", maxHeight: "260px", objectFit: "contain" }}
+                  />
                 </div>
               </div>
             )}

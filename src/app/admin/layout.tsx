@@ -15,7 +15,8 @@ import {
   LogOut,
   Calendar,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Mail
 } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -161,6 +162,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       icon: MessageSquare,
       badge: badgeCounts.unreadMessages,
       badgeColor: "#EF4444",
+    },
+    {
+      href: "/admin/mail-template",
+      label: "Mail Template Oluştur",
+      icon: Mail,
     },
     {
       href: "/admin/settings",

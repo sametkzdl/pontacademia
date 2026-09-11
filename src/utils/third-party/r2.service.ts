@@ -115,7 +115,11 @@ export class R2StorageService {
         contentLength: response.ContentLength,
         etag: response.ETag,
       };
-    } catch (err) {
+    } catch (err: any) {
+      if (err?.name === "NoSuchKey" || err?.Code === "NoSuchKey" || err?.$metadata?.httpStatusCode === 404) {
+        // Dosya R2 depolamasında mevcut değil (normal 404 durumu)
+        return null;
+      }
       console.error("[R2StorageService] getFile hatası:", err);
       return null;
     }

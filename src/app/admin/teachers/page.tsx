@@ -21,7 +21,8 @@ import {
   Modal, 
   PasswordInput, 
   SearchFilterBar,
-  Avatar
+  Avatar,
+  TagSlider
 } from "@/components";
 import { getPhotoUrl } from "@/utils/media";
 
@@ -314,9 +315,18 @@ export default function TeachersListPage() {
                     <td style={{ padding: "14px 18px" }}>
                       <div style={{ fontWeight: "700", color: "#0F2645" }}>{t.teacherProfile?.school || "Belirtilmedi"}</div>
                       {t.teacherProfile?.department && (
-                        <div style={{ fontSize: "12px", color: "#475569", fontWeight: "600" }}>{t.teacherProfile.department}</div>
+                        <div style={{ fontSize: "12px", color: "#475569", fontWeight: "600", marginBottom: "4px" }}>{t.teacherProfile.department}</div>
                       )}
-                      <div style={{ fontSize: "12px", color: "#64748B" }}>{t.teacherProfile?.currentDistrict || "İstanbul"}</div>
+                      <TagSlider
+                        items={t.teacherProfile?.districts}
+                        variant="blue"
+                        icon="map"
+                        itemCountLabel="Bölge"
+                        subtitle={t.teacherProfile?.currentDistrict ? `📍 İkamet: ${t.teacherProfile.currentDistrict}` : undefined}
+                        emptyText={t.teacherProfile?.currentDistrict ? `📍 ${t.teacherProfile.currentDistrict} (Tüm İstanbul)` : undefined}
+                        maxWidth="220px"
+                        compact
+                      />
                     </td>
                     <td style={{ padding: "14px 18px" }}>
                       <Badge variant={t.isActive !== false ? "ACTIVE" : "PASSIVE"} />
@@ -593,7 +603,8 @@ export default function TeachersListPage() {
       <Modal
         isOpen={Boolean(detailTeacher)}
         onClose={() => setDetailTeacher(null)}
-        title={`${detailTeacher?.name || ""} • Öğretmen Profili`}
+        maxWidth="850px"
+        title={`${detailTeacher?.name || ""} • Öğretmen Profil Detayları`}
         titleIcon={<GraduationCap size={20} color="#C8952A" />}
         footer={
           <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", width: "100%" }}>
@@ -615,111 +626,262 @@ export default function TeachersListPage() {
         }
       >
         {detailTeacher && (
-          <div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
             {/* Header / Photo Banner */}
             <div style={{ 
               display: "flex", 
               alignItems: "center", 
               gap: "20px", 
-              padding: "16px", 
+              padding: "16px 20px", 
               backgroundColor: "#F8FAFC", 
               borderRadius: "12px", 
               border: "1px solid #E2E8F0",
-              marginBottom: "20px",
               flexWrap: "wrap"
             }}>
-              <div style={{ position: "relative" }}>
+              <div>
                 <Avatar
                   src={detailTeacher.teacherProfile?.photoUrl}
                   name={detailTeacher.name}
-                  size={96}
+                  size={88}
                   showBorder
                   style={{ boxShadow: "0 4px 12px rgba(15, 38, 69, 0.15)", border: "3px solid #C8952A" }}
                 />
               </div>
 
               <div style={{ flex: 1, minWidth: "220px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                  <h3 style={{ margin: 0, fontSize: "18px", fontWeight: "800", color: "#0F2645" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                  <h3 style={{ margin: 0, fontSize: "20px", fontWeight: "800", color: "#0F2645" }}>
                     {detailTeacher.name}
                   </h3>
                   <Badge variant={detailTeacher.isActive !== false ? "ACTIVE" : "PASSIVE"} />
                 </div>
 
                 <div style={{ marginTop: "6px", fontSize: "13px", color: "#64748B", display: "flex", flexDirection: "column", gap: "4px" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                    <Mail size={14} color="#C8952A" /> {detailTeacher.email}
+                  <div>
+                    <strong style={{ color: "#0F2645" }}>{detailTeacher.teacherProfile?.school}</strong>
+                    {detailTeacher.teacherProfile?.department ? ` • ${detailTeacher.teacherProfile.department}` : ""}
+                    {detailTeacher.teacherProfile?.classStatus ? ` (${detailTeacher.teacherProfile.classStatus})` : ""}
                   </div>
-                  {detailTeacher.teacherProfile?.phone && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                      <Phone size={14} color="#C8952A" /> {detailTeacher.teacherProfile.phone}
-                    </div>
-                  )}
-                  {detailTeacher.teacherProfile?.currentDistrict && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                      <MapPin size={14} color="#C8952A" /> {detailTeacher.teacherProfile.currentDistrict}
-                    </div>
-                  )}
+                  <div>
+                    <span style={{ color: "#C8952A", fontWeight: "700" }}>{detailTeacher.teacherProfile?.scoreType}</span> &bull; {detailTeacher.teacherProfile?.yksRank ? `YKS Sıralaması: ${detailTeacher.teacherProfile.yksRank}` : "Derece Belirtilmedi"}
+                  </div>
+                  <div style={{ fontSize: "12px", color: "#94A3B8" }}>
+                    Kayıt Tarihi: {new Date(detailTeacher.createdAt).toLocaleDateString("tr-TR")}
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Profile Info Grid */}
-            <div className="admin-grid-2col" style={{ marginBottom: "20px", fontSize: "14px" }}>
-              <div>
-                <span style={{ fontSize: "12px", color: "#64748B", fontWeight: "600", display: "block" }}>Okul / Üniversite</span>
-                <strong style={{ color: "#0F2645" }}>{detailTeacher.teacherProfile?.school || "Belirtilmedi"}</strong>
+            {/* Grid 1: Kişisel ve İletişim Bilgileri */}
+            <div style={{ backgroundColor: "#FFFFFF", borderRadius: "10px", border: "1px solid #E2E8F0", padding: "16px" }}>
+              <div style={{ fontSize: "14px", fontWeight: "800", color: "#0F2645", marginBottom: "12px", display: "flex", alignItems: "center", gap: "6px", borderBottom: "1px solid #F1F5F9", paddingBottom: "8px" }}>
+                <UserCheck size={16} color="#C8952A" /> 1. Kişisel ve İletişim Bilgileri
               </div>
-              <div>
-                <span style={{ fontSize: "12px", color: "#64748B", fontWeight: "600", display: "block" }}>Bölüm</span>
-                <strong style={{ color: "#0F2645" }}>{detailTeacher.teacherProfile?.department || "Belirtilmedi"}</strong>
-              </div>
-              <div>
-                <span style={{ fontSize: "12px", color: "#64748B", fontWeight: "600", display: "block" }}>YKS Sıralaması</span>
-                <strong style={{ color: "#C8952A" }}>
-                  {detailTeacher.teacherProfile?.yksRank ? `Türkiye ${detailTeacher.teacherProfile.yksRank}.si` : "Belirtilmedi"}
-                </strong>
-              </div>
-              <div>
-                <span style={{ fontSize: "12px", color: "#64748B", fontWeight: "600", display: "block" }}>Ders Verebileceği İlçeler</span>
-                <span style={{ color: "#0F2645", fontSize: "13px" }}>{detailTeacher.teacherProfile?.districts || "Tüm İstanbul / Online"}</span>
-              </div>
-              <div>
-                <span style={{ fontSize: "12px", color: "#64748B", fontWeight: "600", display: "block" }}>Hizmet Türleri</span>
-                <span style={{ color: "#0F2645", fontSize: "13px" }}>
-                  {[
-                    detailTeacher.teacherProfile?.koclukAvailable ? "Koçluk" : null,
-                    detailTeacher.teacherProfile?.ozelDersAvailable ? "Özel Ders" : null,
-                    detailTeacher.teacherProfile?.onlineAvailable ? "Online" : null
-                  ].filter(Boolean).join(" • ") || "Belirtilmedi"}
-                </span>
-              </div>
-              <div>
-                <span style={{ fontSize: "12px", color: "#64748B", fontWeight: "600", display: "block" }}>Kayıt Tarihi</span>
-                <span style={{ color: "#0F2645", fontSize: "13px" }}>
-                  {new Date(detailTeacher.createdAt).toLocaleDateString("tr-TR")}
-                </span>
+              <div className="admin-grid-2col" style={{ fontSize: "13px" }}>
+                <div>
+                  <span style={{ fontSize: "11px", color: "#64748B", fontWeight: "700", display: "block" }}>Ad Soyad</span>
+                  <strong style={{ color: "#0F2645" }}>{detailTeacher.name}</strong>
+                </div>
+                <div>
+                  <span style={{ fontSize: "11px", color: "#64748B", fontWeight: "700", display: "block" }}>Doğum Tarihi & Cinsiyet</span>
+                  <strong style={{ color: "#0F2645" }}>
+                    {detailTeacher.teacherProfile?.birthDate ? `${detailTeacher.teacherProfile.birthDate} • ` : ""}{detailTeacher.teacherProfile?.gender || "Belirtilmedi"}
+                  </strong>
+                </div>
+                <div>
+                  <span style={{ fontSize: "11px", color: "#64748B", fontWeight: "700", display: "block" }}>E-Posta Adresi</span>
+                  <strong style={{ color: "#0F2645" }}>{detailTeacher.email}</strong>
+                </div>
+                <div>
+                  <span style={{ fontSize: "11px", color: "#64748B", fontWeight: "700", display: "block" }}>Telefon Numarası</span>
+                  <strong style={{ color: "#0F2645" }}>{detailTeacher.teacherProfile?.phone || "Belirtilmedi"}</strong>
+                </div>
+                <div style={{ gridColumn: "1 / -1" }}>
+                  <span style={{ fontSize: "11px", color: "#64748B", fontWeight: "700", display: "block" }}>IBAN Numarası</span>
+                  <code style={{ fontSize: "13px", fontWeight: "700", color: "#0F2645", backgroundColor: "#F8FAFC", padding: "4px 8px", borderRadius: "4px", border: "1px solid #E2E8F0" }}>
+                    {detailTeacher.teacherProfile?.iban || "Belirtilmedi"}
+                  </code>
+                </div>
               </div>
             </div>
 
-            {/* Bio */}
-            {detailTeacher.teacherProfile?.bio && (
-              <div style={{ marginBottom: "20px" }}>
-                <span style={{ fontSize: "12px", color: "#64748B", fontWeight: "600", display: "block", marginBottom: "4px" }}>
-                  Hakkında / Biyografi
+            {/* Grid 2: Akademik Bilgiler & YKS Derecesi */}
+            <div style={{ backgroundColor: "#FFFFFF", borderRadius: "10px", border: "1px solid #E2E8F0", padding: "16px" }}>
+              <div style={{ fontSize: "14px", fontWeight: "800", color: "#0F2645", marginBottom: "12px", display: "flex", alignItems: "center", gap: "6px", borderBottom: "1px solid #F1F5F9", paddingBottom: "8px" }}>
+                <GraduationCap size={16} color="#C8952A" /> 2. Akademik Bilgiler & YKS Derecesi
+              </div>
+              <div className="admin-grid-2col" style={{ fontSize: "13px" }}>
+                <div>
+                  <span style={{ fontSize: "11px", color: "#64748B", fontWeight: "700", display: "block" }}>Üniversite / Okul</span>
+                  <strong style={{ color: "#0F2645" }}>{detailTeacher.teacherProfile?.school || "Belirtilmedi"}</strong>
+                </div>
+                <div>
+                  <span style={{ fontSize: "11px", color: "#64748B", fontWeight: "700", display: "block" }}>Bölüm</span>
+                  <strong style={{ color: "#0F2645" }}>{detailTeacher.teacherProfile?.department || "Belirtilmedi"}</strong>
+                </div>
+                <div>
+                  <span style={{ fontSize: "11px", color: "#64748B", fontWeight: "700", display: "block" }}>Aktif Sınıf Durumu</span>
+                  <strong style={{ color: "#0F2645" }}>{detailTeacher.teacherProfile?.classStatus || "Belirtilmedi"}</strong>
+                </div>
+                <div>
+                  <span style={{ fontSize: "11px", color: "#64748B", fontWeight: "700", display: "block" }}>YKS Sıralaması & Puan Türü</span>
+                  <strong style={{ color: "#C8952A" }}>
+                    {detailTeacher.teacherProfile?.scoreType} &bull; {detailTeacher.teacherProfile?.yksRank ? `Türkiye ${detailTeacher.teacherProfile.yksRank}.si` : "Belirtilmedi"}
+                  </strong>
+                </div>
+              </div>
+            </div>
+
+            {/* Grid 3: Konum & Ders Verme Tercihleri */}
+            <div style={{ backgroundColor: "#FFFFFF", borderRadius: "10px", border: "1px solid #E2E8F0", padding: "16px" }}>
+              <div style={{ fontSize: "14px", fontWeight: "800", color: "#0F2645", marginBottom: "12px", display: "flex", alignItems: "center", gap: "6px", borderBottom: "1px solid #F1F5F9", paddingBottom: "8px" }}>
+                <MapPin size={16} color="#C8952A" /> 3. İkametgah & Ders Verme Tercihleri
+              </div>
+              <div className="admin-grid-2col" style={{ fontSize: "13px", marginBottom: "14px" }}>
+                <div>
+                  <span style={{ fontSize: "11px", color: "#64748B", fontWeight: "700", display: "block" }}>İkamet Ettiği İlçe</span>
+                  <strong style={{ color: "#0F2645" }}>📍 {detailTeacher.teacherProfile?.currentDistrict || "İstanbul"}</strong>
+                </div>
+                <div>
+                  <span style={{ fontSize: "11px", color: "#64748B", fontWeight: "700", display: "block" }}>Online Ders Durumu</span>
+                  <span style={{ 
+                    fontSize: "12px", 
+                    fontWeight: "700", 
+                    padding: "2px 10px", 
+                    borderRadius: "6px", 
+                    backgroundColor: detailTeacher.teacherProfile?.onlineAvailable ? "#ECFDF5" : "#F1F5F9",
+                    color: detailTeacher.teacherProfile?.onlineAvailable ? "#047857" : "#64748B"
+                  }}>
+                    {detailTeacher.teacherProfile?.onlineAvailable ? "✓ Online Ders Verebilir" : "Sadece Yüz Yüze"}
+                  </span>
+                </div>
+                <div style={{ gridColumn: "1 / -1" }}>
+                  <span style={{ fontSize: "11px", color: "#64748B", fontWeight: "700", display: "block" }}>Açık Adres / Mahalle / Semt / Yurt Bilgisi</span>
+                  <strong style={{ color: "#0F2645" }}>{detailTeacher.teacherProfile?.currentAddress || "Belirtilmedi"}</strong>
+                </div>
+              </div>
+
+              {/* Yüz yüze ders verilebilecek ilçeler rozetleri */}
+              <div style={{ backgroundColor: "#F8FAFC", padding: "14px 16px", borderRadius: "10px", border: "1px solid #E2E8F0" }}>
+                <span style={{ fontSize: "12px", color: "#64748B", fontWeight: "700", display: "block", marginBottom: "8px" }}>
+                  Yüz Yüze Ders Verilebilecek İstanbul İlçeleri:
                 </span>
-                <p style={{ backgroundColor: "#F8FAFC", padding: "12px", borderRadius: "8px", fontSize: "14px", color: "#334155", margin: 0, lineHeight: "1.5" }}>
-                  {detailTeacher.teacherProfile.bio}
+                <TagSlider
+                  items={detailTeacher.teacherProfile?.districts}
+                  variant="blue"
+                  icon="map"
+                  itemCountLabel="Hizmet Bölgesi"
+                  emptyText="📍 Tüm İstanbul genelinde ders verebilir"
+                  maxWidth="100%"
+                />
+              </div>
+            </div>
+
+            {/* Ek Notlar / Biyografi */}
+            {detailTeacher.teacherProfile?.notes && (
+              <div style={{ backgroundColor: "#FFFFFF", borderRadius: "10px", border: "1px solid #E2E8F0", padding: "16px" }}>
+                <div style={{ fontSize: "14px", fontWeight: "800", color: "#0F2645", marginBottom: "8px", display: "flex", alignItems: "center", gap: "6px" }}>
+                  <BookOpen size={16} color="#C8952A" /> 4. Eğitmen Notları & Biyografi
+                </div>
+                <p style={{ backgroundColor: "#F8FAFC", padding: "12px", borderRadius: "8px", fontSize: "13px", color: "#334155", margin: 0, lineHeight: "1.6", border: "1px solid #E2E8F0" }}>
+                  {detailTeacher.teacherProfile.notes}
                 </p>
               </div>
             )}
 
+            {/* Atanan Aktif Öğrenciler */}
+            {detailTeacher.teacherMatches && detailTeacher.teacherMatches.length > 0 && (
+              <div style={{ backgroundColor: "#FFFFFF", borderRadius: "10px", border: "1px solid #E2E8F0", padding: "16px" }}>
+                <div style={{ fontSize: "14px", fontWeight: "800", color: "#0F2645", marginBottom: "12px", display: "flex", alignItems: "center", gap: "6px", borderBottom: "1px solid #F1F5F9", paddingBottom: "8px" }}>
+                  <UserCheck size={16} color="#C8952A" /> Atanan Aktif Öğrenciler ({detailTeacher.teacherMatches.length})
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  {detailTeacher.teacherMatches.map((m: any) => (
+                    <div 
+                      key={m.id}
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        padding: "10px 14px",
+                        backgroundColor: "#F8FAFC",
+                        borderRadius: "8px",
+                        border: "1px solid #E2E8F0",
+                        fontSize: "13px"
+                      }}
+                    >
+                      <div>
+                        <strong style={{ color: "#0F2645" }}>{m.student?.name}</strong>
+                        <div style={{ fontSize: "12px", color: "#64748B" }}>
+                          {m.type === "KOCLUK" ? "🎓 Eğitim Koçluğu" : "📚 Özel Ders"}: <strong>{m.subject}</strong>
+                        </div>
+                      </div>
+                      <div style={{ textAlign: "right", fontSize: "12px", color: "#059669", fontWeight: "700" }}>
+                        📍 {m.student?.studentProfile?.currentDistrict || "İstanbul"}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Ders Yetkinlik Puanları Özeti */}
+            <div style={{ backgroundColor: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: "10px", padding: "16px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+                <h4 style={{ margin: 0, fontSize: "14px", fontWeight: "800", color: "#0F2645", display: "flex", alignItems: "center", gap: "6px" }}>
+                  <GraduationCap size={16} color="#C8952A" /> 5. Ders Yetkinlik Puanları Özeti (1 - 10)
+                </h4>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => {
+                    const t = detailTeacher;
+                    setDetailTeacher(null);
+                    openCompetenciesModal(t);
+                  }}
+                >
+                  ✏️ Puanları Düzenle
+                </Button>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "8px" }}>
+                {[
+                  { label: "TYT Türkçe", score: detailTeacher.teacherProfile?.tytTurkce },
+                  { label: "TYT Mat", score: detailTeacher.teacherProfile?.tytMat },
+                  { label: "TYT Fizik", score: detailTeacher.teacherProfile?.tytFizik },
+                  { label: "TYT Kimya", score: detailTeacher.teacherProfile?.tytKimya },
+                  { label: "TYT Biyoloji", score: detailTeacher.teacherProfile?.tytBiyoloji },
+                  { label: "TYT Tarih", score: detailTeacher.teacherProfile?.tytTarih },
+                  { label: "TYT Coğrafya", score: detailTeacher.teacherProfile?.tytCografya },
+                  { label: "AYT Mat", score: detailTeacher.teacherProfile?.aytMat },
+                  { label: "AYT Fizik", score: detailTeacher.teacherProfile?.aytFizik },
+                  { label: "AYT Kimya", score: detailTeacher.teacherProfile?.aytKimya },
+                  { label: "AYT Biyoloji", score: detailTeacher.teacherProfile?.aytBiyoloji },
+                  { label: "AYT Edebiyat", score: detailTeacher.teacherProfile?.aytTurkce },
+                  { label: "AYT Tarih", score: detailTeacher.teacherProfile?.aytTarih },
+                  { label: "AYT Coğrafya", score: detailTeacher.teacherProfile?.aytCografya },
+                  { label: "YDT İngilizce", score: detailTeacher.teacherProfile?.ydtIngilizce },
+                ].map((item, idx) => {
+                  const sc = item.score ?? 5;
+                  return (
+                    <div key={idx} style={{ backgroundColor: "#FFFFFF", padding: "8px 10px", borderRadius: "6px", border: "1px solid #E2E8F0", fontSize: "12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontWeight: "600", color: "#334155" }}>{item.label}</span>
+                      <span style={{ fontWeight: "800", color: sc >= 8 ? "#16A34A" : sc >= 5 ? "#D97706" : "#DC2626" }}>
+                        {sc}/10
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
             {/* Direct High-Resolution Photo Preview if available */}
             {getPhotoUrl(detailTeacher.teacherProfile?.photoUrl) && (
-              <div style={{ marginBottom: "20px" }}>
-                <span style={{ fontSize: "12px", color: "#64748B", fontWeight: "600", display: "block", marginBottom: "6px" }}>
-                  Profil Fotoğrafı Önizlemesi
-                </span>
+              <div style={{ backgroundColor: "#FFFFFF", borderRadius: "10px", border: "1px solid #E2E8F0", padding: "16px" }}>
+                <div style={{ fontSize: "14px", fontWeight: "800", color: "#0F2645", marginBottom: "10px" }}>
+                  🖼️ Profil Fotoğrafı Önizlemesi
+                </div>
                 <div style={{ 
                   borderRadius: "10px", 
                   overflow: "hidden", 
