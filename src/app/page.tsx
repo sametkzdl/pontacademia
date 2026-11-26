@@ -1,11 +1,8 @@
 import type { Metadata } from "next";
 import HomeClient from "./HomeClient";
-import { SettingService } from "@/services/setting.service";
-import db from "@/utils/db";
+import { getSiteSettings } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
-export const fetchCache = "force-no-store";
 
 export const metadata: Metadata = {
   title: "Pont Academy — Birebir Özel Ders ve Kişisel Sınav Koçluğu",
@@ -35,66 +32,7 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  // Fetch initial data on the server for 100% SSR & SEO crawling
-  let settings: any = null;
-  let coaches: any[] = [];
-
-  try {
-    settings = await SettingService.getSettings();
-  } catch (e) {
-    console.error("Server fetch settings error in page.tsx:", e);
-  }
-
-  try {
-    const teachers = await db.user.findMany({
-      where: {
-        role: "TEACHER",
-        isActive: true,
-      },
-      select: {
-        id: true,
-        name: true,
-        teacherProfile: {
-          select: {
-            school: true,
-            department: true,
-            scoreType: true,
-            yksRank: true,
-            classStatus: true,
-            currentDistrict: true,
-            districts: true,
-            onlineAvailable: true,
-            showPhotoOnWeb: true,
-            photoUrl: true,
-          },
-        },
-      },
-      orderBy: { createdAt: "asc" },
-    });
-
-    coaches = teachers.map((t) => {
-      const p = t.teacherProfile;
-      const formattedUni = p?.school
-        ? (p?.department ? `${p.school} • ${p.department}` : p.school)
-        : (p?.department || "Üniversite Belirtilmedi");
-
-      return {
-        id: t.id,
-        name: t.name,
-        branch: p?.scoreType ? `${p.scoreType} Alanı / YKS Koçu` : "YKS Koçu",
-        uni: formattedUni,
-        school: p?.school || "",
-        department: p?.department || "",
-        badge: p?.yksRank ? `YKS ${p.scoreType ? `${p.scoreType} ` : ""}Sıralaması: ${p.yksRank}` : "Derece Eğitmeni",
-        img: p?.showPhotoOnWeb !== false ? (p?.photoUrl || "") : "",
-        showPhotoOnWeb: p?.showPhotoOnWeb !== false,
-        districts: p?.districts || "",
-        onlineAvailable: Boolean(p?.onlineAvailable),
-      };
-    });
-  } catch (e) {
-    console.error("Server fetch coaches error in page.tsx:", e);
-  }
+  const settings = getSiteSettings();
 
   // Schema.org Structured Data
   const jsonLd = {
@@ -133,7 +71,7 @@ export default async function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <HomeClient initialSettings={settings} initialCoaches={coaches} />
+      <HomeClient initialSettings={settings} />
     </>
   );
 }

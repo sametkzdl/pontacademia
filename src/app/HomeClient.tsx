@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { submitContactForm } from "./actions";
 import Image from "next/image";
 import { 
   BookOpen, 
@@ -20,7 +21,6 @@ import {
   GraduationCap,
   MapPin,
   Compass,
-  LogIn,
   UserPlus
 } from "lucide-react";
 
@@ -33,10 +33,9 @@ interface CountdownTime {
 
 interface HomeClientProps {
   initialSettings: any;
-  initialCoaches: any[];
 }
 
-export default function HomeClient({ initialSettings, initialCoaches }: HomeClientProps) {
+export default function HomeClient({ initialSettings }: HomeClientProps) {
   // Mobile Nav State
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -99,54 +98,8 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
   const [yksTime, setYksTime] = useState<CountdownTime>(() => calculateTimeRemaining(yksTargetDate.current));
   const [lgsTime, setLgsTime] = useState<CountdownTime>(() => calculateTimeRemaining(lgsTargetDate.current));
 
-  // Dynamic Settings & Coaches
-  const [coaches, setCoaches] = useState<any[]>(initialCoaches || []);
-  const [settings, setSettings] = useState<any>(initialSettings || {
-    privateLessonPrice: "",
-    coachingPrice: "",
-    campaignBannerActive: false,
-    campaignBannerText: "",
-    contactPhone: "",
-    contactEmail: "",
-    contactAddress: "",
-  });
-
-  // Props güncellendiğinde state'i senkronize et
-  useEffect(() => {
-    if (initialSettings) {
-      setSettings(initialSettings);
-    }
-  }, [initialSettings]);
-
-  useEffect(() => {
-    if (initialCoaches) {
-      setCoaches(initialCoaches);
-    }
-  }, [initialCoaches]);
-
-  // Sayfa yüklendiğinde en güncel DB verisini önbelleksiz çek
-  useEffect(() => {
-    const fetchFreshData = async () => {
-      try {
-        const [settingsRes, coachesRes] = await Promise.all([
-          fetch("/api/settings", { cache: "no-store" }),
-          fetch("/api/coaches", { cache: "no-store" }),
-        ]);
-
-        if (settingsRes.ok) {
-          const sData = await settingsRes.json();
-          if (sData.settings) setSettings(sData.settings);
-        }
-        if (coachesRes.ok) {
-          const cData = await coachesRes.json();
-          if (cData.coaches) setCoaches(cData.coaches);
-        }
-      } catch (err) {
-        // quiet catch
-      }
-    };
-    fetchFreshData();
-  }, []);
+  // Site settings (contact info, price, banner) come from the server, see src/lib/site.ts
+  const settings = initialSettings || {};
 
   // Contact Form State
   const [formData, setFormData] = useState({
@@ -236,20 +189,15 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
     setFormError("");
 
     try {
-      const res = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          subject: `${formData.exam} Hazırlık Danışmanlığı`,
-          message: formData.message,
-        }),
+      const data = await submitContactForm({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        subject: `${formData.exam} Hazırlık Danışmanlığı`,
+        message: formData.message,
       });
 
-      const data = await res.json();
-      if (res.ok && data.success) {
+      if (data.success) {
         setFormSubmitted(true);
         setFormData({ name: "", email: "", phone: "", exam: "YKS", message: "" });
         setTimeout(() => {
@@ -410,13 +358,6 @@ export default function HomeClient({ initialSettings, initialCoaches }: HomeClie
                     <span>Eğitmen Başvurusu Yap</span>
                   </div>
                   <span style={{ fontSize: "11px", backgroundColor: "rgba(245, 158, 11, 0.2)", color: "#FDE68A", padding: "2px 8px", borderRadius: "6px", fontWeight: "700" }}>Katıl</span>
-                </a>
-                <a href="/login" className="mobile-nav-link" onClick={handleMobileNavClick}>
-                  <div className="mobile-nav-link-inner">
-                    <LogIn size={18} color="#A78BFA" />
-                    <span>Öğrenci / Eğitmen Girişi</span>
-                  </div>
-                  <ArrowRight size={15} color="#A78BFA" />
                 </a>
                 <a href="#iletisim" className="mobile-nav-link" onClick={handleMobileNavClick}>
                   <div className="mobile-nav-link-inner">

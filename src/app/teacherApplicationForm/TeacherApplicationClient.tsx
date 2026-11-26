@@ -123,11 +123,9 @@ export default function TeacherApplicationClient() {
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [submittedCandidateName, setSubmittedCandidateName] = useState("");
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
-  const [photoFileName, setPhotoFileName] = useState<string>("");
   const [selectedDistricts, setSelectedDistricts] = useState<string[]>([]);
   const [districtSearch, setDistrictSearch] = useState("");
   const [districtError, setDistrictError] = useState(false);
-  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [photoDisplayName, setPhotoDisplayName] = useState("");
 
   const formRef = useRef<HTMLFormElement>(null);
@@ -143,38 +141,6 @@ export default function TeacherApplicationClient() {
     };
     reader.readAsDataURL(file);
 
-    setIsUploadingPhoto(true);
-    try {
-      const data = new FormData();
-      data.append("file", file);
-      data.append("category", "avatars");
-
-      const res = await fetch("/api/storage/upload", {
-        method: "POST",
-        body: data,
-      });
-
-      const result = await res.json();
-      if (res.ok && result.success && result.url) {
-        setPhotoFileName(result.url);
-      } else {
-        // Fallback to base64 if storage fails
-        const fallbackReader = new FileReader();
-        fallbackReader.onloadend = () => {
-          setPhotoFileName(fallbackReader.result as string);
-        };
-        fallbackReader.readAsDataURL(file);
-      }
-    } catch (err) {
-      console.warn("Photo upload error, using base64 fallback:", err);
-      const fallbackReader = new FileReader();
-      fallbackReader.onloadend = () => {
-        setPhotoFileName(fallbackReader.result as string);
-      };
-      fallbackReader.readAsDataURL(file);
-    } finally {
-      setIsUploadingPhoto(false);
-    }
   };
 
   const toggleDistrict = (district: string) => {
@@ -221,9 +187,7 @@ export default function TeacherApplicationClient() {
 
     // Ekstra alanları ekle
     fd.set("districts", selectedDistricts.join(", "));
-    fd.set("photoFileName", photoFileName);
     fd.set("formType", "teacher_application");
-    fd.set("submittedAt", new Date().toISOString());
 
     const fullNameVal = (fd.get("fullName") as string) || "Eğitmenimiz";
     setSubmittedCandidateName(fullNameVal);
@@ -234,11 +198,11 @@ export default function TeacherApplicationClient() {
         if (response && response.success) {
           setFormSubmitted(true);
         } else {
-          setFormSubmitted(true);
+          alert(response?.error || "Başvurunuz gönderilemedi. Lütfen tekrar deneyin veya bize WhatsApp'tan ulaşın.");
         }
       } catch (err) {
         console.error("Submission error:", err);
-        setFormSubmitted(true);
+        alert("Bağlantı hatası oluştu. Lütfen tekrar deneyin.");
       }
     });
   };
@@ -592,10 +556,10 @@ export default function TeacherApplicationClient() {
                             boxShadow: "0 2px 4px rgba(15, 38, 69, 0.15)"
                           }}
                         >
-                          {isUploadingPhoto ? "Fotoğraf Yükleniyor..." : photoDisplayName ? "Fotoğrafı Değiştir" : "Fotoğraf Seç"}
+                          {photoDisplayName ? "Fotoğrafı Değiştir" : "Fotoğraf Seç"}
                         </label>
                         <span style={{ marginLeft: "12px", fontSize: "13px", color: "#64748B" }}>
-                          {isUploadingPhoto ? "Sunucuya yükleniyor..." : photoDisplayName ? photoDisplayName : "JPG, PNG veya WEBP formatında (Max 5MB)"}
+                          {photoDisplayName ? photoDisplayName : "JPG, PNG veya WEBP formatında (Max 5MB)"}
                         </span>
                       </div>
                     </div>

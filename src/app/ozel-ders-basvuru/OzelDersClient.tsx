@@ -54,8 +54,6 @@ export default function OzelDersClient() {
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [studentName, setStudentName] = useState("");
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
-  const [photoFileName, setPhotoFileName] = useState<string>("");
-  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [photoDisplayName, setPhotoDisplayName] = useState("");
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>(["TYT Matematik"]);
   const [subjectError, setSubjectError] = useState(false);
@@ -71,37 +69,6 @@ export default function OzelDersClient() {
     };
     reader.readAsDataURL(file);
 
-    setIsUploadingPhoto(true);
-    try {
-      const data = new FormData();
-      data.append("file", file);
-      data.append("category", "avatars");
-
-      const res = await fetch("/api/storage/upload", {
-        method: "POST",
-        body: data,
-      });
-
-      const result = await res.json();
-      if (res.ok && result.success && result.url) {
-        setPhotoFileName(result.url);
-      } else {
-        const fallbackReader = new FileReader();
-        fallbackReader.onloadend = () => {
-          setPhotoFileName(fallbackReader.result as string);
-        };
-        fallbackReader.readAsDataURL(file);
-      }
-    } catch (err) {
-      console.warn("Photo upload error, using base64 fallback:", err);
-      const fallbackReader = new FileReader();
-      fallbackReader.onloadend = () => {
-        setPhotoFileName(fallbackReader.result as string);
-      };
-      fallbackReader.readAsDataURL(file);
-    } finally {
-      setIsUploadingPhoto(false);
-    }
   };
 
   const toggleSubject = (subjectLabel: string) => {
@@ -144,8 +111,6 @@ export default function OzelDersClient() {
     fd.set("formType", "ozel_ders");
     fd.set("selectedSubjects", selectedSubjects.join(", "));
     fd.set("subject", selectedSubjects.join(", "));
-    fd.set("photoFileName", photoFileName);
-    fd.set("submittedAt", new Date().toISOString());
 
     const nameVal = (fd.get("name") as string) || "Öğrencimiz";
     setStudentName(nameVal);
@@ -156,11 +121,11 @@ export default function OzelDersClient() {
         if (res && res.success) {
           setFormSubmitted(true);
         } else {
-          setFormSubmitted(true);
+          alert(res?.error || "Başvurunuz gönderilemedi. Lütfen tekrar deneyin veya bize WhatsApp'tan ulaşın.");
         }
       } catch (err) {
         console.error("Submission error:", err);
-        setFormSubmitted(true);
+        alert("Bağlantı hatası oluştu. Lütfen tekrar deneyin.");
       }
     });
   };
@@ -405,10 +370,10 @@ export default function OzelDersClient() {
                             boxShadow: "0 2px 4px rgba(15, 38, 69, 0.15)"
                           }}
                         >
-                          {isUploadingPhoto ? "Fotoğraf Yükleniyor..." : photoDisplayName ? "Fotoğrafı Değiştir" : "Fotoğraf Seç"}
+                          {photoDisplayName ? "Fotoğrafı Değiştir" : "Fotoğraf Seç"}
                         </label>
                         <span style={{ marginLeft: "12px", fontSize: "13px", color: "#64748B" }}>
-                          {isUploadingPhoto ? "Sunucuya yükleniyor..." : photoDisplayName ? photoDisplayName : "JPG, PNG veya WEBP formatında (Max 5MB)"}
+                          {photoDisplayName ? photoDisplayName : "JPG, PNG veya WEBP formatında (Max 5MB)"}
                         </span>
                       </div>
                     </div>
