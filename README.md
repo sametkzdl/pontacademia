@@ -5,11 +5,11 @@ pontakademi.com: YKS/LGS özel ders ve koçluk tanıtım sitesi. Next.js 16, ver
 | Rota | Açıklama |
 |---|---|
 | `/` | Ana sayfa (iletişim bilgileri, fiyat ve kampanya bandı `.env`'den) |
-| `/ozel-ders-basvuru`, `/teacherApplicationForm` | Başvuru formları, `MAIL_TO` adresine mail olarak gelir (fotoğraf ekli) |
+| `/ozel-ders-basvuru`, `/teacherApplicationForm` | Başvuru formları (şimdilik kapalı: gönderince telefon numarasını gösterir, hiçbir şey kaydedilmez) |
 | `/kocluk-basvuru` | Koçluk tanıtım sayfası |
 | `/tyt-puan-hesaplama`, `/yks-puan-hesaplama` | Puan hesaplayıcılar (tamamen tarayıcıda çalışır) |
 
-Formlar `src/app/actions.ts` içindeki server action'larla `src/lib/mail.ts` üzerinden SMTP ile gönderilir.
+Formların gönderimi `src/app/actions.ts` içinde. Şu an hiçbir şey kaydetmiyor veya göndermiyor.
 
 ## Sunucuya kurulum
 
@@ -17,7 +17,7 @@ Formlar `src/app/actions.ts` içindeki server action'larla `src/lib/mail.ts` üz
 cd /var/www
 git clone https://github.com/sametkzdl/pontacademia.git pontakademi
 cd pontakademi
-cp .env.example .env && nano .env      # SMTP + site bilgileri
+cp .env.example .env && nano .env      # site bilgileri
 npm ci && npm run build
 PORT=3001 pm2 start npm --name pontakademi -- start
 pm2 save
